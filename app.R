@@ -3,8 +3,11 @@ library(shiny)
 library(shinydashboard)
 library(tidyverse)
 library(ggvis)
+library(here)
 library(ggplot2)
+library(vroom)
 library(shinythemes)
+library(shinycssloaders)
 library(shinyBS)
 library(shinyjs)
 library(DT)
@@ -14,31 +17,33 @@ library(gt)
 
 ## Load data
 
-## Generate this from the EUTT repo using the script in
-## prep/eutt-history.R
-eutt_date <- "2022-02-18"
-eutt_hist <- read_csv(
-    paste0("data/", eutt_date, "-eutt-history.csv")
-)
-
 ## Data from the IntoValue 1-2 data set
 ## Generate these using the script in
 ## prep/transform-intovalue.R
-iv_all <- read_csv(
-    "data/ct-dashboard-intovalue-all.csv"
-)
-iv_umc <- read_csv(
-    "data/ct-dashboard-intovalue-umc.csv"
-)
+# iv_all <- read_csv(
+#     "data/ct-dashboard-intovalue-all.csv"
+# )
+# iv_umc <- read_csv(
+#     "data/ct-dashboard-intovalue-umc.csv"
+# )
+
+reference_year <- 2022
+# end_year <- reference_year - 5
+
+cali <- vroom(here("data", "California-trials_2014-2017_exp.csv"))
+iv_all <- cali
+# iv_all %>% 
+#   anti_join(pros_reg_data, by = "id")
 
 ## Data from the prospective registration refresh
-pros_reg_data <- read_csv(
-    "data/prospective-reg-ctgov-2018-trials.csv"
-)
+# pros_reg_data_de <- read_csv(
+#     "data/prospective-reg-ctgov-2018-trials.csv"
+# )
+pros_reg_data <- cali
 
-pros_reg_data_umc <- pros_reg_data %>%
-    mutate(city = strsplit(as.character(cities), " ")) %>%
-    tidyr::unnest(city)
+pros_reg_data_umc <- vroom(here("data", "cali_dashboard_umc.csv"))
+
+iv_umc <- pros_reg_data_umc
 
 ## Load functions
 source("ui_elements.R")
@@ -56,7 +61,7 @@ source("methods_page.R")
 source("datasets_page.R")
 source("about_rm.R")
 source("faq_page.R")
-source("trial_characteristics_page.R")
+# source("trial_characteristics_page.R")
 
 ## Define UI
 ui <- tagList(
@@ -67,7 +72,7 @@ ui <- tagList(
         all_umcs_page,
         umc_page,
         why_page,
-        trial_characteristics_page,
+        # trial_characteristics_page,
         methods_page,
         datasets_page,
         faq_page,
@@ -89,72 +94,59 @@ ui <- tagList(
 
 ## Define server function
 server <- function (input, output, session) {
+  
 
     ## Define button actions
 
-    observeEvent(
-        input$buttonUMC, {
-            updateTabsetPanel(
-                session, "navbarTabs",
-                selected = "tabUMC"
-            )
-        }
-    )
-
-    observeEvent(
-        input$buttonAllUMCs, {
-            updateTabsetPanel(
-                session, "navbarTabs",
-                selected = "tabAllUMCs"
-            )
-        }
-    )
+  observe({
+    updateTabsetPanel(   
+      session, "navbarTabs",
+      selected = "tabUMC"
+      )}) %>% 
+    bindEvent(input$buttonUMC)
+  
+  observe({
+    updateTabsetPanel(   
+      session, "navbarTabs",
+      selected = "tabAllUMCd"
+    )}) %>% 
+    bindEvent(input$buttonAllUMCs)
+  
+  observe({
+    updateTabsetPanel(   
+      session, "navbarTabs",
+      selected = "tabMethods"
+    )}) %>% 
+    bindEvent(input$buttonMethods)
+  
+  observe({
+    updateTabsetPanel(   
+      session, "navbarTabs",
+      selected = "tabDatasets"
+    )}) %>% 
+    bindEvent(input$buttonDatasets)
+  
+  observe({
+    updateTabsetPanel(   
+      session, "navbarTabs",
+      selected = "tabMethods"
+    )}) %>% 
+    bindEvent(input$link_to_methods)
+  
+  observe({
+    updateTabsetPanel(   
+      session, "navbarTabs",
+      selected = "tabMethods"
+    )}) %>% 
+    bindEvent(input$link_to_methods2)
     
-    observeEvent(
-        input$buttonMethods, {
-            updateTabsetPanel(
-                session, "navbarTabs",
-                selected = "tabMethods"
-            )
-        }
-    )
-
-    observeEvent(
-        input$buttonDatasets, {
-            updateTabsetPanel(
-                session, "navbarTabs",
-                selected = "tabDatasets"
-            )
-        }
-    )
-
-    observeEvent(
-        input$link_to_methods, {
-            updateTabsetPanel(
-                session, "navbarTabs",
-                selected = "tabMethods"
-            )
-        }
-    )
-
-    observeEvent(
-        input$link_to_methods2, {
-            updateTabsetPanel(
-                session, "navbarTabs",
-                selected = "tabMethods"
-            )
-        }
-    )
-
-    observeEvent(
-        input$link_to_why_these_practices, {
-            updateTabsetPanel(
-                session, "navbarTabs",
-                selected = "tabWhy"
-            )
-        }
-    )
-
+  observe({
+    updateTabsetPanel(   
+      session, "navbarTabs",
+      selected = "tabWhy"
+    )}) %>% 
+    bindEvent(input$link_to_why_these_practices)
+  
     ## Dynamically generate options for UMC drop-down menu
 
     output$startpage <- renderUI({
@@ -268,15 +260,16 @@ server <- function (input, output, session) {
             fluidRow(
                 column(
                     col_width,
-                    uiOutput("startprereg"),
-                    selectInput(
-                        "startpreregregistry",
-                        strong("Trial registry"),
-                        choices = c(
-                            "ClinicalTrials.gov",
-                            "DRKS"
-                        )
-                    )
+                    uiOutput("startprereg") %>% 
+                      shinycssloaders::withSpinner(),
+                    # selectInput(
+                    #     "startpreregregistry",
+                    #     strong("Trial registry"),
+                    #     choices = c(
+                    #         "ClinicalTrials.gov",
+                    #         "DRKS"
+                    #     )
+                    # )
                 ),
                 column(
                     col_width,
@@ -284,7 +277,8 @@ server <- function (input, output, session) {
                         title = "Reporting of Trial Registration Number in publications",
                         value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
                         value_text = paste0("of trials with a publication (n=", all_denom_trn, ") reported a trial registration number in the abstract"),
-                        plot = plotlyOutput('plot_clinicaltrials_trn', height="300px"),
+                        plot = plotlyOutput('plot_clinicaltrials_trn', height="300px") %>% 
+                          shinycssloaders::withSpinner(),
                         info_id = "infoTRN",
                         info_title = "Reporting of Trial Registration Number in publications",
                         info_text = trn_tooltip,
@@ -295,16 +289,17 @@ server <- function (input, output, session) {
                 ),
                 column(
                     col_width,
-                    uiOutput("startlinkage"),
-                    selectInput(
-                        "startlinkagechooser",
-                        strong("Trial registry"),
-                        choices = c(
-                            "All",
-                            "ClinicalTrials.gov",
-                            "DRKS"
-                        )
-                    )
+                    uiOutput("startlinkage") %>%
+                      shinycssloaders::withSpinner(),
+                    # selectInput(
+                    #     "startlinkagechooser",
+                    #     strong("Trial registry"),
+                    #     choices = c(
+                    #         "All",
+                    #         "ClinicalTrials.gov",
+                    #         "DRKS"
+                    #     )
+                    # )
                 )
                 
             )
@@ -327,7 +322,7 @@ server <- function (input, output, session) {
             first_lim_align <- "right"
         }
 
-        if (input$startpreregregistry == "ClinicalTrials.gov") {
+        # if (input$startpreregregistry == "ClinicalTrials.gov") {
 
             ## Value for prereg
 
@@ -357,43 +352,44 @@ server <- function (input, output, session) {
                 preregvaltext <- paste0("of registered clinical trials started in ", max_start_year, " (n=", all_denom_prereg, ") were prospectively registered")
             }
             
-        }
+        # }
 
-        if (input$startpreregregistry == "DRKS") {
-
-            ## Value for prereg
-
-            iv_data_unique <- iv_all %>%
-                filter(! is.na (start_date)) %>%
-                filter(registry == input$startpreregregistry) %>%
-                mutate(start_year = format(start_date, "%Y"))
-            
-            ## Filter for 2017 completion date for the pink descriptor text
-            all_numer_prereg <- iv_data_unique %>%
-                filter(start_year == 2017) %>%
-                filter(is_prospective) %>%
-                nrow()
-            
-            ## Filter for 2017 completion date for the pink descriptor text
-            all_denom_prereg <- iv_data_unique %>%
-                filter(start_year == 2017) %>%
-                nrow()
-
-            if (all_denom_prereg == 0) {
-                preregval <- "Not applicable"
-                preregvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
-            } else {
-                preregval <- paste0(round(100*all_numer_prereg/all_denom_prereg), "%")
-                preregvaltext <- paste0("of registered clinical trials started in 2017 (n=", all_denom_prereg, ") were prospectively registered")
-            }
-            
-        }
+        # if (input$startpreregregistry == "DRKS") {
+        # 
+        #     ## Value for prereg
+        # 
+        #     iv_data_unique <- iv_all %>%
+        #         filter(! is.na (start_date)) %>%
+        #         filter(registry == input$startpreregregistry) %>%
+        #         mutate(start_year = format(start_date, "%Y"))
+        #     
+        #     ## Filter for 2017 completion date for the pink descriptor text
+        #     all_numer_prereg <- iv_data_unique %>%
+        #         filter(start_year == 2017) %>%
+        #         filter(is_prospective) %>%
+        #         nrow()
+        #     
+        #     ## Filter for 2017 completion date for the pink descriptor text
+        #     all_denom_prereg <- iv_data_unique %>%
+        #         filter(start_year == 2017) %>%
+        #         nrow()
+        # 
+        #     if (all_denom_prereg == 0) {
+        #         preregval <- "Not applicable"
+        #         preregvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+        #     } else {
+        #         preregval <- paste0(round(100*all_numer_prereg/all_denom_prereg), "%")
+        #         preregvaltext <- paste0("of registered clinical trials started in 2017 (n=", all_denom_prereg, ") were prospectively registered")
+        #     }
+        #     
+        # }
         
         metric_box(
             title = "Prospective registration",
             value = preregval,
             value_text = preregvaltext,
-            plot = plotlyOutput('plot_clinicaltrials_prereg', height="300px"),
+            plot = plotlyOutput('plot_clinicaltrials_prereg', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoPreReg",
             info_title = "Prospective registration",
             info_text = prereg_tooltip,
@@ -417,7 +413,7 @@ server <- function (input, output, session) {
             first_lim_align <- "right"
         }
 
-        if (input$startlinkagechooser == "All") {
+        # if (input$startlinkagechooser == "All") {
 
             ## Value for linkage
 
@@ -436,33 +432,34 @@ server <- function (input, output, session) {
             
             linkage <- paste0(round(100*link_num/link_den), "%")
 
-        } else {
-
-            ## Value for linkage
-
-            link_num <- iv_all %>%
-                filter(registry == input$startlinkagechooser) %>%
-                filter(has_reg_pub_link == TRUE) %>%
-                filter(publication_type == "journal publication") %>%
-                filter(completion_year == 2017) %>%
-                nrow()
-
-            link_den <- iv_all %>%
-                filter(registry == input$startlinkagechooser) %>%
-                filter(has_publication == TRUE) %>%
-                filter(publication_type == "journal publication") %>%
-                filter(completion_year == 2017) %>%
-                filter(has_pubmed == TRUE | ! is.na (doi)) %>%
-                nrow()
-            
-            linkage <- paste0(round(100*link_num/link_den), "%")
-        }
+        # } else {
+        # 
+        #     ## Value for linkage
+        # 
+        #     link_num <- iv_all %>%
+        #         filter(registry == input$startlinkagechooser) %>%
+        #         filter(has_reg_pub_link == TRUE) %>%
+        #         filter(publication_type == "journal publication") %>%
+        #         filter(completion_year == 2017) %>%
+        #         nrow()
+        # 
+        #     link_den <- iv_all %>%
+        #         filter(registry == input$startlinkagechooser) %>%
+        #         filter(has_publication == TRUE) %>%
+        #         filter(publication_type == "journal publication") %>%
+        #         filter(completion_year == 2017) %>%
+        #         filter(has_pubmed == TRUE | ! is.na (doi)) %>%
+        #         nrow()
+        #     
+        #     linkage <- paste0(round(100*link_num/link_den), "%")
+        # }
         
         metric_box(
             title = "Publication link in registry",
             value = linkage,
             value_text = paste0("of trials completed in 2017 with a publication (n=", link_den, ") provide a link to this publication in the registry entry"),
-            plot = plotlyOutput('plot_linkage', height="300px"),
+            plot = plotlyOutput('plot_linkage', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoLinkage",
             info_title = "Publication link in registry",
             info_text = linkage_tooltip,
@@ -492,20 +489,20 @@ server <- function (input, output, session) {
             fluidRow(
                 column(
                     col_width,
-                    uiOutput("startsumres"),
-                    selectInput(
-                        "startsumresregistry",
-                        strong("Trial registry"),
-                        choices = c(
-                            "EUCTR",
-                            "ClinicalTrials.gov",
-                            "DRKS"
-                        )
-                    )
+                    uiOutput("startsumres") %>%  shinycssloaders::withSpinner(),
+                    # selectInput(
+                    #     "startsumresregistry",
+                    #     strong("Trial registry"),
+                    #     choices = c(
+                    #         "EUCTR",
+                    #         "ClinicalTrials.gov",
+                    #         "DRKS"
+                    #     )
+                    # )
                 ),
                 column(
                     col_width,
-                    uiOutput("startreport2a"),
+                    uiOutput("startreport2a") %>%  shinycssloaders::withSpinner(),
                     selectInput(
                         "startreporttype2a",
                         strong("Reporting type"),
@@ -518,7 +515,7 @@ server <- function (input, output, session) {
                 ),
                 column(
                     col_width,
-                    uiOutput("startreport5a"),
+                    uiOutput("startreport5a") %>%  shinycssloaders::withSpinner(),
                     selectInput(
                         "startreporttype5a",
                         strong("Reporting type"),
@@ -550,68 +547,31 @@ server <- function (input, output, session) {
             first_lim_align <- "right"
         }
 
-        if (input$startsumresregistry == "EUCTR") {
-        ## Value for summary results EUCTR
-            
-            sumres_percent <- eutt_hist %>%
-                group_by(date) %>%
-                mutate(avg = 100*sum(total_reported)/sum(total_due)) %>%
-                slice_head() %>%
-                ungroup() %>%
-                slice_tail() %>%
-                select(avg) %>%
-                pull() %>%
-                format(digits=2)
-
-            n_eutt_records <- eutt_hist %>%
-                nrow()
-
-            sumres_denom <- eutt_hist %>%
-                group_by(city) %>%
-                arrange(date) %>%
-                slice_tail() %>%
-                ungroup() %>%
-                select(total_due) %>%
-                sum()
-
-            
-            if (n_eutt_records == 0) {
-                sumresval <- "Not applicable"
-                sumresvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
-            } else {
-                sumresval <- paste0(sumres_percent, "%")
-                sumresvaltext <- paste0("of due clinical trials registered in EUCTR (n=", sumres_denom, ") reported summary results (as of: ", eutt_date, ")")
-            }
-            
-        } else {
-            ## Summary results for CT dot gov and DRKS
-            
             sumres_numer <- iv_all %>%
                 filter(
-                    registry == input$startsumresregistry,
+                    # registry == input$startsumresregistry,
                     has_summary_results == TRUE
                 ) %>%
                 nrow()
             
             sumres_denom <- iv_all %>%
-                filter(
-                    registry == input$startsumresregistry
-                ) %>%
+                # filter(
+                #     # registry == input$startsumresregistry
+                # ) %>%
                 nrow()
 
             sumres_percent <- format(100*sumres_numer/sumres_denom, digits=2)
 
             sumresval <- paste0(sumres_percent, "%")
 
-            sumresvaltext <- paste0("of due clinical trials registered in ", input$startsumresregistry, " (n=", sumres_denom, ") reported summary results")
+            sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=", sumres_denom, ") reported summary results")
             
-        }
-
         metric_box(
             title = "Summary Results Reporting",
             value = sumresval,
             value_text = sumresvaltext,
-            plot = plotlyOutput('plot_clinicaltrials_sumres', height="300px"),
+            plot = plotlyOutput('plot_clinicaltrials_sumres', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoSumRes",
             info_title = "Summary Results Reporting",
             info_text = sumres_tooltip,
@@ -716,7 +676,8 @@ server <- function (input, output, session) {
             title = "Results reporting within 2 years of trial completion (timely)",
             value = timpubval,
             value_text = timpubvaltext,
-            plot = plotlyOutput('plot_clinicaltrials_timpub_2a', height="300px"),
+            plot = plotlyOutput('plot_clinicaltrials_timpub_2a', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoTimPub2",
             info_title = "Results reporting (2 years)",
             info_text = timpub_tooltip2,
@@ -820,7 +781,8 @@ server <- function (input, output, session) {
             title = "Results reporting within 5 years of trial completion",
             value = timpubval5a,
             value_text = timpubvaltext5a,
-            plot = plotlyOutput('plot_clinicaltrials_timpub_5a', height="300px"),
+            plot = plotlyOutput('plot_clinicaltrials_timpub_5a', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoTimPub5",
             info_title = "Results reporting (5 years)",
             info_text = timpub_tooltip5,
@@ -865,13 +827,13 @@ server <- function (input, output, session) {
         all_numer_oa <- oa_set %>%
             filter(
                 color == "gold" | color == "green" | color == "hybrid",
-                oa_year == "2020"
+                oa_year == "2022"
             ) %>%
             nrow()
 
         # Keep pubs with NA color for now 
         all_denom_oa <- oa_set %>%
-            filter(oa_year == "2020") %>%
+            filter(oa_year == "2022") %>%
             nrow()
         
         #Create set for Green OA percentage plot
@@ -881,7 +843,7 @@ server <- function (input, output, session) {
                 publication_type == "journal publication",
                 ! is.na(doi),
                 ! is.na(publication_date_unpaywall),
-                is_closed_archivable == TRUE | color_green_only == "green"
+                # is_closed_archivable == TRUE | color_green_only == "green"
             ) %>%
             distinct(doi, .keep_all=TRUE)
 
@@ -889,7 +851,7 @@ server <- function (input, output, session) {
             format("%Y")
 
         oa_set_green <- oa_set_green %>%
-            filter(oa_year == "2020")
+            filter(oa_year == "2022")
         
         denom_greenoa <- oa_set_green %>%
             nrow()
@@ -907,8 +869,8 @@ server <- function (input, output, session) {
                 "opensci_absnum",
                 strong("Show proportions or absolute numbers"),
                 choices = c(
-                    "Show proportions",
-                    "Show absolute numbers"
+                  "Show proportions",
+                  "Show absolute numbers"
                 )
             ),
             fluidRow(
@@ -917,8 +879,9 @@ server <- function (input, output, session) {
                     metric_box(
                         title = "Open Access (OA)",
                         value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
-                        value_text = paste0("of publications from 2020 (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
-                        plot = plotlyOutput('plot_opensci_oa', height="300px"),
+                        value_text = paste0("of publications from xyx (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
+                        plot = plotlyOutput('plot_opensci_oa', height="300px") %>% 
+                          shinycssloaders::withSpinner(),
                         info_id = "infoOpenAccess",
                         info_title = "Open Access",
                         info_text = openaccess_tooltip,
@@ -972,12 +935,12 @@ server <- function (input, output, session) {
             ## Value for TRN in abstract
 
             all_numer_trn <- iv_umc %>%
-                filter(city == input$selectUMC) %>%
+                filter(umc == input$selectUMC) %>%
                 filter(has_iv_trn_abstract == TRUE) %>%
                 nrow()
             
             all_denom_trn <- iv_umc %>%
-                filter(city == input$selectUMC) %>%
+                filter(umc == input$selectUMC) %>%
                 filter(
                     has_publication == TRUE,
                     publication_type == "journal publication",
@@ -993,15 +956,15 @@ server <- function (input, output, session) {
                 fluidRow(
                     column(
                         col_width,
-                        uiOutput("oneumcprereg"),
-                        selectInput(
-                            "oneumcpreregregistry",
-                            strong("Trial registry"),
-                            choices = c(
-                                "ClinicalTrials.gov",
-                                "DRKS"
-                            )
-                        )
+                        uiOutput("oneumcprereg") %>%  shinycssloaders::withSpinner(),
+                        # selectInput(
+                        #     "oneumcpreregregistry",
+                        #     strong("Trial registry"),
+                        #     choices = c(
+                        #         "ClinicalTrials.gov",
+                        #         "DRKS"
+                        #     )
+                        # )
                     ),
                     column(
                         col_width,
@@ -1009,7 +972,8 @@ server <- function (input, output, session) {
                             title = "Reporting of Trial Registration Number in publications",
                             value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
                             value_text = paste0("of trials with a publication (n=", all_denom_trn, ") reported a trial registration number in the abstract"),
-                            plot = plotlyOutput('umc_plot_clinicaltrials_trn', height="300px"),
+                            plot = plotlyOutput('umc_plot_clinicaltrials_trn', height="300px") %>% 
+                              shinycssloaders::withSpinner(),
                             info_id = "UMCinfoTRN",
                             info_title = "Reporting of Trial Registration Number in publications",
                             info_text = trn_tooltip,
@@ -1020,16 +984,16 @@ server <- function (input, output, session) {
                     ),
                     column(
                         col_width,
-                        uiOutput("oneumclinkage"),
-                        selectInput(
-                            "oneumclinkagechooser",
-                            strong("Trial registry"),
-                            choices = c(
-                                "All",
-                                "ClinicalTrials.gov",
-                                "DRKS"
-                            )
-                        )
+                        uiOutput("oneumclinkage") %>%  shinycssloaders::withSpinner(),
+                        # selectInput(
+                        #     "oneumclinkagechooser",
+                        #     strong("Trial registry"),
+                        #     choices = c(
+                        #         "All",
+                        #         "ClinicalTrials.gov",
+                        #         "DRKS"
+                        #     )
+                        # )
                     )
                     
                 )
@@ -1053,13 +1017,13 @@ server <- function (input, output, session) {
             first_lim_align <- "right"
         }
 
-        if (input$oneumcpreregregistry == "ClinicalTrials.gov") {
+        # if (input$oneumcpreregregistry == "ClinicalTrials.gov") {
             
             ## Value for prereg
 
             pr_unique <- pros_reg_data_umc %>%
-                filter(city == input$selectUMC) %>%
-                filter(! is.na (start_date)) %>%
+                filter(umc == input$selectUMC,
+                       ! is.na (start_date)) %>%
                 mutate(start_year = format(start_date, "%Y"))
 
             max_start_year <- max(pr_unique$start_year)
@@ -1084,46 +1048,47 @@ server <- function (input, output, session) {
             }
 
             
-        }
-
-        if (input$oneumcpreregregistry == "DRKS") {
-
-            ## Value for prereg
-
-            iv_data_unique <- iv_umc %>%
-                filter(city == input$selectUMC) %>%
-                filter(! is.na (start_date)) %>%
-                filter(registry == input$oneumcpreregregistry) %>%
-                mutate(start_year = format(start_date, "%Y"))
-
-            max_start_year <- max(iv_data_unique$start_year)
-            
-            ## Filter for latest completion date for the pink descriptor text
-            all_numer_prereg <- iv_data_unique %>%
-                filter(start_year == max_start_year) %>%
-                filter(is_prospective) %>%
-                nrow()
-            
-            ## Filter for latest completion date for the pink descriptor text
-            all_denom_prereg <- iv_data_unique %>%
-                filter(start_year == max_start_year) %>%
-                nrow()
-
-            if (all_denom_prereg == 0) {
-                preregval <- "Not applicable"
-                preregvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
-            } else {
-                preregval <- paste0(round(100*all_numer_prereg/all_denom_prereg), "%")
-                preregvaltext <- paste0("of registered clinical trials started in ", max_start_year, " (n=", all_denom_prereg, ") were prospectively registered")
-            }
-
-        }
+        # }
+# 
+#         if (input$oneumcpreregregistry == "DRKS") {
+# 
+#             ## Value for prereg
+# 
+#             iv_data_unique <- iv_umc %>%
+#                 filter(city == input$selectUMC) %>%
+#                 filter(! is.na (start_date)) %>%
+#                 filter(registry == input$oneumcpreregregistry) %>%
+#                 mutate(start_year = format(start_date, "%Y"))
+# 
+#             max_start_year <- max(iv_data_unique$start_year)
+#             
+#             ## Filter for latest completion date for the pink descriptor text
+#             all_numer_prereg <- iv_data_unique %>%
+#                 filter(start_year == max_start_year) %>%
+#                 filter(is_prospective) %>%
+#                 nrow()
+#             
+#             ## Filter for latest completion date for the pink descriptor text
+#             all_denom_prereg <- iv_data_unique %>%
+#                 filter(start_year == max_start_year) %>%
+#                 nrow()
+# 
+#             if (all_denom_prereg == 0) {
+#                 preregval <- "Not applicable"
+#                 preregvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+#             } else {
+#                 preregval <- paste0(round(100*all_numer_prereg/all_denom_prereg), "%")
+#                 preregvaltext <- paste0("of registered clinical trials started in ", max_start_year, " (n=", all_denom_prereg, ") were prospectively registered")
+#             }
+# 
+#         }
 
         metric_box(
             title = "Prospective registration",
             value = preregval,
             value_text = preregvaltext,
-            plot = plotlyOutput('umc_plot_clinicaltrials_prereg', height="300px"),
+            plot = plotlyOutput('umc_plot_clinicaltrials_prereg', height="300px") %>%
+              shinycssloaders::withSpinner(),
             info_id = "UMCinfoPreReg",
             info_title = "Prospective registration",
             info_text = prereg_tooltip,
@@ -1148,19 +1113,42 @@ server <- function (input, output, session) {
             first_lim_align <- "right"
         }
 
-        if (input$oneumclinkagechooser == "All") {
+        # if (input$oneumclinkagechooser == "All") {
+        # 
+        #     ## Value for linkage
+        # 
+        #     link_num <- iv_umc %>%
+        #         filter(city == input$selectUMC) %>%
+        #         filter(has_reg_pub_link == TRUE) %>%
+        #         filter(publication_type == "journal publication") %>%
+        #         filter(completion_year == 2017) %>%
+        #         nrow()
+        # 
+        #     link_den <- iv_umc %>%
+        #         filter(city == input$selectUMC) %>%
+        #         filter(has_publication == TRUE) %>%
+        #         filter(publication_type == "journal publication") %>%
+        #         filter (has_pubmed == TRUE | ! is.na (doi)) %>%
+        #         filter(completion_year == 2017) %>%
+        #         nrow()
+        # 
+        #     linkage <- paste0(round(100*link_num/link_den), "%")
+        #     
+        # } else {
 
             ## Value for linkage
 
             link_num <- iv_umc %>%
-                filter(city == input$selectUMC) %>%
+                # filter(registry == input$oneumclinkagechooser) %>%
+                filter(umc == input$selectUMC) %>%
                 filter(has_reg_pub_link == TRUE) %>%
                 filter(publication_type == "journal publication") %>%
                 filter(completion_year == 2017) %>%
                 nrow()
 
             link_den <- iv_umc %>%
-                filter(city == input$selectUMC) %>%
+                # filter(registry == input$oneumclinkagechooser) %>%
+                filter(umc == input$selectUMC) %>%
                 filter(has_publication == TRUE) %>%
                 filter(publication_type == "journal publication") %>%
                 filter (has_pubmed == TRUE | ! is.na (doi)) %>%
@@ -1169,36 +1157,14 @@ server <- function (input, output, session) {
 
             linkage <- paste0(round(100*link_num/link_den), "%")
             
-        } else {
-
-            ## Value for linkage
-
-            link_num <- iv_umc %>%
-                filter(registry == input$oneumclinkagechooser) %>%
-                filter(city == input$selectUMC) %>%
-                filter(has_reg_pub_link == TRUE) %>%
-                filter(publication_type == "journal publication") %>%
-                filter(completion_year == 2017) %>%
-                nrow()
-
-            link_den <- iv_umc %>%
-                filter(registry == input$oneumclinkagechooser) %>%
-                filter(city == input$selectUMC) %>%
-                filter(has_publication == TRUE) %>%
-                filter(publication_type == "journal publication") %>%
-                filter (has_pubmed == TRUE | ! is.na (doi)) %>%
-                filter(completion_year == 2017) %>%
-                nrow()
-
-            linkage <- paste0(round(100*link_num/link_den), "%")
-            
-        }
+        # }
 
         metric_box(
             title = "Publication link in registry",
             value = linkage,
             value_text = paste0("of trials completed in 2017 with a publication (n=", link_den, ") provide a link to this publication in the registry entry"),
-            plot = plotlyOutput('umc_plot_linkage', height="300px"),
+            plot = plotlyOutput('umc_plot_linkage', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "UMCinfoLinkage",
             info_title = "Publication link in registry",
             info_text = linkage_tooltip,
@@ -1227,7 +1193,6 @@ server <- function (input, output, session) {
                 first_lim_align <- "right"
             }
 
-           
             
             wellPanel(
                 style="padding-top: 0px; padding-bottom: 0px;",
@@ -1235,20 +1200,21 @@ server <- function (input, output, session) {
                 fluidRow(
                     column(
                         col_width,
-                        uiOutput("oneumcsumres"),
-                        selectInput(
-                            "oneumcsumresregistry",
-                            strong("Trial registry"),
-                            choices = c(
-                                "EUCTR",
-                                "ClinicalTrials.gov",
-                                "DRKS"
-                            )
-                        )
+                        uiOutput("oneumcsumres") %>% 
+                          shinycssloaders::withSpinner(),
+                        # selectInput(
+                        #     "oneumcsumresregistry",
+                        #     strong("Trial registry"),
+                        #     choices = c(
+                        #         "EUCTR",
+                        #         "ClinicalTrials.gov",
+                        #         "DRKS"
+                        #     )
+                        # )
                     ),
                     column(
                         col_width,
-                        uiOutput("report2a"),
+                        uiOutput("report2a") %>%  shinycssloaders::withSpinner(),
                         selectInput(
                             "reporttype2a",
                             strong("Reporting type"),
@@ -1261,7 +1227,7 @@ server <- function (input, output, session) {
                     ),
                     column(
                         col_width,
-                        uiOutput("report5a"),
+                        uiOutput("report5a") %>%  shinycssloaders::withSpinner(),
                         selectInput(
                             "reporttype5a",
                             strong("Reporting type"),
@@ -1294,48 +1260,48 @@ server <- function (input, output, session) {
             first_lim_align <- "right"
         }
 
-        if (input$oneumcsumresregistry == "EUCTR") {
-            ## Value for summary results
-
-            sumres_percent <- eutt_hist %>%
-                filter(city == input$selectUMC) %>%
-                slice_head() %>%
-                select(percent_reported) %>%
-                pull()
-
-            n_eutt_records <- eutt_hist %>%
-                filter(city == input$selectUMC) %>%
-                nrow()
-
-            sumres_denom <- eutt_hist %>%
-                filter(city == input$selectUMC) %>%
-                slice_head() %>%
-                select(total_due) %>%
-                pull()
-
-            if (n_eutt_records == 0) {
-                sumresval <- "Not applicable"
-                sumresvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
-            } else {
-                sumresval <- paste0(sumres_percent, "%")
-                sumresvaltext <- paste0("of due clinical trials registered in EUCTR (n=", sumres_denom, ") reported summary results (as of: ", eutt_date, ")")
-            }
-            
-        } else {
+        # if (input$oneumcsumresregistry == "EUCTR") {
+        #     ## Value for summary results
+        # 
+        #     sumres_percent <- eutt_hist %>%
+        #         filter(city == input$selectUMC) %>%
+        #         slice_head() %>%
+        #         select(percent_reported) %>%
+        #         pull()
+        # 
+        #     n_eutt_records <- eutt_hist %>%
+        #         filter(city == input$selectUMC) %>%
+        #         nrow()
+        # 
+        #     sumres_denom <- eutt_hist %>%
+        #         filter(city == input$selectUMC) %>%
+        #         slice_head() %>%
+        #         select(total_due) %>%
+        #         pull()
+        # 
+        #     if (n_eutt_records == 0) {
+        #         sumresval <- "Not applicable"
+        #         sumresvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+        #     } else {
+        #         sumresval <- paste0(sumres_percent, "%")
+        #         sumresvaltext <- paste0("of due clinical trials registered in EUCTR (n=", sumres_denom, ") reported summary results (as of: ", eutt_date, ")")
+        #     }
+        #     
+        # } else {
             ## Summary results for CT dot gov and DRKS
             
             sumres_numer <- iv_umc %>%
                 filter(
-                    city == input$selectUMC,
-                    registry == input$oneumcsumresregistry,
+                    umc == input$selectUMC,
+                    # registry == input$oneumcsumresregistry,
                     has_summary_results == TRUE
                 ) %>%
                 nrow()
             
             sumres_denom <- iv_umc %>%
                 filter(
-                    city == input$selectUMC,
-                    registry == input$oneumcsumresregistry
+                    umc == input$selectUMC,
+                    # registry == input$oneumcsumresregistry
                 ) %>%
                 nrow()
 
@@ -1343,16 +1309,17 @@ server <- function (input, output, session) {
 
             sumresval <- paste0(sumres_percent, "%")
 
-            sumresvaltext <- paste0("of due clinical trials registered in ", input$oneumcsumresregistry, " (n=", sumres_denom, ") reported summary results")
+            sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=", sumres_denom, ") reported summary results")
             
-        }
+        # }
 
 
         metric_box(
             title = "Summary Results Reporting",
             value = sumresval,
             value_text = sumresvaltext,
-            plot = plotlyOutput('umc_plot_clinicaltrials_sumres', height="300px"),
+            plot = plotlyOutput('umc_plot_clinicaltrials_sumres', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "UMCinfoSumRes",
             info_title = "Summary Results Reporting",
             info_text = sumres_tooltip,
@@ -1369,7 +1336,7 @@ server <- function (input, output, session) {
         
         # Filter for the last completion date for the pink descriptor text
         max_completion_year <- iv_umc %>%
-            filter(city == input$selectUMC,
+            filter(umc == input$selectUMC,
                    has_followup_2y_pub & has_followup_2y_sumres
                    ) %>%
             select(completion_year) %>%
@@ -1377,7 +1344,7 @@ server <- function (input, output, session) {
         
         iv_data_unique <- iv_umc %>%
             filter(completion_year == max_completion_year) %>%
-            filter(city == input$selectUMC)
+            filter(umc == input$selectUMC)
 
         all_numer_timpub <- iv_data_unique %>%
             filter(
@@ -1396,7 +1363,7 @@ server <- function (input, output, session) {
             
             # Filter for the last completion date for the pink descriptor text
             max_completion_year <- iv_umc %>%
-                filter(city == input$selectUMC,
+                filter(umc == input$selectUMC,
                        has_followup_2y_sumres
                 ) %>%
                 select(completion_year) %>%
@@ -1404,7 +1371,7 @@ server <- function (input, output, session) {
             
             iv_data_unique <- iv_umc %>%
                 filter(completion_year == max_completion_year) %>%
-                filter(city == input$selectUMC)
+                filter(umc == input$selectUMC)
             
             all_numer_timpub <- iv_data_unique %>%
                 filter(
@@ -1423,7 +1390,7 @@ server <- function (input, output, session) {
             
             # Filter for the last completion date for the pink descriptor text
             max_completion_year <- iv_umc %>%
-                filter(city == input$selectUMC,
+                filter(umc == input$selectUMC,
                        has_followup_2y_pub
                 ) %>%
                 select(completion_year) %>%
@@ -1431,7 +1398,7 @@ server <- function (input, output, session) {
             
             iv_data_unique <- iv_umc %>%
                 filter(completion_year == max_completion_year) %>%
-                filter(city == input$selectUMC)
+                filter(umc == input$selectUMC)
             
             all_numer_timpub <- iv_data_unique %>%
                 filter(
@@ -1458,7 +1425,8 @@ server <- function (input, output, session) {
             title = "Results reporting within 2 years of trial completion (timely)",
             value = timpubval,
             value_text = timpubvaltext,
-            plot = plotlyOutput('umc_plot_clinicaltrials_timpub_2a', height="300px"),
+            plot = plotlyOutput('umc_plot_clinicaltrials_timpub_2a', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "UMCinfoTimPub2",
             info_title = "Results reporting (2 years)",
             info_text = timpub_tooltip2,
@@ -1473,7 +1441,7 @@ server <- function (input, output, session) {
         
         # Filter for the last completion date for the pink descriptor text
         max_completion_year <- iv_umc %>%
-            filter(city == input$selectUMC,
+            filter(umc == input$selectUMC,
                    has_followup_5y_pub & has_followup_5y_sumres
             ) %>%
             select(completion_year) %>%
@@ -1481,7 +1449,7 @@ server <- function (input, output, session) {
         
         iv_data_unique <- iv_umc %>%
             filter(completion_year == max_completion_year) %>%
-            filter(city == input$selectUMC)
+            filter(umc == input$selectUMC)
     
         all_numer_timpub <- iv_data_unique %>%
             filter(
@@ -1499,7 +1467,7 @@ server <- function (input, output, session) {
         if (input$reporttype5a == "Summary results only") {
 
             max_completion_year <- iv_umc %>%
-                filter(city == input$selectUMC,
+                filter(umc == input$selectUMC,
                        has_followup_5y_sumres
                 ) %>%
                 select(completion_year) %>%
@@ -1507,7 +1475,7 @@ server <- function (input, output, session) {
             
             iv_data_unique <- iv_umc %>%
                 filter(completion_year == max_completion_year) %>%
-                filter(city == input$selectUMC)
+                filter(umc == input$selectUMC)
             
             all_numer_timpub <- iv_data_unique %>%
                 filter(
@@ -1525,7 +1493,7 @@ server <- function (input, output, session) {
         if (input$reporttype5a == "Manuscript publication only") {
             
             max_completion_year <- iv_umc %>%
-                filter(city == input$selectUMC,
+                filter(umc == input$selectUMC,
                        has_followup_5y_pub
                 ) %>%
                 select(completion_year) %>%
@@ -1533,7 +1501,7 @@ server <- function (input, output, session) {
             
             iv_data_unique <- iv_umc %>%
                 filter(completion_year == max_completion_year) %>%
-                filter(city == input$selectUMC)
+                filter(umc == input$selectUMC)
             
             all_numer_timpub <- iv_data_unique %>%
                 filter(
@@ -1559,7 +1527,8 @@ server <- function (input, output, session) {
             title = "Results reporting within 5 years of trial completion",
             value = timpubval,
             value_text = timpubvaltext,
-            plot = plotlyOutput('umc_plot_clinicaltrials_timpub_5a', height="300px"),
+            plot = plotlyOutput('umc_plot_clinicaltrials_timpub_5a', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "UMCinfoTimPub5",
             info_title = "Results reporting (5 years)",
             info_text = timpub_tooltip5,
@@ -1603,7 +1572,7 @@ server <- function (input, output, session) {
 
             all_numer_oa <- oa_set %>%
                 filter(
-                    city == input$selectUMC,
+                    umc == input$selectUMC,
                     color == "gold" | color == "green" | color == "hybrid"
                     ) %>%
                 distinct(doi, .keep_all = TRUE) %>%
@@ -1611,14 +1580,14 @@ server <- function (input, output, session) {
 
             all_denom_oa <- oa_set %>%
                 filter(
-                    city == input$selectUMC
+                    umc == input$selectUMC
                     ) %>%
                 distinct(doi, .keep_all = TRUE) %>%
                 nrow()
 
             ## Date range for OA
             min_oa <- oa_set %>%
-                filter(city == input$selectUMC) %>%
+                filter(umc == input$selectUMC) %>%
                 distinct(doi, .keep_all = TRUE) %>%
                 select(publication_date_unpaywall) %>%
                 arrange(publication_date_unpaywall) %>%
@@ -1627,7 +1596,7 @@ server <- function (input, output, session) {
                 format("%Y")
 
             max_oa <- oa_set %>%
-                filter(city == input$selectUMC) %>%
+                filter(umc == input$selectUMC) %>%
                 distinct(doi, .keep_all = TRUE) %>%
                 select(publication_date_unpaywall) %>%
                 arrange(publication_date_unpaywall) %>%
@@ -1642,19 +1611,19 @@ server <- function (input, output, session) {
                     publication_type == "journal publication",
                     ! is.na(doi),
                     ! is.na(publication_date_unpaywall),
-                    is_closed_archivable == TRUE | color_green_only == "green"
+                    # is_closed_archivable == TRUE | color_green_only == "green"
                 )
             
             denom_greenoa <- oa_set_green %>%
                 filter(
-                    city == input$selectUMC
+                    umc == input$selectUMC
                     ) %>%
                 distinct(doi, .keep_all = TRUE) %>%
                 nrow()
             
             numer_greenoa <- oa_set_green %>%
                 filter(
-                    city == input$selectUMC,
+                    umc == input$selectUMC,
                     color_green_only == "green"
                     ) %>%
                 distinct(doi, .keep_all = TRUE) %>%
@@ -1662,7 +1631,7 @@ server <- function (input, output, session) {
 
             ## Date range for Green OA
             min_oa_green <- oa_set_green %>%
-                filter(city == input$selectUMC) %>%
+                filter(umc == input$selectUMC) %>%
                 distinct(doi, .keep_all = TRUE) %>%
                 select(publication_date_unpaywall) %>%
                 arrange(publication_date_unpaywall) %>%
@@ -1671,7 +1640,7 @@ server <- function (input, output, session) {
                 format("%Y")
 
             max_oa_green <- oa_set_green %>%
-                filter(city == input$selectUMC) %>%
+                filter(umc == input$selectUMC) %>%
                 distinct(doi, .keep_all = TRUE) %>%
                 select(publication_date_unpaywall) %>%
                 arrange(publication_date_unpaywall) %>%
@@ -1697,7 +1666,8 @@ server <- function (input, output, session) {
                             title = "Open Access (OA)",
                             value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
                             value_text = paste0("of publications published between ", min_oa, " and ", max_oa, " (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
-                            plot = plotlyOutput('umc_plot_opensci_oa', height="300px"),
+                            plot = plotlyOutput('umc_plot_opensci_oa', height="300px") %>% 
+                              shinycssloaders::withSpinner(),
                             info_id = "UMCinfoOpenAccess",
                             info_title = "Open Access",
                             info_text = openaccess_tooltip,
@@ -1744,22 +1714,22 @@ server <- function (input, output, session) {
             fluidRow(
                 column(
                     12,
-                    uiOutput("prereg_all"),
-                    selectInput(
-                        "allumc_prereg_registry",
-                        strong("Trial registry"),
-                        choices = c(
-                            "ClinicalTrials.gov",
-                            "DRKS"
-                        )
-                    )
+                    uiOutput("prereg_all") %>%  shinycssloaders::withSpinner(),
+                    # selectInput(
+                    #     "allumc_prereg_registry",
+                    #     strong("Trial registry"),
+                    #     choices = c(
+                    #         "ClinicalTrials.gov",
+                    #         "DRKS"
+                    #     )
+                    # )
                     
                 )
             ),
             fluidRow(
                 column(
                     12,
-                    uiOutput("trn_in_pubs_all"),
+                    uiOutput("trn_in_pubs_all") %>%  shinycssloaders::withSpinner(),
                     selectInput(
                         "allumc_trnpub",
                         strong("Location of reported trial registration number"),
@@ -1775,16 +1745,16 @@ server <- function (input, output, session) {
             fluidRow(
                 column(
                     12,
-                    uiOutput("allumclinkage"),
-                    selectInput(
-                        "allumc_linkagechooser",
-                        strong("Trial registry"),
-                        choices = c(
-                            "All",
-                            "ClinicalTrials.gov",
-                            "DRKS"
-                        )
-                    )
+                    uiOutput("allumclinkage") %>%  shinycssloaders::withSpinner(),
+                    # selectInput(
+                    #     "allumc_linkagechooser",
+                    #     strong("Trial registry"),
+                    #     choices = c(
+                    #         "All",
+                    #         "ClinicalTrials.gov",
+                    #         "DRKS"
+                    #     )
+                    # )
                 )
             )
         )
@@ -1795,41 +1765,42 @@ server <- function (input, output, session) {
 
         ## Value for linkage
 
-        if (input$allumc_linkagechooser == "All") {
+        # if (input$allumc_linkagechooser == "All") {
+        # 
+        #     all_numer_link <- iv_all %>%
+        #         filter(has_reg_pub_link == TRUE) %>%
+        #         filter(publication_type == "journal publication") %>%
+        #         nrow()
+        # 
+        #     all_denom_link <- iv_all %>%
+        #         filter(has_publication == TRUE) %>%
+        #         filter(publication_type == "journal publication") %>%
+        #         filter(has_pubmed == TRUE | ! is.na(doi)) %>%
+        #         nrow()
+        #     
+        # } else {
 
             all_numer_link <- iv_all %>%
+                # filter(registry == input$allumc_linkagechooser) %>%
                 filter(has_reg_pub_link == TRUE) %>%
                 filter(publication_type == "journal publication") %>%
                 nrow()
 
             all_denom_link <- iv_all %>%
+                # filter(registry == input$allumc_linkagechooser) %>%
                 filter(has_publication == TRUE) %>%
                 filter(publication_type == "journal publication") %>%
                 filter(has_pubmed == TRUE | ! is.na(doi)) %>%
                 nrow()
             
-        } else {
-
-            all_numer_link <- iv_all %>%
-                filter(registry == input$allumc_linkagechooser) %>%
-                filter(has_reg_pub_link == TRUE) %>%
-                filter(publication_type == "journal publication") %>%
-                nrow()
-
-            all_denom_link <- iv_all %>%
-                filter(registry == input$allumc_linkagechooser) %>%
-                filter(has_publication == TRUE) %>%
-                filter(publication_type == "journal publication") %>%
-                filter(has_pubmed == TRUE | ! is.na(doi)) %>%
-                nrow()
-            
-        }
+        # }
 
         metric_box(
             title = "Publication link in registry",
             value = paste0(round(100*all_numer_link/all_denom_link), "%"),
             value_text = "of trials with a publication provide a link to this publication in the registry entry",
-            plot = plotlyOutput('plot_allumc_linkage', height="300px"),
+            plot = plotlyOutput('plot_allumc_linkage', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoALLUMCLinkage",
             info_title = "Publication link in registry (All UMCs)",
             info_text = allumc_linkage_tooltip,
@@ -1844,46 +1815,47 @@ server <- function (input, output, session) {
 
         ## Value for All UMC summary results reporting
 
-        if (input$allumcsumresregistry == "EUCTR") {
-           
-            sumres_percent <- eutt_hist %>%
-                group_by(date) %>%
-                mutate(avg = mean(percent_reported)) %>%
-                slice_head() %>%
-                ungroup() %>%
-                slice_tail() %>%
-                select(avg) %>%
-                pull()
-
-            sumresvaltext <- paste("of due clinical trials registered in EUCTR reported summary results (as of:", eutt_date, ")")
-            
-        } else {
+        # if (input$allumcsumresregistry == "EUCTR") {
+        #    
+        #     sumres_percent <- eutt_hist %>%
+        #         group_by(date) %>%
+        #         mutate(avg = mean(percent_reported)) %>%
+        #         slice_head() %>%
+        #         ungroup() %>%
+        #         slice_tail() %>%
+        #         select(avg) %>%
+        #         pull()
+        # 
+        #     sumresvaltext <- paste("of due clinical trials registered in EUCTR reported summary results (as of:", eutt_date, ")")
+        #     
+        # } else {
             ## Summary results for CT dot gov and DRKS
             
             sumres_numer <- iv_umc %>%
                 filter(
-                    registry == input$allumcsumresregistry,
+                    # registry == input$allumcsumresregistry,
                     has_summary_results == TRUE
                 ) %>%
                 nrow()
             
             sumres_denom <- iv_umc %>%
-                filter(
-                    registry == input$allumcsumresregistry
-                ) %>%
+                # filter(
+                #     registry == input$allumcsumresregistry
+                # ) %>%
                 nrow()
 
             sumres_percent <- 100*sumres_numer/sumres_denom
 
-            sumresvaltext <- paste0("of due clinical trials registered in ", input$allumcsumresregistry, " reported summary results")
+            sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov reported summary results")
             
-        }
+        # }
         
         metric_box(
             title = "Summary Results Reporting",
             value = paste0(round(sumres_percent), "%"),
             value_text = sumresvaltext,
-            plot = plotlyOutput('plot_allumc_clinicaltrials_sumres', height="300px"),
+            plot = plotlyOutput('plot_allumc_clinicaltrials_sumres', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoALLUMCSumRes",
             info_title = "Summary results reporting (All UMCs)",
             info_text = allumc_clinicaltrials_sumres_tooltip,
@@ -1898,7 +1870,7 @@ server <- function (input, output, session) {
 
         ## Value for prereg
 
-        if (input$allumc_prereg_registry == "ClinicalTrials.gov") {
+        # if (input$allumc_prereg_registry == "ClinicalTrials.gov") {
             
             all_numer_prereg <- pros_reg_data %>%
                 filter(is_prospective == TRUE) %>%
@@ -1908,27 +1880,28 @@ server <- function (input, output, session) {
                 filter(! is.na(start_date)) %>%
                 nrow()
         
-        }
+        # }
 
-        if (input$allumc_prereg_registry == "DRKS") {
-            
-            all_numer_prereg <- iv_all %>%
-                filter(is_prospective == TRUE) %>%
-                filter(registry == "DRKS") %>%
-                nrow()
-
-            all_denom_prereg <- iv_all %>%
-                filter(! is.na(start_date)) %>%
-                filter(registry == "DRKS") %>%
-                nrow()
-            
-        }
+        # if (input$allumc_prereg_registry == "DRKS") {
+        #     
+        #     all_numer_prereg <- iv_all %>%
+        #         filter(is_prospective == TRUE) %>%
+        #         filter(registry == "DRKS") %>%
+        #         nrow()
+        # 
+        #     all_denom_prereg <- iv_all %>%
+        #         filter(! is.na(start_date)) %>%
+        #         filter(registry == "DRKS") %>%
+        #         nrow()
+        #     
+        # }
 
         metric_box(
             title = "Prospective registration",
             value = paste0(round(100*all_numer_prereg/all_denom_prereg), "%"),
-            value_text = paste("of clinical trials registered on", input$allumc_prereg_registry, "were prospectively registered"),
-            plot = plotlyOutput('plot_allumc_clinicaltrials_prereg', height="300px"),
+            value_text = paste("of clinical trials registered on ClinicalTrials.gov  were prospectively registered"),
+            plot = plotlyOutput('plot_allumc_clinicaltrials_prereg', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoALLUMCPreReg",
             info_title = "Prospective registration (All UMCs)",
             info_text = allumc_clinicaltrials_prereg_tooltip,
@@ -2024,7 +1997,8 @@ server <- function (input, output, session) {
             title = "Reporting of Trial Registration Number in publications",
             value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
             value_text = all_trn_value_text,
-            plot = plotlyOutput('plot_allumc_clinicaltrials_trn', height="300px"),
+            plot = plotlyOutput('plot_allumc_clinicaltrials_trn', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoALLUMCTRN",
             info_title = "TRN reporting (All UMCs)",
             info_text = allumc_clinicaltrials_trn_tooltip,
@@ -2044,22 +2018,23 @@ server <- function (input, output, session) {
             fluidRow(
                 column(
                     12,
-                    uiOutput("allumcsumres"),
-                    selectInput(
-                        "allumcsumresregistry",
-                        strong("Trial registry"),
-                        choices = c(
-                            "EUCTR",
-                            "ClinicalTrials.gov",
-                            "DRKS"
-                        )
-                    )
+                    uiOutput("allumcsumres") %>% 
+                      shinycssloaders::withSpinner(),
+                    # selectInput(
+                    #     "allumcsumresregistry",
+                    #     strong("Trial registry"),
+                    #     choices = c(
+                    #         "EUCTR",
+                    #         "ClinicalTrials.gov",
+                    #         "DRKS"
+                    #     )
+                    # )
                 )
             ),
             fluidRow(
                 column(
                     12,
-                    uiOutput("allumc_2a_pub"),
+                    uiOutput("allumc_2a_pub") %>%  shinycssloaders::withSpinner(),
                     selectInput(
                         "allumcreporttype2a",
                         strong("Reporting type"),
@@ -2074,7 +2049,7 @@ server <- function (input, output, session) {
             fluidRow(
                 column(
                     12,
-                    uiOutput("allumc_5a_pub"),
+                    uiOutput("allumc_5a_pub") %>%  shinycssloaders::withSpinner(),
                     selectInput(
                         "allumcreporttype5a",
                         strong("Reporting type"),
@@ -2145,7 +2120,8 @@ server <- function (input, output, session) {
             title = "Results reporting within 2 years of trial completion (timely)",
             value = paste0(round(100*all_numer_timpub/all_denom_timpub), "%"),
             value_text = "of clinical trials with the appropriate follow-up period reported results within 2 years",
-            plot = plotlyOutput('plot_allumc_clinicaltrials_timpub', height="300px"),
+            plot = plotlyOutput('plot_allumc_clinicaltrials_timpub', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoALLUMCTimPub",
             info_title = "Results reporting (2 years) (All UMCs)",
             info_text = allumc_clinicaltrials_timpub_tooltip,
@@ -2210,7 +2186,8 @@ server <- function (input, output, session) {
             title = "Results reporting within 5 years of trial completion",
             value = paste0(round(100*all_numer_timpub5a/all_denom_timpub5a), "%"),
             value_text = "of clinical trials with the appropriate follow-up period reported results within 5 years",
-            plot = plotlyOutput('plot_allumc_timpub_5a', height="300px"),
+            plot = plotlyOutput('plot_allumc_timpub_5a', height="300px") %>% 
+              shinycssloaders::withSpinner(),
             info_id = "infoALLUMCTimPub5a",
             info_title = "Results reporting (5 years) (All UMCs)",
             info_text = allumc_clinicaltrials_timpub_tooltip5a,
@@ -2253,7 +2230,7 @@ server <- function (input, output, session) {
                 publication_type == "journal publication",
                 ! is.na(doi),
                 ! is.na(publication_date_unpaywall),
-                is_closed_archivable | color_green_only == "green"
+                # is_closed_archivable | color_green_only == "green"
             ) %>%
             distinct(doi, .keep_all = TRUE)
 
@@ -2276,7 +2253,8 @@ server <- function (input, output, session) {
                         title = "Open Access",
                         value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
                         value_text = "of publications are Open Access (Gold, Green or Hybrid)",
-                        plot = plotlyOutput('plot_allumc_openaccess', height="300px"),
+                        plot = plotlyOutput('plot_allumc_openaccess', height="300px") %>% 
+                          shinycssloaders::withSpinner(),
                         info_id = "infoALLUMCOpenAccess",
                         info_title = "Open Access (All UMCs)",
                         info_text = allumc_openaccess_tooltip,
@@ -2325,7 +2303,8 @@ server <- function (input, output, session) {
     
     ## Preregistration plot
     output$plot_clinicaltrials_prereg <- renderPlotly({
-        return (plot_clinicaltrials_prereg(pros_reg_data, iv_all, input$startpreregregistry, color_palette))
+       return (plot_clinicaltrials_prereg(pros_reg_data, color_palette))
+      # return (plot_clinicaltrials_prereg(pros_reg_data, iv_all, input$startpreregregistry, color_palette))
     })
     
     ## TRN plot
@@ -2335,12 +2314,16 @@ server <- function (input, output, session) {
 
     ## Linkage plot
     output$plot_linkage <- renderPlotly({
-        return (plot_linkage(iv_all, color_palette, input$startlinkagechooser))
+        return (plot_linkage(iv_all, color_palette))
+      # return (plot_linkage(iv_all, color_palette, input$startlinkagechooser))
+      
     })
     
     ## Summary results plot
     output$plot_clinicaltrials_sumres <- renderPlotly({
-        return (plot_clinicaltrials_sumres(eutt_hist, iv_all, input$startsumresregistry, color_palette))
+        return (plot_clinicaltrials_sumres(iv_all, color_palette))
+      # return (plot_clinicaltrials_sumres(eutt_hist, iv_all, input$startsumresregistry, color_palette))
+
     })
     
     ## Timely Publication plot 2a
@@ -2367,7 +2350,8 @@ server <- function (input, output, session) {
 
     ## Preregistration plot
     output$umc_plot_clinicaltrials_prereg <- renderPlotly({
-        return (umc_plot_clinicaltrials_prereg(pros_reg_data_umc, pros_reg_data, iv_umc, iv_all, input$oneumcpreregregistry, input$selectUMC, color_palette))
+      return (umc_plot_clinicaltrials_prereg(pros_reg_data_umc, pros_reg_data, input$selectUMC, color_palette))  
+      # return (umc_plot_clinicaltrials_prereg(pros_reg_data_umc, pros_reg_data, iv_umc, iv_all, input$oneumcpreregregistry, input$selectUMC, color_palette))
     })
     
     ## TRN plot
@@ -2377,7 +2361,9 @@ server <- function (input, output, session) {
 
     ## Linkage plot
     output$umc_plot_linkage <- renderPlotly({
-        return (umc_plot_linkage(iv_umc, iv_all, input$oneumclinkagechooser, input$selectUMC, color_palette))
+        return (umc_plot_linkage(iv_umc, iv_all, input$selectUMC, color_palette))
+      # return (umc_plot_linkage(iv_umc, iv_all, input$oneumclinkagechooser, input$selectUMC, color_palette))
+      
     })
     
     ## Open Access plot
@@ -2392,7 +2378,9 @@ server <- function (input, output, session) {
     
     ## Summary results plot
     output$umc_plot_clinicaltrials_sumres <- renderPlotly({
-        return (umc_plot_clinicaltrials_sumres(eutt_hist, iv_umc, iv_all, input$oneumcsumresregistry, input$selectUMC, color_palette))
+        return (umc_plot_clinicaltrials_sumres(iv_umc, iv_all, input$selectUMC, color_palette))
+      # return (umc_plot_clinicaltrials_sumres(eutt_hist, iv_umc, iv_all, input$oneumcsumresregistry, input$selectUMC, color_palette))
+
     })
     
     ## Timely Publication plot 2a
@@ -2409,7 +2397,8 @@ server <- function (input, output, session) {
 
     ## Preregistration
     output$plot_allumc_clinicaltrials_prereg <- renderPlotly({
-        return(plot_allumc_clinicaltrials_prereg(pros_reg_data_umc, iv_umc, input$allumc_prereg_registry, color_palette, color_palette_bars))
+      # return(plot_allumc_clinicaltrials_prereg(pros_reg_data_umc, iv_umc, input$allumc_prereg_registry, color_palette, color_palette_bars))  
+      return(plot_allumc_clinicaltrials_prereg(pros_reg_data_umc, color_palette, color_palette_bars))
     })
 
     ## TRN
@@ -2419,12 +2408,16 @@ server <- function (input, output, session) {
 
     ## Linkage
     output$plot_allumc_linkage <- renderPlotly({
-        return(plot_allumc_linkage(iv_umc, input$allumc_linkagechooser, color_palette, color_palette_bars))
+        return(plot_allumc_linkage(iv_umc, color_palette, color_palette_bars))
+      # return(plot_allumc_linkage(iv_umc, input$allumc_linkagechooser, color_palette, color_palette_bars))
+      
     })
     
     ## Summary results
     output$plot_allumc_clinicaltrials_sumres <- renderPlotly({
-        return(plot_allumc_clinicaltrials_sumres(eutt_hist, iv_umc, input$allumcsumresregistry, color_palette, color_palette_bars))
+        return(plot_allumc_clinicaltrials_sumres(iv_umc, color_palette, color_palette_bars))
+      # return(plot_allumc_clinicaltrials_sumres(eutt_hist, iv_umc, input$allumcsumresregistry, color_palette, color_palette_bars))
+
     })
 
     ## Timely publication
@@ -2452,18 +2445,18 @@ server <- function (input, output, session) {
         make_datatable(pros_reg_data)
     })
     
-    output$data_table_eutt_data <- DT::renderDataTable({
-        make_datatable(eutt_hist %>% select (!hash))
-    })
+    # output$data_table_eutt_data <- DT::renderDataTable({
+    #     make_datatable(eutt_hist %>% select (!hash))
+    # })
 
     output$data_table_iv_data <- DT::renderDataTable({
         make_datatable(iv_umc)
     })
 
                                         # Trial characteristics tables #
-    output$trial_characteristics_table <- render_gt(trial_characteristics)
+    # output$trial_characteristics_table <- render_gt(trial_characteristics)
     
-    output$pros_reg_trial_characteristics_table <- render_gt(pros_reg_trial_characteristics)
+    # output$pros_reg_trial_characteristics_table <- render_gt(pros_reg_trial_characteristics)
     
 }
 

@@ -1,14 +1,18 @@
 # Verify assumptions for numerators/denominators for metrics in dashboard
 
 library(tidyverse)
-library(here)
 
-iv_all <-
-  read_csv(here("data", "ct-dashboard-intovalue-all.csv"))
+# iv_all <-
+#   read_csv(here("data", "ct-dashboard-intovalue-all.csv"))
+cali <- vroom(here("data", "California-trials_2014-2017.csv"))
+
+# ignore errors in PI columns for now
 
 # All publication metrics are limited to trials with journal publication
 # Each metric has additional limitations as needed to maximize accuracy
-iv_all %>%
+# iv_all %>%
+
+cali %>%
   filter(
     has_publication,
     publication_type == "journal publication"
@@ -19,8 +23,11 @@ iv_all %>%
 # Trial registration ------------------------------------------------------
 
 # Prospective registration (given start date available in registry)
-iv_all %>%
+# iv_all %>%
 
+##### where to get info on is_prospective? i2v
+cali %>% 
+  
   filter(!is.na(start_date)) %>%
 
   # dashboard highlights 2017
@@ -33,8 +40,8 @@ iv_all %>%
   )
 
 # Trial registration numbers in abstract (given a pubmed record)
-iv_all %>%
-
+# iv_all %>%
+cali %>%
   filter(
     has_publication,
     publication_type == "journal publication",
@@ -48,7 +55,7 @@ iv_all %>%
   )
 
 # Trial registration numbers in full-text  (given a full-text pdf publication)
-iv_all %>%
+cali %>%
 
   filter(
     has_publication,
@@ -63,12 +70,12 @@ iv_all %>%
   )
 
 # Link to publication in registration (given JOURNAL publication with doi or has_pubmed)
-iv_all %>%
+cali %>%
 
   filter(
     has_publication,
     publication_type == "journal publication",
-    !is.na(doi) | has_pubmed
+    has_pubmed
   ) %>%
   
   # dashboard highlights 2017
@@ -105,7 +112,7 @@ iv_all %>%
   )
 
 # Summary results only
-iv_all %>%
+cali %>%
 
   filter(has_followup_2y) %>%
 
@@ -122,7 +129,7 @@ iv_all %>%
   )
 
 # Publication-only
-iv_all %>%
+cali %>%
 
   filter(has_followup_2y) %>%
 
@@ -140,7 +147,7 @@ iv_all %>%
 
 # Reporting within 5 years (given 5 years follow-up)
 # Publication or summary results
-iv_all %>%
+cali %>%
 
   filter(has_followup_5y) %>%
 
@@ -160,7 +167,7 @@ iv_all %>%
   )
 
 # Summary results only
-iv_all %>%
+cali %>%
 
   filter(has_followup_5y) %>%
 
@@ -177,7 +184,7 @@ iv_all %>%
   )
 
 # Publication-only
-iv_all %>%
+cali %>%
 
   filter(has_followup_5y) %>%
 
@@ -197,12 +204,12 @@ iv_all %>%
 # Open access -------------------------------------------------------------
 
 # open access (given publication with doi)
-iv_all %>%
+cali %>%
 
   filter(
     has_publication,
     publication_type == "journal publication",
-    !is.na(doi)
+    !is.na(pmid)
   ) %>%
 
   # convert unresolved pubs in unpaywall to false
@@ -221,12 +228,12 @@ iv_all %>%
 
 # absolute numbers
 
-iv_all %>%
+cali %>%
   
   filter(
     has_publication,
     publication_type == "journal publication",
-    !is.na(doi)
+    !is.na(pmid)
   ) %>%
   
   # dashboard highlights 2020
@@ -236,12 +243,12 @@ iv_all %>%
 
 # realized potential for green oa (given publication that is closed and archivable, i.e., EITHER accepted or published version may be archived according to SYP AND publication is closed according to unpaywall, OR accessible via green oa)
 
-iv_all %>%
+cali %>%
 
   filter(
     has_publication,
     publication_type == "journal publication",
-    !is.na(doi),
+    !is.na(pmid),
     is_closed_archivable | color_green_only == "green"
   ) %>%
 
@@ -255,12 +262,12 @@ iv_all %>%
   )
 
 # absolute numbers
-iv_all %>%
+cali %>%
 
   filter(
     has_publication,
     publication_type == "journal publication",
-    !is.na(doi),
+    !is.na(pmid),
   ) %>%
   
   filter(publication_date_unpaywall %>% format("%Y") == 2020) %>%
