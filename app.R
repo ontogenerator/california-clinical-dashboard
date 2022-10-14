@@ -827,13 +827,21 @@ server <- function (input, output, session) {
         all_numer_oa <- oa_set %>%
             filter(
                 color == "gold" | color == "green" | color == "hybrid",
+<<<<<<< HEAD
                 oa_year == reference_year - 1
+=======
+                oa_year == "2022"
+>>>>>>> a3e795d674e2162031a566f732aed568e7d6b1a2
             ) %>%
             nrow()
 
         # Keep pubs with NA color for now 
         all_denom_oa <- oa_set %>%
+<<<<<<< HEAD
             filter(oa_year == reference_year - 1) %>%
+=======
+            filter(oa_year == "2022") %>%
+>>>>>>> a3e795d674e2162031a566f732aed568e7d6b1a2
             nrow()
         
         #Create set for Green OA percentage plot
@@ -851,7 +859,11 @@ server <- function (input, output, session) {
             format("%Y")
 
         oa_set_green <- oa_set_green %>%
+<<<<<<< HEAD
             filter(oa_year == reference_year - 1)
+=======
+            filter(oa_year == "2022")
+>>>>>>> a3e795d674e2162031a566f732aed568e7d6b1a2
         
         denom_greenoa <- oa_set_green %>%
             nrow()
@@ -879,7 +891,11 @@ server <- function (input, output, session) {
                     metric_box(
                         title = "Open Access (OA)",
                         value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
+<<<<<<< HEAD
                         value_text = paste0("of publications from ", reference_year - 1, " (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
+=======
+                        value_text = paste0("of publications from xyx (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
+>>>>>>> a3e795d674e2162031a566f732aed568e7d6b1a2
                         plot = plotlyOutput('plot_opensci_oa', height="300px") %>% 
                           shinycssloaders::withSpinner(),
                         info_id = "infoOpenAccess",
