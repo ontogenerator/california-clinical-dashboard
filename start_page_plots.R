@@ -1,7 +1,10 @@
-# Prospective registration
-plot_clinicaltrials_prereg <- function (dataset, iv_dataset, toggled_registry, color_palette) {
+reference_year <- 2022
 
-    if (toggled_registry == "ClinicalTrials.gov") {
+# Prospective registration
+plot_clinicaltrials_prereg <- function (dataset, color_palette) {
+  # plot_clinicaltrials_prereg <- function (dataset, iv_dataset, toggled_registry, color_palette) {
+    
+    # if (toggled_registry == "ClinicalTrials.gov") {
         
         dataset <- dataset %>%
             filter( ! is.na (start_date) )
@@ -40,52 +43,52 @@ plot_clinicaltrials_prereg <- function (dataset, iv_dataset, toggled_registry, c
                     )
                 )
             
-        }
+        # }
         
     }
 
-    if (toggled_registry == "DRKS") {
-
-        dataset <- iv_dataset %>%
-            filter( ! is.na (start_date) ) %>%
-            filter(registry == toggled_registry) %>%
-            mutate(start_year = format(start_date, "%Y")) %>%
-            filter(start_year >= 2006)
-
-        years <- seq(from=min(dataset$start_year), to=max(dataset$start_year))
-
-        plot_data <- tribble(
-            ~year, ~percentage, ~mouseover
-        )
-
-        for (current_year in years) {
-
-            numer_for_year <- dataset %>%
-                filter(
-                    start_year == current_year,
-                    is_prospective
-                ) %>%
-                nrow()
-
-            denom_for_year <- dataset %>%
-                filter(
-                    start_year == current_year
-                ) %>%
-                nrow()
-
-            percentage_for_year <- round(100*numer_for_year/denom_for_year, digits=1)
-            
-            plot_data <- plot_data %>%
-                bind_rows(
-                    tribble(
-                        ~year, ~percentage, ~mouseover,
-                        current_year, percentage_for_year, paste0(numer_for_year, "/", denom_for_year)
-                    )
-                )
-            
-        }
-        
-    }
+    # if (toggled_registry == "DRKS") {
+    # 
+    #     dataset <- iv_dataset %>%
+    #         filter( ! is.na (start_date) ) %>%
+    #         filter(registry == toggled_registry) %>%
+    #         mutate(start_year = format(start_date, "%Y")) %>%
+    #         filter(start_year >= 2006)
+    # 
+    #     years <- seq(from=min(dataset$start_year), to=max(dataset$start_year))
+    # 
+    #     plot_data <- tribble(
+    #         ~year, ~percentage, ~mouseover
+    #     )
+    # 
+    #     for (current_year in years) {
+    # 
+    #         numer_for_year <- dataset %>%
+    #             filter(
+    #                 start_year == current_year,
+    #                 is_prospective
+    #             ) %>%
+    #             nrow()
+    # 
+    #         denom_for_year <- dataset %>%
+    #             filter(
+    #                 start_year == current_year
+    #             ) %>%
+    #             nrow()
+    # 
+    #         percentage_for_year <- round(100*numer_for_year/denom_for_year, digits=1)
+    #         
+    #         plot_data <- plot_data %>%
+    #             bind_rows(
+    #                 tribble(
+    #                     ~year, ~percentage, ~mouseover,
+    #                     current_year, percentage_for_year, paste0(numer_for_year, "/", denom_for_year)
+    #                 )
+    #             )
+    #         
+    #     }
+    #     
+    # }
         
     plot_ly(
         plot_data,
@@ -186,17 +189,18 @@ plot_clinicaltrials_trn <- function (dataset, color_palette) {
 }
 
 ## Linkage
-plot_linkage <- function (dataset, color_palette, chosenregistry) {
-
+plot_linkage <- function (dataset, color_palette) {
+  # plot_linkage <- function (dataset, color_palette, chosenregistry) {
     dataset <- dataset %>%
-        filter(has_publication == TRUE) %>%
-        filter(publication_type == "journal publication") %>%
-        filter(has_pubmed == TRUE | ! is.na (doi))
+        filter(has_publication == TRUE,
+               publication_type == "journal publication",
+               has_pubmed == TRUE | ! is.na (doi),
+               ! is.na(completion_year))
 
-    if (chosenregistry != "All") {
-        dataset <- dataset %>%
-            filter(registry == chosenregistry)
-    }
+    # if (chosenregistry != "All") {
+    #     dataset <- dataset %>%
+    #         filter(registry == chosenregistry)
+    # }
 
     years <- seq(from=min(dataset$completion_year), to=max(dataset$completion_year))
 
@@ -259,38 +263,41 @@ plot_linkage <- function (dataset, color_palette, chosenregistry) {
 }
 
 ## Summary results
-plot_clinicaltrials_sumres <- function (eutt_dataset, iv_dataset, toggled_registry, color_palette) {
-
-    if (toggled_registry == "EUCTR") {
+plot_clinicaltrials_sumres <- function (iv_dataset, color_palette) {
+  # plot_clinicaltrials_sumres <- function (eutt_dataset, iv_dataset, toggled_registry, color_palette) {
+    # if (toggled_registry == "EUCTR") {
+    #     
+    #     dataset <- eutt_dataset %>%
+    #         filter (date > as.Date("2022-02-18")-365*1.5) ## Only look at the last year and a half
+    # 
+    #     ## Only take the latest data point per month
+    #     dataset$month <- dataset$date %>%
+    #         format("%Y-%m")
+    # 
+    #     dataset <- dataset %>%
+    #         group_by(city, month) %>%
+    #         arrange(desc(date)) %>%
+    #         slice_head()
+    # 
+    #     plot_data <- dataset %>%
+    #         group_by(date) %>%
+    #         mutate(avg = round(100*sum(total_reported)/sum(total_due), digits=1)) %>%
+    #         mutate(mouseover = paste0(sum(total_reported), "/", sum(total_due))) %>%
+    #         slice_head() %>%
+    #         select(date, avg, mouseover) %>%
+    #         rename(percent_reported = avg) %>%
+    #         mutate(city = "All") %>%
+    #         ungroup()
+    #     
+    # } else { ## The registry is not EUCTR
         
-        dataset <- eutt_dataset %>%
-            filter (date > as.Date("2022-02-18")-365*1.5) ## Only look at the last year and a half
-
-        ## Only take the latest data point per month
-        dataset$month <- dataset$date %>%
-            format("%Y-%m")
-
-        dataset <- dataset %>%
-            group_by(city, month) %>%
-            arrange(desc(date)) %>%
-            slice_head()
-
-        plot_data <- dataset %>%
-            group_by(date) %>%
-            mutate(avg = round(100*sum(total_reported)/sum(total_due), digits=1)) %>%
-            mutate(mouseover = paste0(sum(total_reported), "/", sum(total_due))) %>%
-            slice_head() %>%
-            select(date, avg, mouseover) %>%
-            rename(percent_reported = avg) %>%
-            mutate(city = "All") %>%
-            ungroup()
-        
-    } else { ## The registry is not EUCTR
-        
-        dataset <- iv_dataset %>%
-            filter(
-                registry == toggled_registry
-            )
+        dataset <- iv_dataset %>% 
+          filter(!is.na(completion_year),
+                 completion_year <= reference_year)
+        # %>%
+        #     filter(
+        #         registry == toggled_registry
+        #     )
 
         min_year <- dataset$completion_year %>%
             min()
@@ -319,13 +326,14 @@ plot_clinicaltrials_sumres <- function (eutt_dataset, iv_dataset, toggled_regist
                 bind_rows(
                     tribble(
                         ~date, ~percent_reported, ~mouseover,
-                        currentyear, round(100*currentyear_numer/currentyear_denom, digits=1), paste0(currentyear_numer, "/", currentyear_denom)
+                        currentyear, round(100*currentyear_numer/currentyear_denom, digits=1),
+                        paste0(currentyear_numer, "/", currentyear_denom)
                     )
                 )
             
         }
 
-    }
+    # }
 
     plot_ly(
         plot_data,
@@ -847,7 +855,7 @@ plot_opensci_oa <- function (dataset, absnum, color_palette) {
             ),
             yaxis = list(
                 title = paste('<b>', ylabel, '</b>'),
-                range = c(0, 105)
+                range = c(0, 115)
             ),
             paper_bgcolor = color_palette[9],
             plot_bgcolor = color_palette[9]

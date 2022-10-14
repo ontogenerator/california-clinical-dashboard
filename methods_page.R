@@ -28,7 +28,7 @@ methods_page <- tabPanel(
             [enter DOI]. ")),
     
     h3("Identification of clinical trials"),
-    bsCollapse(id = "methodsPanels_IdentificationTrials",
+    # bsCollapse(id = "methodsPanels_IdentificationTrials",
                bsCollapsePanel(strong("Identification of clinical trials"),
                                p(HTML("The data displayed in this dashboard are
                                based on 3 data sources with the following inclusion
@@ -93,10 +93,12 @@ methods_page <- tabPanel(
                             corresponding sponsor name was found for a given UMC, we
                             selected the sponsor with the most trials.")),
                                value = "methodsPanels_IdentificationTrials",
-                               style = "default")),
+                               style = "default"
+                               # )
+    ),
     
     h3("Trial Registration"),
-    bsCollapse(id = "methodsPanels_TrialRegistration",
+    # bsCollapse(id = "methodsPanels_TrialRegistration",
                methods_panel("Prospective registration",
                              
                              "How many clinical trials were prospectively registered (i.e., registered
@@ -183,10 +185,12 @@ methods_page <- tabPanel(
                              PMID field for references. In addition, ClinicalTrials.gov automatically
                              indexes publications from PubMed using TRNs in the secondary identifier field.
                              In contrast, DRKS includes references as a free-text field, leaving it up to
-                                  trialists to enter publication identifiers."))),
+                                  trialists to enter publication identifiers.")
+                             # )
+    ),
     
     h3("Trial Reporting"),
-    bsCollapse(id = "methodsPanels_TrialReporting",
+    # bsCollapse(id = "methodsPanels_TrialReporting",
                methods_panel("Summary results reporting",
                              
                              HTML("How many due clinical trials reported summary results in the registry.
@@ -305,11 +309,13 @@ methods_page <- tabPanel(
                                   publications published after these manual searches were conducted would
                                   have been missed. Furthermore, some publications may have been missed in the
                                   manual search procedure as the search was restricted to a limited number of
-                                  scientific databases and the responsible parties were not contacted."))),
+                                  scientific databases and the responsible parties were not contacted.")
+                             # )
+    ),
     
     hr(),
     h3("Open Access"),
-    bsCollapse(id = "methodsPanels_OpenAccess",
+    # bsCollapse(id = "methodsPanels_OpenAccess",
                
                methods_panel("Open Access",
                              
@@ -411,16 +417,19 @@ methods_page <- tabPanel(
                ##               Self-archiving permissions data was only extracted for publications with
                ##               a known \"best permission\" in the Shareyourpaper.org database. We did
                ##               not perform a manual check of self-archiving permissions.")
-               ),
+               # )
+,
     
     h3("Dashboard development"),
-    bsCollapse(id = "methodsPanels_DashboardDevelopment",
+    # bsCollapse(id = "methodsPanels_DashboardDevelopment",
                bsCollapsePanel(strong("Dashboard development"),
                                p(HTML("The dashboard was developed using the Shiny R package
                                (version 1.6.0). The <a href=https://github.com/quest-bih/clinical-dashboard
                                       >underlying code</a> is openly available in GitHub under
                                       an AGPL license and may be adapted for further use."),
-                               style = "default"))),
+                               style = "default")
+                               # )
+    ),
                    
     h3("Tools used for data collection"),
     helpText(HTML('<a href="https://github.com/NicoRiedel/unpaywallR"> UnpaywallR </a>')),

@@ -1,8 +1,9 @@
 ## Define the page layout
 
-iv_umc <- read_csv(
-    "data/ct-dashboard-intovalue-umc.csv"
-)
+# iv_umc <- read_csv(
+#     "data/ct-dashboard-intovalue-umc.csv"
+# )
+iv_umc <- vroom(here("data", "cali_dashboard_umc.csv"))
 
 umc_page <- tabPanel(
     "One UMC", value = "tabUMC",
@@ -47,8 +48,8 @@ umc_page <- tabPanel(
                     choices = c(
                         "Select a UMC",
                         iv_umc %>%
-                        arrange(city) %>%
-                        distinct(city) %>%
+                        arrange(umc) %>%
+                        distinct(umc) %>%
                         pull()
                     ),
                     selected = NA
