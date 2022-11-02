@@ -4,11 +4,11 @@ start_page <- tabPanel(
     ## The following are defined in app.R in the Shiny server object
     uiOutput("startpage"),
     uiOutput("registry_metrics") %>% 
-      shinycssloaders::withSpinner(),
+      shinycssloaders::withSpinner(color = "#007265"),
     uiOutput("publication_metrics") %>% 
-      shinycssloaders::withSpinner(),
+      shinycssloaders::withSpinner(color = "#007265"),
     uiOutput("openscience_metrics") %>% 
-      shinycssloaders::withSpinner(),
+      shinycssloaders::withSpinner(color = "#007265"),
     bsCollapsePanel(strong("Impressum"),
                     impressum_text,
                     style = "default"),

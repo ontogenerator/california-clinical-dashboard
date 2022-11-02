@@ -1,5 +1,3 @@
-reference_year <- 2022
-
 ## Prospective registration
 plot_allumc_clinicaltrials_prereg <- function (dataset, color_palette, color_palette_bars) {
   # plot_allumc_clinicaltrials_prereg <- function (dataset, iv_dataset, toggled_registry, color_palette, color_palette_bars) {
@@ -221,9 +219,9 @@ plot_allumc_linkage <- function (dataset, color_palette, color_palette_bars) {
   # plot_allumc_linkage <- function (dataset, chosenregistry, color_palette, color_palette_bars) {
     
     dataset <- dataset %>%
-        filter(has_publication == TRUE) %>%
-        filter(publication_type == "journal publication") %>%
-        filter (has_pubmed == TRUE | ! is.na (doi))
+        filter(has_publication == TRUE, 
+               publication_type == "journal publication", 
+               has_pubmed == TRUE | ! is.na (doi))
 
     # if (chosenregistry != "All") {
     #     dataset <- dataset %>%
@@ -308,8 +306,7 @@ plot_allumc_clinicaltrials_sumres <- function (iv_dataset, color_palette, color_
 #     } else {
 
         dataset <- iv_dataset %>% 
-            filter(!is.na(completion_year),
-                   completion_year <= reference_year)
+            filter(!is.na(primary_completion_year))
             # filter(
             #     registry == toggled_registry
             # )
