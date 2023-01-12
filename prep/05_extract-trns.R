@@ -7,6 +7,7 @@ library(ctregistries)
 # renv::install("maia-sh/tidypubmed")
 # remotes::install_github("maia-sh/tidypubmed")
 library(tidypubmed)
+library(vroom)
 
 source(here("prep", "functions", "extract_pubmed.R"))
 source(here("prep", "functions", "get_grobid_ft_trn.R"))
@@ -146,7 +147,8 @@ write_rds(ft_pmid, path(dir_trn, "trn-ft-pmid.rds"))
 
 trn_combined <-
   bind_rows(si, abs,
-            # ft_doi, ft_pmid
+            ft_doi
+            # ft_pmid
             ) %>%
   
   distinct(pmid, doi, trn = trn_cleaned, registry, source) %>%
@@ -189,8 +191,6 @@ trn_combined <-
     has_trn_abstract = if_else(!has_pubmed, NA, has_trn_abstract),
     
     # TRN in full-text is NA no full-text
-    
-    
     has_trn_ft = if_else(!has_ft, NA, has_trn_ft)
   ) %>%
   

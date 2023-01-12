@@ -209,36 +209,36 @@ umc_plot_clinicaltrials_trn <- function (dataset, dataset_all, umc_selected, col
             has_ft == TRUE
         )
     
-    all_numer_abs <- sum(plot_data_abs_all$has_iv_trn_abstract, na.rm=TRUE)
+    all_numer_abs <- sum(plot_data_abs_all$has_trn_abstract, na.rm=TRUE)
     abs_denom <- plot_data_abs_all %>%
-        filter(! is.na(has_iv_trn_abstract)) %>%
+        filter(! is.na(has_trn_abstract)) %>%
         nrow()
     
-    all_numer_ft <- sum(plot_data_ft_all$has_iv_trn_ft, na.rm=TRUE)
+    all_numer_ft <- sum(plot_data_ft_all$has_trn_ft, na.rm=TRUE)
     ft_denom <- plot_data_ft_all %>%
-        filter(! is.na(has_iv_trn_ft)) %>%
+        filter(! is.na(has_trn_ft)) %>%
         nrow()
 
     umc_abs_denom <- plot_data_abs %>%
         filter(umc == umc_selected) %>%
-        filter(! is.na(has_iv_trn_abstract)) %>%
+        filter(! is.na(has_trn_abstract)) %>%
         nrow()
 
     umc_numer_abs <- plot_data_abs %>%
         filter(umc == umc_selected) %>%
-        select(has_iv_trn_abstract) %>%
-        filter(has_iv_trn_abstract == TRUE) %>%
+        select(has_trn_abstract) %>%
+        filter(has_trn_abstract == TRUE) %>%
         nrow()
 
     umc_numer_ft <- plot_data_ft %>%
         filter(umc == umc_selected) %>%
-        select(has_iv_trn_ft) %>%
-        filter(has_iv_trn_ft == TRUE) %>%
+        select(has_trn_ft) %>%
+        filter(has_trn_ft == TRUE) %>%
         nrow()
 
     umc_ft_denom <- plot_data_ft %>%
         filter(umc == umc_selected) %>%
-        filter(! is.na(has_iv_trn_ft)) %>%
+        filter(! is.na(has_trn_ft)) %>%
         nrow()
 
     plot_data <- tribble(

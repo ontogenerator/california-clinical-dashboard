@@ -226,7 +226,7 @@ lim_allumc_animal_power_tooltip <- strwrap("We did not test the sensitivity and 
 
 ## Define the page layout
 all_umcs_page <- tabPanel(
-    "All UMCs", value = "tabAllUMCs",
+    "All Universities", value = "tabAllUMCs",
     wellPanel(
         br(),
         fluidRow(
@@ -234,24 +234,26 @@ all_umcs_page <- tabPanel(
                 12,
                 h1(
                     style = "margin-left: 0",
-                    strong("Dashboard for clinical research transparency: All UMCs"),
+                    strong("Dashboard for clinical research transparency: All Universities/Medical Schools"),
                     align = "left"
                 ),
                 h4(
                     style = "margin-left: 0",
-                    "This dashboard displays the performance of University Medical
-                    Centers (UMCs) in Germany on established registration and
-                    reporting practices for clinical research transparency. On
-                    this page, you can view the data for all UMCs
-                    side-by-side. More detailed information on the underlying
+                    "This dashboard displays the performance of Universities/Medical Schools
+                    in California on established registration and reporting practices for
+                    clinical research transparency. On this page, you can view the data
+                    for all Universities/Medical Schools side-by-side."
+                ),
+                h4("IN PROGRESS / CURRENT VERSION REFLECTS THE GERMAN DASHBOARD:
+                    More detailed information on the underlying
                     methods can be found in the methods and limitations widgets
                     next to each plot, and in the Methods page."
                 ),
                 h4(style = "margin-left:0cm",
-                   "The dashboard was developed as part of a scientific research
-                   project with the overall aim to support the adoption of responsible
-                   research practices at UMCs. The dashboard is a pilot and continues
-                       to be updated. More metrics may be added in the future."),
+                   "The dashboard was developed as part of a scientific research project
+                    with the overall aim to support the adoption of responsible research
+                    practices at Universities/Medical Schools. The dashboard is a pilot and
+                    continues to be updated. More metrics may be added in the future."),
                 br()
             )
         )

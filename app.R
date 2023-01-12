@@ -27,7 +27,7 @@ cali_umc <- vroom(here("data", "cali_dashboard_umc.csv"))
 pros_reg_data <- vroom(here("data", "processed", "cali_prospective_registration.csv"))
 
 pros_reg_data_umc <- pros_reg_data %>%
-  mutate(umc = strsplit(as.character(affiliation), " ")) %>%
+  mutate(umc = strsplit(as.character(affiliation), ", ")) %>%
   tidyr::unnest(umc)
 
 ## Load functions
@@ -141,42 +141,39 @@ server <- function (input, output, session) {
       fluidRow(
         column(
           8,
-          h1(style = "margin-left:0cm", strong("Dashboard for clinical research transparency"), align = "left"),
+          h1(style = "margin-left:0cm", strong("Dashboard for clinical research transparency:\n
+                                               California Universities/Medical Schools"), align = "left"),
           h4(style = "margin-left:0cm",
-             "This dashboard displays the performance of University
-                       Medical Centers (UMCs) in Germany on established registration
-                       and reporting practices for clinical research transparency.
-                       The dashboard displays data for interventional
-                       clinical trials conducted at German UMCs, registered in
-                       ClinicalTrials.gov or the German Clinical Trials Registry
-                       (DRKS), and reported as complete between 2009 - 2017. For
-                       summary results reporting, we additionally included trials
-                       conducted at German UMCs and registered in the EU Clinical
-                       Trials Register (EUCTR). The dashboard was developed as part
-                       of a scientific research project with the overall aim to support
-                       the adoption of responsible research practices at UMCs.
-                       The dashboard is a pilot and continues to be updated.
-                       More metrics may be added in the future."),
+             "This dashboard displays the performance of Universities/Medical Schools in California,
+             USA on established registration and reporting practices for clinical research transparency.
+             The dashboard displays data for interventional clinical trials conducted at California
+             Universities/Medical Schools, registered in ClinicalTrials.gov and reported as complete
+             between 2014 - 2017."),
           h4(style = "margin-left:0cm",
-             HTML("The <i>Start page</i> displays data across all
-                       included UMCs. The <i>All UMCs</i> page displays the data
-                       of all UMCs side-by-side. The <i>One UMC</i> page allows you
-                       to focus on any given UMC by selecting it in the drop-down
-                       menu. The data for this UMC is then contextualized to that
-                       across all included UMCs. Besides each plot, you can
-                       find an overview of the methods and limitations by clicking
-                       on the associated widgets. For more detailed information
-                       on the methods and underlying datasets used to assess
-                       the practices displayed in this dashboard, visit the <i>Methods</i>
-                       and <i>Datasets</i> pages. The <i>Trial Characteristics</i> page
-                       provides an overview of the characteristics of trials included
-                       in the dashboard.The <i>FAQ</i> and <i>Why these practices?</i>
-                       pages provide more general information about this
-                       dashboard and our selection of practices.")),
+             "The dashboard was developed as part of a scientific research project with the overall aim
+             to support the adoption of responsible research practices at Universities/Medical Schools.
+             The dashboard is a pilot and continues to be updated. More metrics may be added in the future."),
+          h4(style = "margin-left:0cm",
+             HTML("The <i>Start page</i> displays data across all included Universities.
+             The <i>All Universities</i> page displays the data of all Universities side-by-side.
+             <i>The One University</i> page allows you to focus on any given University by selecting it in
+             the drop-down menu. The data for this University is then contextualized to that across
+             all included Universities. 
+             <br>
+             <br>
+             IN PROGRESS / CURRENT VERSION REFLECTS THE GERMAN DASHBOARDS: Besides each plot, you can find
+             an overview of the methods and limitations by clicking on the associated widgets.
+             For more detailed information on the methods and underlying datasets used to assess
+             the practices displayed in this dashboard, visit the <i>Methods</i> and <i>Datasets</i> pages.
+             The <i>Trial Characteristics</i> (NOT SHOWN, IN PROGRESS) page provides an overview of the characteristics of trials included
+             in the dashboard.
+             <br>
+             <br>
+             IN PROGRESS / CURRENT VERSION REFLECTS THE GERMAN DASHBOARDS: The <i>FAQ</i> and <i>Why these practices?</i>
+             pages provide more general information about this dashboard and our selection of practices.")),
           h3(style = "margin-left:0cm; color: purple",
-             "More information on the overall aim and methodology can be
-                       found in the associated publication [enter DOI]. "),
-          br()
+             "More information on the overall aim and methodology can be found in the publication associated with
+             this dashboard [enter DOI].")
         ),
         column(
           4,
@@ -186,12 +183,12 @@ server <- function (input, output, session) {
           actionButton(
             style = "color: white; background-color: #aa1c7d;",
             'buttonUMC',
-            'See one UMC'
+            'See one University'
           ),
           actionButton(
             style = "color: white; background-color: #aa1c7d;",
             'buttonAllUMCs',
-            'See all UMCs'
+            'See all Universities'
           ),
           actionButton(
             style = "color: white; background-color: #aa1c7d;",
@@ -228,7 +225,7 @@ server <- function (input, output, session) {
     ## Value for TRN in abstract
     
     all_numer_trn <- cali %>%
-      filter(has_iv_trn_abstract == TRUE) %>%
+      filter(has_trn_abstract == TRUE) %>%
       nrow()
     
     all_denom_trn <- cali %>%
@@ -247,21 +244,14 @@ server <- function (input, output, session) {
           col_width,
           uiOutput("startprereg") %>% 
             shinycssloaders::withSpinner(color = "#007265"),
-          # selectInput(
-          #     "startpreregregistry",
-          #     strong("Trial registry"),
-          #     choices = c(
-          #         "ClinicalTrials.gov",
-          #         "DRKS"
-          #     )
-          # )
         ),
         column(
           col_width,
           metric_box(
             title = "Reporting of Trial Registration Number in publications",
             value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
-            value_text = paste0("of trials with a publication (n=", all_denom_trn, ") reported a trial registration number in the abstract"),
+            value_text = paste0("of trials with a publication (n=",
+                                all_denom_trn, ") reported a trial registration number in the abstract"),
             plot = plotlyOutput('plot_clinicaltrials_trn', height="300px") %>% 
               shinycssloaders::withSpinner(color = "#007265"),
             info_id = "infoTRN",
@@ -276,22 +266,9 @@ server <- function (input, output, session) {
           col_width,
           uiOutput("startlinkage") %>%
             shinycssloaders::withSpinner(color = "#007265"),
-          # selectInput(
-          #     "startlinkagechooser",
-          #     strong("Trial registry"),
-          #     choices = c(
-          #         "All",
-          #         "ClinicalTrials.gov",
-          #         "DRKS"
-          #     )
-          # )
         )
-        
       )
-      
     )
-    
-    
   })
   
   ## Start page prospective registration toggle
@@ -307,9 +284,7 @@ server <- function (input, output, session) {
       first_lim_align <- "right"
     }
     
-    # if (input$startpreregregistry == "ClinicalTrials.gov") {
-    
-    ## Value for prereg
+   ## Value for prereg
     
     pr_unique <- pros_reg_data %>%
       filter(! is.na (start_date))
@@ -331,7 +306,7 @@ server <- function (input, output, session) {
     
     if (all_denom_prereg == 0) {
       preregval <- "Not applicable"
-      preregvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+      preregvaltext <- "No clinical trials for this metric were captured by this method for this University"
     } else {
       preregval <- paste0(round(100*all_numer_prereg/all_denom_prereg), "%")
       preregvaltext <- paste0("of registered clinical trials started in ", max_start_year, " (n=", all_denom_prereg, ") were prospectively registered")
@@ -367,20 +342,16 @@ server <- function (input, output, session) {
       first_lim_align <- "right"
     }
     
-    # if (input$startlinkagechooser == "All") {
-    
     ## Value for linkage
     
     link_num <- cali %>%
       filter(has_reg_pub_link == TRUE) %>%
       filter(publication_type == "journal publication") %>%
-      # filter(completion_year == ub_year) %>%
       nrow()
     
     link_den <- cali %>%
       filter(has_publication == TRUE) %>%
       filter(publication_type == "journal publication") %>%
-      # filter(completion_year == ub_year) %>%
       filter(has_pubmed == TRUE | ! is.na (doi)) %>%
       nrow()
     
@@ -390,7 +361,8 @@ server <- function (input, output, session) {
     metric_box(
       title = "Publication link in registry",
       value = linkage,
-      value_text = paste0("of trials completed in 2017 with a publication (n=", link_den, ") provide a link to this publication in the registry entry"),
+      value_text = paste0("of trials completed in 2017 with a publication (n=",
+                          link_den, ") provide a link to this publication in the registry entry"),
       plot = plotlyOutput('plot_linkage', height="300px") %>% 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoLinkage",
@@ -423,15 +395,6 @@ server <- function (input, output, session) {
         column(
           col_width,
           uiOutput("startsumres") %>%  shinycssloaders::withSpinner(color = "#007265"),
-          # selectInput(
-          #     "startsumresregistry",
-          #     strong("Trial registry"),
-          #     choices = c(
-          #         "EUCTR",
-          #         "ClinicalTrials.gov",
-          #         "DRKS"
-          #     )
-          # )
         ),
         column(
           col_width,
@@ -488,16 +451,14 @@ server <- function (input, output, session) {
       nrow()
     
     sumres_denom <- cali %>%
-      # filter(
-      #     # registry == input$startsumresregistry
-      # ) %>%
-      nrow()
+       nrow()
     
     sumres_percent <- format(100*sumres_numer/sumres_denom, digits=2)
     
     sumresval <- paste0(sumres_percent, "%")
     
-    sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=", sumres_denom, ") reported summary results")
+    sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=",
+                            sumres_denom, ") reported summary results")
     
     metric_box(
       title = "Summary Results Reporting",
@@ -598,11 +559,13 @@ server <- function (input, output, session) {
     
     if (all_denom_timpub == 0) {
       timpubval <- "Not applicable"
-      timpubvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+      timpubvaltext <- "No clinical trials for this metric were captured by this method for this University"
     } else {
       
       timpubval <- paste0(round(100*all_numer_timpub/all_denom_timpub), "%")
-      timpubvaltext <- paste0("of clinical trials completed in ", max_completion_year, " with the appropriate follow-up period (n=", all_denom_timpub, ") reported results within 2 years")
+      timpubvaltext <- paste0("of clinical trials completed in ",
+                              max_completion_year, " with the appropriate follow-up period (n=",
+                              all_denom_timpub, ") reported results within 2 years")
     }
     
     metric_box(
@@ -704,10 +667,12 @@ server <- function (input, output, session) {
     
     if (all_denom_timpub5a == 0) {
       timpubval5a <- "Not applicable"
-      timpubvaltext5a <- "No clinical trials for this metric were captured by this method for this UMC"
+      timpubvaltext5a <- "No clinical trials for this metric were captured by this method for this University"
     } else {
       timpubval5a <- paste0(round(100*all_numer_timpub5a/all_denom_timpub5a), "%")
-      timpubvaltext5a <- paste0("of clinical trials completed in ", max_completion_year, " with the appropriate follow-up period (n=", all_denom_timpub5a, ") reported results within 5 years")
+      timpubvaltext5a <- paste0("of clinical trials completed in ",
+                                max_completion_year, " with the appropriate follow-up period (n=",
+                                all_denom_timpub5a, ") reported results within 5 years")
     }
     
     metric_box(
@@ -812,7 +777,8 @@ server <- function (input, output, session) {
           metric_box(
             title = "Open Access (OA)",
             value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
-            value_text = paste0("of publications from ", reference_year - 1, " (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
+            value_text = paste0("of publications from ", reference_year - 1,
+                                " (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
             plot = plotlyOutput('plot_opensci_oa', height="300px") %>% 
               shinycssloaders::withSpinner(color = "#007265"),
             info_id = "infoOpenAccess",
@@ -850,9 +816,9 @@ server <- function (input, output, session) {
   ## One UMC: Trial registration
   output$umc_registry_metrics <- renderUI({
     
-    if (input$selectUMC != "Select a UMC") {
+    if (input$selectUMC != "Select a University") {
       ## Nothing will be diplayed if the selector is still on
-      ## "Select a UMC"
+      ## "Select a University"
       
       req(input$width)
       req(input$selectUMC)
@@ -869,7 +835,7 @@ server <- function (input, output, session) {
       
       all_numer_trn <- cali_umc %>%
         filter(umc == input$selectUMC) %>%
-        filter(has_iv_trn_abstract == TRUE) %>%
+        filter(has_trn_abstract == TRUE) %>%
         nrow()
       
       all_denom_trn <- cali_umc %>%
@@ -890,21 +856,14 @@ server <- function (input, output, session) {
           column(
             col_width,
             uiOutput("oneumcprereg") %>%  shinycssloaders::withSpinner(color = "#007265"),
-            # selectInput(
-            #     "oneumcpreregregistry",
-            #     strong("Trial registry"),
-            #     choices = c(
-            #         "ClinicalTrials.gov",
-            #         "DRKS"
-            #     )
-            # )
           ),
           column(
             col_width,
             metric_box(
               title = "Reporting of Trial Registration Number in publications",
               value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
-              value_text = paste0("of trials with a publication (n=", all_denom_trn, ") reported a trial registration number in the abstract"),
+              value_text = paste0("of trials with a publication (n=",
+                                  all_denom_trn, ") reported a trial registration number in the abstract"),
               plot = plotlyOutput('umc_plot_clinicaltrials_trn', height="300px") %>% 
                 shinycssloaders::withSpinner(color = "#007265"),
               info_id = "UMCinfoTRN",
@@ -918,15 +877,6 @@ server <- function (input, output, session) {
           column(
             col_width,
             uiOutput("oneumclinkage") %>%  shinycssloaders::withSpinner(color = "#007265"),
-            # selectInput(
-            #     "oneumclinkagechooser",
-            #     strong("Trial registry"),
-            #     choices = c(
-            #         "All",
-            #         "ClinicalTrials.gov",
-            #         "DRKS"
-            #     )
-            # )
           )
           
         )
@@ -950,8 +900,6 @@ server <- function (input, output, session) {
       first_lim_align <- "right"
     }
     
-    # if (input$oneumcpreregregistry == "ClinicalTrials.gov") {
-    
     ## Value for prereg
     
     pr_unique <- pros_reg_data_umc %>%
@@ -974,47 +922,12 @@ server <- function (input, output, session) {
     
     if (all_denom_prereg == 0) {
       preregval <- "Not applicable"
-      preregvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+      preregvaltext <- "No clinical trials for this metric were captured by this method for this University"
     } else {
       preregval <- paste0(round(100*all_numer_prereg/all_denom_prereg), "%")
       preregvaltext <- paste0("of registered clinical trials started in ", max_start_year, " (n=", all_denom_prereg, ") were prospectively registered")
     }
     
-    
-    # }
-    # 
-    #         if (input$oneumcpreregregistry == "DRKS") {
-    # 
-    #             ## Value for prereg
-    # 
-    #             iv_data_unique <- cali_umc %>%
-    #                 filter(city == input$selectUMC) %>%
-    #                 filter(! is.na (start_date)) %>%
-    #                 filter(registry == input$oneumcpreregregistry) %>%
-    #                 mutate(start_year = format(start_date, "%Y"))
-    # 
-    #             max_start_year <- max(iv_data_unique$start_year)
-    #             
-    #             ## Filter for latest completion date for the pink descriptor text
-    #             all_numer_prereg <- iv_data_unique %>%
-    #                 filter(start_year == max_start_year) %>%
-    #                 filter(is_prospective) %>%
-    #                 nrow()
-    #             
-    #             ## Filter for latest completion date for the pink descriptor text
-    #             all_denom_prereg <- iv_data_unique %>%
-    #                 filter(start_year == max_start_year) %>%
-    #                 nrow()
-    # 
-    #             if (all_denom_prereg == 0) {
-    #                 preregval <- "Not applicable"
-    #                 preregvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
-    #             } else {
-    #                 preregval <- paste0(round(100*all_numer_prereg/all_denom_prereg), "%")
-    #                 preregvaltext <- paste0("of registered clinical trials started in ", max_start_year, " (n=", all_denom_prereg, ") were prospectively registered")
-    #             }
-    # 
-    #         }
     
     metric_box(
       title = "Prospective registration",
@@ -1046,51 +959,22 @@ server <- function (input, output, session) {
       first_lim_align <- "right"
     }
     
-    # if (input$oneumclinkagechooser == "All") {
-    # 
-    #     ## Value for linkage
-    # 
-    #     link_num <- cali_umc %>%
-    #         filter(city == input$selectUMC) %>%
-    #         filter(has_reg_pub_link == TRUE) %>%
-    #         filter(publication_type == "journal publication") %>%
-    #         filter(completion_year == ub_year) %>%
-    #         nrow()
-    # 
-    #     link_den <- cali_umc %>%
-    #         filter(city == input$selectUMC) %>%
-    #         filter(has_publication == TRUE) %>%
-    #         filter(publication_type == "journal publication") %>%
-    #         filter (has_pubmed == TRUE | ! is.na (doi)) %>%
-    #         filter(completion_year == ub_year) %>%
-    #         nrow()
-    # 
-    #     linkage <- paste0(round(100*link_num/link_den), "%")
-    #     
-    # } else {
-    
     ## Value for linkage
     
     link_num <- cali_umc %>%
-      # filter(registry == input$oneumclinkagechooser) %>%
       filter(umc == input$selectUMC) %>%
       filter(has_reg_pub_link == TRUE) %>%
       filter(publication_type == "journal publication") %>%
-      # filter(completion_year == ub_year) %>%
       nrow()
     
     link_den <- cali_umc %>%
-      # filter(registry == input$oneumclinkagechooser) %>%
       filter(umc == input$selectUMC) %>%
       filter(has_publication == TRUE) %>%
       filter(publication_type == "journal publication") %>%
       filter (has_pubmed == TRUE | ! is.na (doi)) %>%
-      # filter(completion_year == ub_year) %>%
       nrow()
     
     linkage <- paste0(round(100*link_num/link_den), "%")
-    
-    # }
     
     metric_box(
       title = "Publication link in registry",
@@ -1111,9 +995,9 @@ server <- function (input, output, session) {
   ## One UMC: Trial Reporting
   output$umc_publication_metrics <- renderUI({
     
-    if (input$selectUMC != "Select a UMC") {
+    if (input$selectUMC != "Select a University") {
       ## Nothing will be diplayed if the selector is still on
-      ## "Select a UMC"
+      ## "Select a University"
       
       req(input$width)
       req(input$selectUMC)
@@ -1135,15 +1019,6 @@ server <- function (input, output, session) {
             col_width,
             uiOutput("oneumcsumres") %>% 
               shinycssloaders::withSpinner(color = "#007265"),
-            # selectInput(
-            #     "oneumcsumresregistry",
-            #     strong("Trial registry"),
-            #     choices = c(
-            #         "EUCTR",
-            #         "ClinicalTrials.gov",
-            #         "DRKS"
-            #     )
-            # )
           ),
           column(
             col_width,
@@ -1193,40 +1068,11 @@ server <- function (input, output, session) {
       first_lim_align <- "right"
     }
     
-    # if (input$oneumcsumresregistry == "EUCTR") {
-    #     ## Value for summary results
-    # 
-    #     sumres_percent <- eutt_hist %>%
-    #         filter(city == input$selectUMC) %>%
-    #         slice_head() %>%
-    #         select(percent_reported) %>%
-    #         pull()
-    # 
-    #     n_eutt_records <- eutt_hist %>%
-    #         filter(city == input$selectUMC) %>%
-    #         nrow()
-    # 
-    #     sumres_denom <- eutt_hist %>%
-    #         filter(city == input$selectUMC) %>%
-    #         slice_head() %>%
-    #         select(total_due) %>%
-    #         pull()
-    # 
-    #     if (n_eutt_records == 0) {
-    #         sumresval <- "Not applicable"
-    #         sumresvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
-    #     } else {
-    #         sumresval <- paste0(sumres_percent, "%")
-    #         sumresvaltext <- paste0("of due clinical trials registered in EUCTR (n=", sumres_denom, ") reported summary results (as of: ", eutt_date, ")")
-    #     }
-    #     
-    # } else {
-    ## Summary results for CT dot gov and DRKS
+   ## Summary results for CT dot gov
     
     sumres_numer <- cali_umc %>%
       filter(
         umc == input$selectUMC,
-        # registry == input$oneumcsumresregistry,
         has_summary_results == TRUE
       ) %>%
       nrow()
@@ -1234,7 +1080,6 @@ server <- function (input, output, session) {
     sumres_denom <- cali_umc %>%
       filter(
         umc == input$selectUMC,
-        # registry == input$oneumcsumresregistry
       ) %>%
       nrow()
     
@@ -1242,10 +1087,9 @@ server <- function (input, output, session) {
     
     sumresval <- paste0(sumres_percent, "%")
     
-    sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=", sumres_denom, ") reported summary results")
-    
-    # }
-    
+    sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=",
+                            sumres_denom, ") reported summary results")
+ 
     
     metric_box(
       title = "Summary Results Reporting",
@@ -1348,10 +1192,12 @@ server <- function (input, output, session) {
     
     if (all_denom_timpub == 0) {
       timpubval <- "Not applicable"
-      timpubvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+      timpubvaltext <- "No clinical trials for this metric were captured by this method for this University"
     } else {
       timpubval <- paste0(round(100*all_numer_timpub/all_denom_timpub), "%")
-      timpubvaltext <- paste0("of clinical trials completed in ", max_completion_year, " with the appropriate follow-up period (n=", all_denom_timpub, ") reported results within 2 years")
+      timpubvaltext <- paste0("of clinical trials completed in ",
+                              max_completion_year, " with the appropriate follow-up period (n=",
+                              all_denom_timpub, ") reported results within 2 years")
     }
     
     metric_box(
@@ -1450,10 +1296,12 @@ server <- function (input, output, session) {
     
     if (all_denom_timpub == 0) {
       timpubval <- "Not applicable"
-      timpubvaltext <- "No clinical trials for this metric were captured by this method for this UMC"
+      timpubvaltext <- "No clinical trials for this metric were captured by this method for this University"
     } else {
       timpubval <- paste0(round(100*all_numer_timpub/all_denom_timpub), "%")
-      timpubvaltext <- paste0("of clinical trials completed in ", max_completion_year, " with the appropriate follow-up period (n=", all_denom_timpub, ") reported results within 5 years")
+      timpubvaltext <- paste0("of clinical trials completed in ",
+                              max_completion_year, " with the appropriate follow-up period (n=",
+                              all_denom_timpub, ") reported results within 5 years")
     }
     
     metric_box(
@@ -1474,7 +1322,7 @@ server <- function (input, output, session) {
   ## One UMC: Open Access
   output$umc_openscience_metrics <- renderUI({
     
-    if (input$selectUMC != "Select a UMC") {
+    if (input$selectUMC != "Select a University") {
       ## Nothing will be diplayed if the selector is still on
       ## "Select a UMC"
       
@@ -1532,7 +1380,6 @@ server <- function (input, output, session) {
         filter(umc == input$selectUMC) %>%
         distinct(doi, .keep_all = TRUE) %>%
         select(publication_date_unpaywall) %>%
-        # filter(publication_date_unpaywall < reference_year) %>% 
         arrange(publication_date_unpaywall) %>%
         slice_tail() %>%
         pull() %>%
@@ -1545,7 +1392,6 @@ server <- function (input, output, session) {
           publication_type == "journal publication",
           ! is.na(doi),
           ! is.na(publication_date_unpaywall),
-          # is_closed_archivable == TRUE | color_green_only == "green"
         )
       
       denom_greenoa <- oa_set_green %>%
@@ -1635,8 +1481,6 @@ server <- function (input, output, session) {
     
   })
   
-  
-  
   # All UMCs metrics #
   
   ## All UMCs: Trial registration
@@ -1649,15 +1493,6 @@ server <- function (input, output, session) {
         column(
           12,
           uiOutput("prereg_all") %>%  shinycssloaders::withSpinner(color = "#007265"),
-          # selectInput(
-          #     "allumc_prereg_registry",
-          #     strong("Trial registry"),
-          #     choices = c(
-          #         "ClinicalTrials.gov",
-          #         "DRKS"
-          #     )
-          # )
-          
         )
       ),
       fluidRow(
@@ -1680,15 +1515,6 @@ server <- function (input, output, session) {
         column(
           12,
           uiOutput("allumclinkage") %>%  shinycssloaders::withSpinner(color = "#007265"),
-          # selectInput(
-          #     "allumc_linkagechooser",
-          #     strong("Trial registry"),
-          #     choices = c(
-          #         "All",
-          #         "ClinicalTrials.gov",
-          #         "DRKS"
-          #     )
-          # )
         )
       )
     )
@@ -1701,13 +1527,11 @@ server <- function (input, output, session) {
     
 
     all_numer_link <- cali %>%
-      # filter(registry == input$allumc_linkagechooser) %>%
       filter(has_reg_pub_link == TRUE) %>%
       filter(publication_type == "journal publication") %>%
       nrow()
     
     all_denom_link <- cali %>%
-      # filter(registry == input$allumc_linkagechooser) %>%
       filter(has_publication == TRUE) %>%
       filter(publication_type == "journal publication") %>%
       filter(has_pubmed == TRUE | ! is.na(doi)) %>%
@@ -1720,10 +1544,10 @@ server <- function (input, output, session) {
       plot = plotlyOutput('plot_allumc_linkage', height="300px") %>% 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCLinkage",
-      info_title = "Publication link in registry (All UMCs)",
+      info_title = "Publication link in registry (All Universities)",
       info_text = allumc_linkage_tooltip,
       lim_id = "limALLUMCLinkage",
-      lim_title = "Limitations: Publication link in registry (All UMCs)",
+      lim_title = "Limitations: Publication link in registry (All Universities)",
       lim_text = lim_allumc_linkage_tooltip
     )
     
@@ -1733,25 +1557,10 @@ server <- function (input, output, session) {
     
     ## Value for All UMC summary results reporting
     
-    # if (input$allumcsumresregistry == "EUCTR") {
-    #    
-    #     sumres_percent <- eutt_hist %>%
-    #         group_by(date) %>%
-    #         mutate(avg = mean(percent_reported)) %>%
-    #         slice_head() %>%
-    #         ungroup() %>%
-    #         slice_tail() %>%
-    #         select(avg) %>%
-    #         pull()
-    # 
-    #     sumresvaltext <- paste("of due clinical trials registered in EUCTR reported summary results (as of:", eutt_date, ")")
-    #     
-    # } else {
-    ## Summary results for CT dot gov and DRKS
+    ## Summary results for CT dot gov
     
     sumres_numer <- cali_umc %>%
       filter(
-        # registry == input$allumcsumresregistry,
         has_summary_results == TRUE
       ) %>%
       nrow()
@@ -1763,8 +1572,6 @@ server <- function (input, output, session) {
     
     sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov reported summary results")
     
-    # }
-    
     metric_box(
       title = "Summary Results Reporting",
       value = paste0(round(sumres_percent), "%"),
@@ -1772,10 +1579,10 @@ server <- function (input, output, session) {
       plot = plotlyOutput('plot_allumc_clinicaltrials_sumres', height="300px") %>% 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCSumRes",
-      info_title = "Summary results reporting (All UMCs)",
+      info_title = "Summary results reporting (All Universities)",
       info_text = allumc_clinicaltrials_sumres_tooltip,
       lim_id = "limALLUMCSumRes",
-      lim_title = "Limitations: Summary results reporting (All UMCs)",
+      lim_title = "Limitations: Summary results reporting (All Universities)",
       lim_text = lim_allumc_clinicaltrials_sumres_tooltip
     )
     
@@ -1802,10 +1609,10 @@ server <- function (input, output, session) {
       plot = plotlyOutput('plot_allumc_clinicaltrials_prereg', height="300px") %>% 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCPreReg",
-      info_title = "Prospective registration (All UMCs)",
+      info_title = "Prospective registration (All Universities)",
       info_text = allumc_clinicaltrials_prereg_tooltip,
       lim_id = "limALLUMCPreReg",
-      lim_title = "Limitations: Prospective registration (All UMCs)",
+      lim_title = "Limitations: Prospective registration (All Universities)",
       lim_text = lim_allumc_clinicaltrials_prereg_tooltip
     )
   })
@@ -1817,7 +1624,7 @@ server <- function (input, output, session) {
     if (input$allumc_trnpub == "In abstract") {
       
       all_numer_trn <- cali %>%
-        filter(has_iv_trn_abstract == TRUE) %>%
+        filter(has_trn_abstract == TRUE) %>%
         nrow()
       
       all_denom_trn <- cali %>%
@@ -1834,7 +1641,7 @@ server <- function (input, output, session) {
     if (input$allumc_trnpub == "In full-text") {
       
       all_numer_trn <- cali %>%
-        filter(has_iv_trn_ft == TRUE) %>%
+        filter(has_trn_ft == TRUE) %>%
         nrow()
       
       all_denom_trn <- cali %>%
@@ -1842,7 +1649,7 @@ server <- function (input, output, session) {
           has_publication == TRUE,
           publication_type == "journal publication",
           has_ft,
-          ! is.na(has_iv_trn_ft)
+          ! is.na(has_trn_ft)
         ) %>%
         nrow()
       
@@ -1854,7 +1661,7 @@ server <- function (input, output, session) {
       
       all_numer_trn <- cali %>%
         filter(
-          has_iv_trn_abstract == TRUE | has_iv_trn_ft == TRUE
+          has_trn_abstract == TRUE | has_trn_ft == TRUE
         ) %>%
         nrow()
       
@@ -1863,7 +1670,7 @@ server <- function (input, output, session) {
           has_publication == TRUE,
           publication_type == "journal publication",
           has_ft | has_pubmed,
-          ! is.na(has_iv_trn_ft) | ! is.na(has_iv_trn_abstract)
+          ! is.na(has_trn_ft) | ! is.na(has_trn_abstract)
         ) %>%
         nrow()
       
@@ -1875,7 +1682,7 @@ server <- function (input, output, session) {
       
       all_numer_trn <- cali %>%
         filter(
-          has_iv_trn_abstract == TRUE & has_iv_trn_ft == TRUE
+          has_trn_abstract == TRUE & has_trn_ft == TRUE
         ) %>%
         nrow()
       
@@ -1884,7 +1691,7 @@ server <- function (input, output, session) {
           has_publication == TRUE,
           publication_type == "journal publication",
           has_ft | has_pubmed,
-          ! is.na(has_iv_trn_ft) & ! is.na(has_iv_trn_abstract)
+          ! is.na(has_trn_ft) & ! is.na(has_trn_abstract)
         ) %>%
         nrow()
       
@@ -1899,10 +1706,10 @@ server <- function (input, output, session) {
       plot = plotlyOutput('plot_allumc_clinicaltrials_trn', height="300px") %>% 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTRN",
-      info_title = "TRN reporting (All UMCs)",
+      info_title = "TRN reporting (All Universities)",
       info_text = allumc_clinicaltrials_trn_tooltip,
       lim_id = "limALLUMCTRN",
-      lim_title = "Limitations: TRN reporting (All UMCs)",
+      lim_title = "Limitations: TRN reporting (All Universities)",
       lim_text = lim_allumc_clinicaltrials_trn_tooltip
     )
   })
@@ -1919,15 +1726,6 @@ server <- function (input, output, session) {
           12,
           uiOutput("allumcsumres") %>% 
             shinycssloaders::withSpinner(color = "#007265"),
-          # selectInput(
-          #     "allumcsumresregistry",
-          #     strong("Trial registry"),
-          #     choices = c(
-          #         "EUCTR",
-          #         "ClinicalTrials.gov",
-          #         "DRKS"
-          #     )
-          # )
         )
       ),
       fluidRow(
@@ -2022,10 +1820,10 @@ server <- function (input, output, session) {
       plot = plotlyOutput('plot_allumc_clinicaltrials_timpub', height="300px") %>% 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTimPub",
-      info_title = "Results reporting (2 years) (All UMCs)",
+      info_title = "Results reporting (2 years) (All Universities)",
       info_text = allumc_clinicaltrials_timpub_tooltip,
       lim_id = "limALLUMCTimPub",
-      lim_title = "Limitations: Results reporting (2 years) (All UMCs)",
+      lim_title = "Limitations: Results reporting (2 years) (All Universities)",
       lim_text = lim_allumc_clinicaltrials_timpub_tooltip
     )
     
@@ -2088,10 +1886,10 @@ server <- function (input, output, session) {
       plot = plotlyOutput('plot_allumc_timpub_5a', height="300px") %>% 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTimPub5a",
-      info_title = "Results reporting (5 years) (All UMCs)",
+      info_title = "Results reporting (5 years) (All Universities)",
       info_text = allumc_clinicaltrials_timpub_tooltip5a,
       lim_id = "limALLUMCTimPub5a",
-      lim_title = "Limitations: Results reporting (5 years) (All UMCs)",
+      lim_title = "Limitations: Results reporting (5 years) (All Universities)",
       lim_text = lim_allumc_clinicaltrials_timpub_tooltip5a
     )
     
@@ -2155,10 +1953,10 @@ server <- function (input, output, session) {
             plot = plotlyOutput('plot_allumc_openaccess', height="300px") %>% 
               shinycssloaders::withSpinner(color = "#007265"),
             info_id = "infoALLUMCOpenAccess",
-            info_title = "Open Access (All UMCs)",
+            info_title = "Open Access (All Universities)",
             info_text = allumc_openaccess_tooltip,
             lim_id = "limALLUMCOpenAccess",
-            lim_title = "Limitations: Open Access (All UMCs)",
+            lim_title = "Limitations: Open Access (All Universities)",
             lim_text = lim_allumc_openaccess_tooltip
           )
         )
@@ -2286,7 +2084,6 @@ server <- function (input, output, session) {
   
   ## Preregistration
   output$plot_allumc_clinicaltrials_prereg <- renderPlotly({
-    # return(plot_allumc_clinicaltrials_prereg(cali_umc, cali_umc, input$allumc_prereg_registry, color_palette, color_palette_bars))  
     return(plot_allumc_clinicaltrials_prereg(pros_reg_data_umc, color_palette, color_palette_bars))
   })
   
@@ -2298,15 +2095,11 @@ server <- function (input, output, session) {
   ## Linkage
   output$plot_allumc_linkage <- renderPlotly({
     return(plot_allumc_linkage(cali_umc, color_palette, color_palette_bars))
-    # return(plot_allumc_linkage(cali_umc, input$allumc_linkagechooser, color_palette, color_palette_bars))
-    
   })
   
   ## Summary results
   output$plot_allumc_clinicaltrials_sumres <- renderPlotly({
     return(plot_allumc_clinicaltrials_sumres(cali_umc, color_palette, color_palette_bars))
-    # return(plot_allumc_clinicaltrials_sumres(eutt_hist, cali_umc, input$allumcsumresregistry, color_palette, color_palette_bars))
-    
   })
   
   ## Timely publication

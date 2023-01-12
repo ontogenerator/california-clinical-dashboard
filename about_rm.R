@@ -2,10 +2,13 @@ about_rm_page <- tabPanel(
     "Contributions",
     value = "tabAboutRM",
     h2("Contributions"),
+    h4("IN PROGRESS"),
     br(),
-    helpText('We would like to thank all those who contributed to this dashboard. We would
-             particularly like to thank Nico Riedel who created the prototype of this dashboard, which
-             we adapted for clinical research transparency at the level of UMCs in Germany.'),
+    helpText('We would like to thank all those who contributed to this dashboard
+             which we adapted for clinical research transparency at the level of
+             University Medical Center (UMCs) in Germany. More information on the
+             German dashboard can be found in the publication asssociated with
+             this dashboard [enter DOI].'),
     # br(),
     # h4("UMC publication search"),
     # helpText('Franzen, Delwen (Conceptualization, Methodology, Technical Implementation, Validation); Saksone, Lana (Conceptualization, Methodology, Validation); Grabitz, Peter (Conceptualization, Methodology); Riedel, Nico (Conceptualization, Methodology, Technical Implementation); Carlisle, Benjamin Gregory (Methodology, Technical Implementation, Validation), Holst, Martin (Conceptualization, Validation); Salholz-Hillel, Maia (Conceptualization, Methodology); Strech, Daniel (Conceptualization, Methodology)'),
@@ -18,21 +21,13 @@ about_rm_page <- tabPanel(
     br(),
     h3("Metrics"),
     h4("Prospective registration, Reporting of summary results in the registry, Reporting of results as a journal publication (2- and 5 years)"),
-    helpText("Riedel, Nico (Conceptualization, Methodology, Data Curation, Technical Implementation);
-                Salholz-Hillel, Maia (Conceptualization, Methodology, Data Curation, Technical Implementation);
-                Wieschowski, Susanne (Conceptualization, Methodology);
-                Carlisle, Benjamin Gregory (Technical Implementation);
-                Strech, Daniel (Conceptualization, Methodology)"),
+    helpText("XXX"),
     h4("Reporting of Trial Registration Number in publications, Publication link in the registry"),
-    helpText("Salholz-Hillel, Maia (Conceptualization, Methodology, Technical Implementation);
-             Carlisle, Benjamin Gregory (Methodology);"),
+    helpText("XXX"),
     h4("Reporting of summary results in EUCTR"),
-    helpText("EU TrialsTracker;
-             Carlisle, Benjamin Gregory (Conceptualization, Methodology, Technical Implementation);
-             Franzen, Delwen (Conceptualization, Methodology, Technical Implementation)"),
+    helpText("XXX"),
     h4("Open Access"),
-    helpText("Delwen Franzen (Conceptualization, Methodology, Technical Implementation);
-             Nico Riedel (Conceptualization, Methodology, Technical Implementation)"),
+    helpText("XXX"),
     ## h4("Realised potential of green Open Access"),
     ## helpText("Delwen Franzen (Conceptualization, Methodology, Technical Implementation)"),
     
@@ -44,18 +39,7 @@ about_rm_page <- tabPanel(
     
     br(),
     h3("Shiny app"),
-    helpText('Carlisle, Benjamin Gregory (Conceptualization, Technical Implementation);
-                Franzen, Delwen (Conceptualization, Technical Implementation);
-                Riedel, Nico (Conceptualization, Technical Implementation);
-                Maia Salholz-Hillel (Conceptualization);
-                Holst, Martin (Conceptualization);
-                Haven, Tamarinde (Conceptualization);
-                Haslberger, Martin (Conceptualization);
-                Saksone, Lana (Conceptualization);
-                Strech, Daniel (Conceptualization);
-                Weissgerber, Tracey (Conceptualization);
-                Dirnagl, Ulrich (Conceptualization);
-             Bobrov, Evgeny (Conceptualization)'),
+    helpText('XXX'),
     
     br(),
     h2('Contact address'),

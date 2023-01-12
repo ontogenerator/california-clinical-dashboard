@@ -87,20 +87,20 @@ plot_allumc_clinicaltrials_trn <- function (dataset, location, color_palette) {
 
         umc_numer_abs <- dataset %>%
             filter(umc == currentumc) %>%
-            select(has_iv_trn_abstract) %>%
-            filter(has_iv_trn_abstract == TRUE) %>%
+            select(has_trn_abstract) %>%
+            filter(has_trn_abstract == TRUE) %>%
             nrow()
 
         umc_numer_ft <- dataset %>%
             filter(umc == currentumc) %>%
-            select(has_iv_trn_ft) %>%
-            filter(has_iv_trn_ft == TRUE) %>%
+            select(has_trn_ft) %>%
+            filter(has_trn_ft == TRUE) %>%
             nrow()
 
         umc_numer_either <- dataset %>%
             filter(
                 umc == currentumc,
-                has_iv_trn_abstract == TRUE | has_iv_trn_ft == TRUE
+                has_trn_abstract == TRUE | has_trn_ft == TRUE
             ) %>%
             nrow()
 
@@ -110,7 +110,7 @@ plot_allumc_clinicaltrials_trn <- function (dataset, location, color_palette) {
                 has_publication == TRUE,
                 publication_type == "journal publication",
                 has_ft,
-                ! is.na(has_iv_trn_ft)
+                ! is.na(has_trn_ft)
             ) %>%
             nrow()
         
@@ -120,7 +120,7 @@ plot_allumc_clinicaltrials_trn <- function (dataset, location, color_palette) {
                 has_publication == TRUE,
                 publication_type == "journal publication",
                 has_pubmed,
-                ! is.na(has_iv_trn_abstract)
+                ! is.na(has_trn_abstract)
             ) %>%
             nrow()
 
@@ -130,14 +130,14 @@ plot_allumc_clinicaltrials_trn <- function (dataset, location, color_palette) {
                 has_publication == TRUE,
                 publication_type == "journal publication",
                 has_ft | has_pubmed,
-                ! is.na(has_iv_trn_ft) | ! is.na(has_iv_trn_abstract)
+                ! is.na(has_trn_ft) | ! is.na(has_trn_abstract)
             ) %>%
             nrow()
 
         umc_numer_both <- dataset %>%
             filter(
                 umc == currentumc,
-                has_iv_trn_abstract == TRUE & has_iv_trn_ft == TRUE
+                has_trn_abstract == TRUE & has_trn_ft == TRUE
             ) %>%
             nrow()
 
@@ -147,7 +147,7 @@ plot_allumc_clinicaltrials_trn <- function (dataset, location, color_palette) {
                 has_publication == TRUE,
                 publication_type == "journal publication",
                 has_ft | has_pubmed,
-                ! is.na(has_iv_trn_ft) & ! is.na(has_iv_trn_abstract)
+                ! is.na(has_trn_ft) & ! is.na(has_trn_abstract)
             ) %>%
             nrow()
 

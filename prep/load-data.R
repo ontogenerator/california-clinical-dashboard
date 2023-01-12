@@ -47,7 +47,8 @@ cali_trials <- cali_trials %>%
   rename(id = nct_id)
 
 cali_trials %>% count(publication_found, publication_type)
-
+cali_trials %>% count(publication_found)
+cali_trials %>%  count(publication_found)
 has_duplicates(cali_trials, id)
 
 
@@ -145,11 +146,7 @@ cali_trials$is_publication_5y <-
 
 # 
 cali_trials <- cali_trials %>%
-  mutate(has_publication = ifelse(`any paper` > 0, TRUE, FALSE),
-         ######### temp debug workaround
-         # has_iv_trn_abstract = TRUE,
-         # has_iv_trn_ft = TRUE
-         ) %>% 
+  mutate(has_publication = ifelse(`any paper` > 0, TRUE, FALSE)) %>% 
   filter(start_year > 2004)
 
 dir_raw <- here("data", "raw")
@@ -213,7 +210,7 @@ cali_trials <- cali_trials %>%
   left_join(pubmed, by = "pmid")
 
 
-# Add intovalue trns ------------------------------------------------------
+# Add trns ------------------------------------------------------
 
 cali_trials <-
   cali_trials %>%
@@ -228,28 +225,26 @@ cali_trials <-
   # However, `has_trn` should be FALSE if source retrieved
   # Also, rename to clarify that iv_trn (not any trn)
   mutate(
-    has_iv_trn_abstract =
+    has_trn_abstract =
       if_else(has_pubmed & is.na(has_trn_abstract), FALSE, has_trn_abstract),
-    has_iv_trn_secondary_id =
+    has_trn_secondary_id =
       if_else(has_pubmed & is.na(has_trn_secondary_id), FALSE, has_trn_secondary_id),
-    has_iv_trn_ft = FALSE
-      # if_else(has_ft & is.na(has_trn_ft), FALSE, has_trn_ft)
+    has_trn_ft = if_else(has_ft & is.na(has_trn_ft), FALSE, has_trn_ft)
   ) %>%
-  select(-starts_with("has_trn_")) %>%
+  # select(-starts_with("has_trn_")) %>%
   
   # If trial has pubmed, trn in abstract/si must not be NA
   pointblank::col_vals_not_null(
-    vars(has_iv_trn_secondary_id, has_iv_trn_secondary_id),
+    vars(has_trn_secondary_id, has_trn_secondary_id),
     preconditions = ~ . %>% filter(has_pubmed)
   ) %>%
   
   # If trial has ft pdf, trn in ft pds must not be NA
   pointblank::col_vals_not_null(
-    vars(has_iv_trn_ft),
+    vars(has_trn_ft),
     preconditions = ~ . %>% filter(has_pubmed & has_ft)
   )
 
-# 
 # ######################@@@
 # # Add registry references links -------------------------------------------
 # # any, any with doi or pmid, intovalue
@@ -329,8 +324,6 @@ cali_trials <-
 #       is.na(doi_link) & is.na(pmid_link) ~ NA
 #     )
 #   )
-
-
 
 
 ## Write to disk

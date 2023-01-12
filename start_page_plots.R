@@ -126,7 +126,7 @@ plot_clinicaltrials_trn <- function (dataset, color_palette) {
     umc <- "All"
  
     all_numer_abs <- dataset %>%
-        filter(has_iv_trn_abstract == TRUE) %>%
+        filter(has_trn_abstract == TRUE) %>%
         nrow()
     abs_denom <- dataset %>%
         filter(
@@ -137,7 +137,7 @@ plot_clinicaltrials_trn <- function (dataset, color_palette) {
         nrow()
     
     all_numer_ft <- dataset %>%
-        filter(has_iv_trn_ft == TRUE) %>%
+        filter(has_trn_ft == TRUE) %>%
         nrow()
     ft_denom <- dataset %>%
         filter(

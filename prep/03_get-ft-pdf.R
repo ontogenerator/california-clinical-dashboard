@@ -29,7 +29,7 @@ dir_pmid_pdf <- dir_create(path(dir_pmid, "pdf"))
 dir_doi_xml  <- dir_create(path(dir_doi, "xml"))
 dir_pmid_xml <- dir_create(path(dir_pmid, "xml"))
 
-cali <- vroom(here("data", "California-trials_2014-2017_exp.csv"))
+
 
 source(here("prep", "functions", "retrieve_pdf.R"))
 source(here("prep", "functions", "resolve_doi.R"))
@@ -37,14 +37,25 @@ source(here("prep", "functions", "correct_pdf_url.R"))
 
 # Get pdfs from dois ------------------------------------------------------
 
-dois <-
-  cali %>%
+cali <- vroom(here("data", "California-trials_2014-2017_exp.csv"))
+
+cali_dois <- cali %>%
   filter(!is.na(doi)) %>%
   # Alternatively, could limit to dois for pubmed records (with pmid)
   # filter(!is.na(pmid)) %>%
-  distinct(doi) %>%
-  arrange(doi) %>%
-  pull()
+  distinct(doi, .keep_all = TRUE) %>%
+  arrange(doi) %>% 
+  mutate(doi = tolower(doi),
+         found = paste0(gsub("/", "+", doi), ".pdf") %in%
+           tolower(list.files(dir_doi_pdf)),
+  ) %>% 
+  select(found, everything())
+
+cali_dois %>% count(found)
+
+dois <- cali_dois %>% 
+  filter(found == FALSE) %>% 
+  pull(doi)
 
 # If dois already downloaded and/or converted, remove those from list to download
 ft_doi_pdf <-
@@ -96,6 +107,8 @@ if (length(dois) > 0) {
                 email = email
     )
 }
+
+dois <- dois[!str_detect(dois, "10.1177")] 
 
 # Get pdfs from pmids -----------------------------------------------------
 

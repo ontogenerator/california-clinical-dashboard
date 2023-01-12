@@ -59,8 +59,8 @@ pubmed_ft_retrieved <-
       doi %in% ft_doi_retrieved ~ "doi",
       pmid %in% ft_pmid_retrieved ~ "pmid",
       TRUE ~ NA_character_
-    )
-    # ft_doi = if_else(doi %in% ft_doi_retrieved, TRUE, FALSE),
+    ),
+    ft_doi = if_else(doi %in% ft_doi_retrieved, TRUE, FALSE)
     # ft_pmid = if_else(pmid %in% ft_pmid_retrieved, TRUE, FALSE),
   ) %>%
   

@@ -2,30 +2,30 @@ methods_page <- tabPanel(
     "Methods", value = "tabMethods",
     h1("Methods"),
     
-    h4(HTML('This dashboard displays the performance of University
-                       Medical Centers (UMCs) in Germany on established registration
-                       and reporting practices for clinical research transparency.
-                       The dashboard displays data for interventional
-                       clinical trials conducted at German UMCs, registered in
-                       ClinicalTrials.gov or the German Clinical Trials Registry
-                       (DRKS), and reported as complete between 2009 - 2017. For
-                       summary results reporting, we additionally included trials
-                       conducted at German UMCs and registered in the EU Clinical
-                       Trials Register (EUCTR). The dashboard was developed as part
-                       of a scientific research project with the overall aim to support
-                       the adoption of responsible research practices at UMCs.')),
+    h4(HTML('This dashboard displays the performance of Universities/Medical Schools
+            in California on established registration and reporting practices for
+            clinical research transparency. The dashboard displays data for
+            interventional clinical trials conducted at
+            California Universities/Medical Schools, registered in ClinicalTrials.gov
+            and reported as complete between 2014 - 2017.
+            <br>
+            <br>
+            The dashboard was developed as part of a scientific research project with
+            the overall aim to support the adoption of responsible research practices
+            at Universities/Medical Schools. ')),
                        
-    h4(HTML('You can find more information on our methods for individual metrics
-    by extending the panels below. You can also find a list of tools used for data
-            collection at the bottom of this page. The <i>Trial Characteristics</i>
-            page provides an overview of the characteristics of trials included
-            in the dashboard. The <i>FAQ</i> and <i>Why these practices?</i> pages provide
-            more general information about this dashboard and our selection of practices.')),
+    h4(HTML('IN PROGRESS / CURRENT VERSION REFLECTS THE GERMAN DASHBOARD:
+    You can find more information on our methods for individual metrics by extending
+    the panels below. You can also find a list of tools used for data collection at
+    the bottom of this page. The <i>Trial Characteristics</i> page provides an overview of
+    the characteristics of trials included in the dashboard. The <i>FAQ</i> and
+    <i>Why these practices?</i> pages provide more general information about this
+    dashboard and our selection of practices.')),
     
     h4(style = "margin-left:0cm; color: purple",
        HTML("More information on the overall aim and methodology can be
-                       found in the publication asssociated with this dashboard
-            [enter DOI]. ")),
+                       found in the publication associated with this dashboard
+            [enter DOI].")),
     
     h3("Identification of clinical trials"),
     # bsCollapse(id = "methodsPanels_IdentificationTrials",
