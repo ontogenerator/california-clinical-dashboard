@@ -643,9 +643,12 @@ plot_allumc_openaccess <- function (dataset, color_palette) {
     plot_ly(
         plot_data,
         x = ~reorder(x_label, sort),
-        color = ~colour,
-        text = ~paste0(numer, "/", sum),
         y = ~percentage,
+        color = ~colour,
+        text = ~paste0(numer, " out of ", sum),
+        textposition = "none",
+        hoverinfo = "text",
+        hovertemplate = paste0('%{y}%, %{text}'),
         type = 'bar',
         colors = c(
             "#F1BA50",
@@ -662,12 +665,15 @@ plot_allumc_openaccess <- function (dataset, color_palette) {
         layout(
             barmode = 'stack',
             xaxis = list(
-                title = '<b>UMC</b>'
+                title = '<b>UMC</b>',
+                spikemode = 'marker',
+                spikethickness = 0
             ),
             yaxis = list(
                 title = '<b>Percentage Open Access (%)</b>',
                 range = c(0, 115)
             ),
+            hovermode = "x unified",
             paper_bgcolor = color_palette[9],
             plot_bgcolor = color_palette[9]
         )
