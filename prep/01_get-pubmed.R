@@ -1,17 +1,21 @@
 library(dplyr)
 library(fs)
 library(here)
+library(readxl)
 
 source(here("prep", "functions", "download_pubmed.R"))
 
 dir <- dir_create(here("data", "raw", "pubmed"))
-cali <- vroom::vroom(here("data", "California-trials_2014-2017_exp.csv"))
+
+# cali1 <- vroom::vroom(here("data", "California-trials_2014-2017.csv"))
+cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+
 
 pmids <-
-  cali %>%
-  tidyr::drop_na(pmid) %>%
-  filter(str_length(pmid) < 10) %>% 
-  distinct(pmid) %>%
+  cali |>
+  tidyr::drop_na(pmid) |>
+  filter(str_length(pmid) < 10) |> 
+  distinct(pmid) |>
   pull()
 
 
@@ -20,9 +24,9 @@ pmids <-
 if (dir_exists(dir)){
   
   pmids_downloaded <-
-    dir_ls(dir) %>%
-    path_file() %>%
-    path_ext_remove() %>%
+    dir_ls(dir) |>
+    path_file() |>
+    path_ext_remove() |>
     as.numeric()
   
   # Check whether pmids downloaded which aren't needed and manually review and remove
@@ -37,7 +41,7 @@ if (dir_exists(dir)){
 # Download remaining pmids, if any
 if (length(pmids) > 0) {
 
-  pmids %>%
+  pmids |>
     purrr::walk(download_pubmed,
                 dir = dir,
                 api_key = Sys.getenv("ENTREZ_KEY")
@@ -47,3 +51,4 @@ if (length(pmids) > 0) {
   loggit::set_logfile(here::here("queries.log"))
   loggit::loggit("INFO", "PubMed")
 }
+

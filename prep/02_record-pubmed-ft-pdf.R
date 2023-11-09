@@ -7,63 +7,71 @@ library(vroom)
 library(fs)
 library(here)
 library(stringr)
+library(janitor)
+library(readxl)
 
 
-cali <- vroom(here("data", "California-trials_2014-2017_exp.csv"))
+cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+cali_dois <- vroom(here("data", "processed", "cali_dois.csv")) |> 
+  rename(nct_id = id)
 
 # Prepare paths
 dir_pubmed <- here("data", "raw", "pubmed")
 dir_doi_xml <- here("data", "raw", "fulltext", "doi", "xml")
-dir_pmid_xml <- here("data", "raw", "fulltext", "pmid", "xml")
+# dir_pmid_xml <- here("data", "raw", "fulltext", "pmid", "xml")
 
 dir_pubmed_processed <- dir_create(here("data", "processed", "pubmed"))
 
 # List retrieved records
 pubmed_retrieved <-
-  dir_pubmed %>%
-  dir_ls() %>%
-  path_file() %>%
+  dir_pubmed |>
+  dir_ls() |>
+  path_file() |>
   path_ext_remove()
 
 ft_doi_retrieved <-
-  dir_doi_xml %>%
-  dir_ls() %>%
-  path_file() %>%
-  str_remove(".tei.xml$") %>%
-  str_replace_all("\\+", "/")
+  dir_doi_xml |>
+  dir_ls() |>
+  path_file() |>
+  str_remove(".tei.xml$") |>
+  str_replace_all("\\+", "/") |> 
+  tolower()
 
-ft_pmid_retrieved <-
-  dir_pmid_xml %>%
-  dir_ls() %>%
-  path_file() %>%
-  str_remove(".tei.xml$") %>%
-  str_replace_all("\\+", "/")
+# ft_pmid_retrieved <-
+# dir_pmid_xml |>
+# dir_ls() |>
+# path_file() |>
+# str_remove(".tei.xml$") |>
+# str_replace_all("\\+", "/") |>
+# tolower()
+
 
 pubmed_ft_retrieved <-
-  cali %>%
-  select(id, doi, pmid) %>%
+  cali |>
+  left_join(cali_dois) |>
+  select(id = nct_id, doi, pmid) |>
   mutate(
     has_pubmed = case_when(
       is.na(pmid) ~ NA,
       pmid %in% pubmed_retrieved ~ TRUE,
-      TRUE ~ FALSE
+      .default = FALSE
     ),
-    
+
     has_ft = case_when(
-      is.na(pmid) ~ NA,
-      (doi %in% ft_doi_retrieved) | (pmid %in% ft_pmid_retrieved) ~ TRUE,
-      TRUE ~ FALSE
+      is.na(doi) ~ NA,
+      (doi %in% ft_doi_retrieved) ~ TRUE,
+      .default = FALSE
     ),
-    
+
     ft_source = case_when(
       doi %in% ft_doi_retrieved ~ "doi",
-      pmid %in% ft_pmid_retrieved ~ "pmid",
-      TRUE ~ NA_character_
+      # pmid %in% ft_pmid_retrieved ~ "pmid",
+      .default = NA
     ),
     ft_doi = if_else(doi %in% ft_doi_retrieved, TRUE, FALSE)
     # ft_pmid = if_else(pmid %in% ft_pmid_retrieved, TRUE, FALSE),
-  ) %>%
-  
+  ) |>
+
   # Remove duplicates due to intovalue versions
   distinct()
 

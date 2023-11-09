@@ -4,12 +4,12 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
     
     # if (toggled_registry == "ClinicalTrials.gov") {
         
-        dataset <- dataset %>%
-            filter( ! is.na (start_date) ) %>%
+        dataset <- dataset |>
+            filter( ! is.na (start_date) ) |>
             mutate(start_year = format(start_date, "%Y"))
 
-        dataset_all <- dataset_all %>%
-            filter( ! is.na (start_date) ) %>%
+        dataset_all <- dataset_all |>
+            filter( ! is.na (start_date) ) |>
             mutate(start_year = format(start_date, "%Y"))
 
         years <- seq(from=min(dataset$start_year, na.rm=TRUE), to=max(dataset$start_year, na.rm=TRUE))
@@ -20,32 +20,32 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
 
         for (current_year in years) {
 
-            numer_for_year <- dataset %>%
+            numer_for_year <- dataset |>
                 filter(
                     umc == umc_selected,
                     start_year == current_year,
                     is_prospective == TRUE
-                ) %>%
+                ) |>
                 nrow()
 
-            denom_for_year <- dataset %>%
+            denom_for_year <- dataset |>
                 filter(
                     umc == umc_selected,
                     start_year == current_year
-                ) %>%
+                ) |>
                 nrow()
 
-            all_numer_for_year <-  dataset_all %>%
+            all_numer_for_year <-  dataset_all |>
                 filter(
                     start_year == current_year,
                     is_prospective == TRUE
-                ) %>%
+                ) |>
                 nrow()
 
-            all_denom_for_year <- dataset_all %>%
+            all_denom_for_year <- dataset_all |>
                 filter(
                     start_year == current_year
-                ) %>%
+                ) |>
                 nrow()
 
             if (denom_for_year > 0) {
@@ -56,7 +56,7 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
 
             all_percentage_for_year <- round(100*all_numer_for_year/all_denom_for_year, digits=1)
             
-            plot_data <- plot_data %>%
+            plot_data <- plot_data |>
                 bind_rows(
                     tribble(
                         ~year, ~all_percentage, ~umc_percentage, ~all_mouseover, ~umc_mouseover,
@@ -70,16 +70,16 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
 
     # if (toggled_registry == "DRKS") {
     # 
-    #     dataset <- dataset_iv_umc %>%
-    #         filter( ! is.na (start_date) ) %>%
-    #         filter(registry == toggled_registry) %>%
-    #         mutate(start_year = format(start_date, "%Y")) %>%
+    #     dataset <- dataset_iv_umc |>
+    #         filter( ! is.na (start_date) ) |>
+    #         filter(registry == toggled_registry) |>
+    #         mutate(start_year = format(start_date, "%Y")) |>
     #         filter(start_year >= 2006)
     # 
-    #     dataset_all <- dataset_iv_all %>%
-    #         filter( ! is.na (start_date) ) %>%
-    #         filter(registry == toggled_registry) %>%
-    #         mutate(start_year = format(start_date, "%Y")) %>%
+    #     dataset_all <- dataset_iv_all |>
+    #         filter( ! is.na (start_date) ) |>
+    #         filter(registry == toggled_registry) |>
+    #         mutate(start_year = format(start_date, "%Y")) |>
     #         filter(start_year >= 2006)
     # 
     #     years <- seq(from=min(dataset$start_year), to=max(dataset$start_year))
@@ -90,32 +90,32 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
     # 
     #     for (current_year in years) {
     # 
-    #         numer_for_year <- dataset %>%
+    #         numer_for_year <- dataset |>
     #             filter(
     #                 umc == umc_selected,
     #                 start_year == current_year,
     #                 is_prospective == TRUE
-    #             ) %>%
+    #             ) |>
     #             nrow()
     # 
-    #         denom_for_year <- dataset %>%
+    #         denom_for_year <- dataset |>
     #             filter(
     #                 umc == umc_selected,
     #                 start_year == current_year
-    #             ) %>%
+    #             ) |>
     #             nrow()
     # 
-    #         all_numer_for_year <-  dataset_all %>%
+    #         all_numer_for_year <-  dataset_all |>
     #             filter(
     #                 start_year == current_year,
     #                 is_prospective == TRUE
-    #             ) %>%
+    #             ) |>
     #             nrow()
     # 
-    #         all_denom_for_year <- dataset_all %>%
+    #         all_denom_for_year <- dataset_all |>
     #             filter(
     #                 start_year == current_year
-    #             ) %>%
+    #             ) |>
     #             nrow()
     # 
     #         if (denom_for_year > 0) {
@@ -126,7 +126,7 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
     # 
     #         all_percentage_for_year <- round(100*all_numer_for_year/all_denom_for_year, digits=1)
     #         
-    #         plot_data <- plot_data %>%
+    #         plot_data <- plot_data |>
     #             bind_rows(
     #                 tribble(
     #                     ~year, ~all_percentage, ~umc_percentage, ~all_mouseover, ~umc_mouseover,
@@ -153,14 +153,14 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
                 width = 1.5
             )
         )
-    ) %>%
+    ) |>
         add_trace(
-            data=plot_data %>% filter(!is.na(umc_percentage)),
+            data=plot_data |> filter(!is.na(umc_percentage)),
             y=~umc_percentage,
             name=umc_selected,
             text=~umc_mouseover,
             marker = list(color = color_palette[2])
-        ) %>%
+        ) |>
         layout(
             xaxis = list(
                 title = '<b>Start year</b>',
@@ -181,28 +181,28 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
 
 umc_plot_clinicaltrials_trn <- function (dataset, dataset_all, umc_selected, color_palette) {
 
-    plot_data_abs <- dataset %>%
+    plot_data_abs <- dataset |>
         filter(
             has_publication == TRUE,
             publication_type == "journal publication",
             has_pubmed == TRUE
         )
     
-    plot_data_abs_all <- dataset_all %>%
+    plot_data_abs_all <- dataset_all |>
         filter(
             has_publication == TRUE,
             publication_type == "journal publication",
             has_pubmed == TRUE
         )
     
-    plot_data_ft <- dataset %>%
+    plot_data_ft <- dataset |>
         filter(
             has_publication == TRUE,
             publication_type == "journal publication",
             has_ft == TRUE
         )
     
-    plot_data_ft_all <- dataset_all %>%
+    plot_data_ft_all <- dataset_all |>
         filter(
             has_publication == TRUE,
             publication_type == "journal publication",
@@ -210,35 +210,35 @@ umc_plot_clinicaltrials_trn <- function (dataset, dataset_all, umc_selected, col
         )
     
     all_numer_abs <- sum(plot_data_abs_all$has_trn_abstract, na.rm=TRUE)
-    abs_denom <- plot_data_abs_all %>%
-        filter(! is.na(has_trn_abstract)) %>%
+    abs_denom <- plot_data_abs_all |>
+        filter(! is.na(has_trn_abstract)) |>
         nrow()
     
     all_numer_ft <- sum(plot_data_ft_all$has_trn_ft, na.rm=TRUE)
-    ft_denom <- plot_data_ft_all %>%
-        filter(! is.na(has_trn_ft)) %>%
+    ft_denom <- plot_data_ft_all |>
+        filter(! is.na(has_trn_ft)) |>
         nrow()
 
-    umc_abs_denom <- plot_data_abs %>%
-        filter(umc == umc_selected) %>%
-        filter(! is.na(has_trn_abstract)) %>%
+    umc_abs_denom <- plot_data_abs |>
+        filter(umc == umc_selected) |>
+        filter(! is.na(has_trn_abstract)) |>
         nrow()
 
-    umc_numer_abs <- plot_data_abs %>%
-        filter(umc == umc_selected) %>%
-        select(has_trn_abstract) %>%
-        filter(has_trn_abstract == TRUE) %>%
+    umc_numer_abs <- plot_data_abs |>
+        filter(umc == umc_selected) |>
+        select(has_trn_abstract) |>
+        filter(has_trn_abstract == TRUE) |>
         nrow()
 
-    umc_numer_ft <- plot_data_ft %>%
-        filter(umc == umc_selected) %>%
-        select(has_trn_ft) %>%
-        filter(has_trn_ft == TRUE) %>%
+    umc_numer_ft <- plot_data_ft |>
+        filter(umc == umc_selected) |>
+        select(has_trn_ft) |>
+        filter(has_trn_ft == TRUE) |>
         nrow()
 
-    umc_ft_denom <- plot_data_ft %>%
-        filter(umc == umc_selected) %>%
-        filter(! is.na(has_trn_ft)) %>%
+    umc_ft_denom <- plot_data_ft |>
+        filter(umc == umc_selected) |>
+        filter(! is.na(has_trn_ft)) |>
         nrow()
 
     plot_data <- tribble(
@@ -269,7 +269,7 @@ umc_plot_clinicaltrials_trn <- function (dataset, dataset_all, umc_selected, col
                 width = 1.5
             )
         )
-    ) %>%
+    ) |>
         layout(
             xaxis = list(
                 title = '<b>UMC</b>'
@@ -283,34 +283,34 @@ umc_plot_clinicaltrials_trn <- function (dataset, dataset_all, umc_selected, col
         )
     
 }
-# cali_test <- cali_trials %>% select(has_publication, publication_type, has_pubmed, has_reg_pub_link)
+# cali_test <- cali_trials |> select(has_publication, publication_type, has_pubmed, has_reg_pub_link)
 # Linkage
 
 umc_plot_linkage <- function (dataset, dataset_all, umc_selected, color_palette) {
   # umc_plot_linkage <- function (dataset, dataset_all, chosenregistry, umc, color_palette) {
-    dataset <- dataset %>%
+    dataset <- dataset |>
         filter(has_publication == TRUE,
                publication_type == "journal publication",
                has_pubmed == TRUE | ! is.na (doi),
                ! is.na (primary_completion_year))
     
-    dataset_all <- dataset_all %>%
+    dataset_all <- dataset_all |>
         filter(has_publication == TRUE,
                publication_type == "journal publication",
                has_pubmed == TRUE | ! is.na (doi),
                ! is.na (primary_completion_year))
 
     # if (chosenregistry != "All") {
-    #     dataset <- dataset %>%
+    #     dataset <- dataset |>
     #         filter(registry == chosenregistry)
     # 
-    #     dataset_all <- dataset_all %>%
+    #     dataset_all <- dataset_all |>
     #         filter(registry == chosenregistry)
     # }
     
     years <- seq(from=min(dataset_all$primary_completion_year), to=max(dataset_all$primary_completion_year))
     
-    umcdata <- dataset %>%
+    umcdata <- dataset |>
         filter (umc == umc_selected)
     
     plot_data <- tribble(
@@ -319,22 +319,22 @@ umc_plot_linkage <- function (dataset, dataset_all, umc_selected, color_palette)
 
     for (current_year in years) {
 
-        umc_numer <- umcdata %>%
-            filter(has_reg_pub_link == TRUE) %>%
-            filter(primary_completion_year == current_year) %>%
+        umc_numer <- umcdata |>
+            filter(has_reg_pub_link == TRUE) |>
+            filter(primary_completion_year == current_year) |>
             nrow()
 
-        umc_denom <- umcdata %>%
-            filter(primary_completion_year == current_year) %>%
+        umc_denom <- umcdata |>
+            filter(primary_completion_year == current_year) |>
             nrow()
 
-        all_numer <- dataset_all %>%
-            filter(has_reg_pub_link == TRUE) %>%
-            filter(primary_completion_year == current_year) %>%
+        all_numer <- dataset_all |>
+            filter(has_reg_pub_link == TRUE) |>
+            filter(primary_completion_year == current_year) |>
             nrow()
 
-        all_denom <- dataset_all %>%
-            filter(primary_completion_year == current_year) %>%
+        all_denom <- dataset_all |>
+            filter(primary_completion_year == current_year) |>
             nrow()
 
         if (umc_denom > 0) {
@@ -345,7 +345,7 @@ umc_plot_linkage <- function (dataset, dataset_all, umc_selected, color_palette)
         
         all_percentage_for_year <- round(100*all_numer/all_denom, digits=1)
         
-        plot_data <- plot_data %>%
+        plot_data <- plot_data |>
             bind_rows(
                 tribble(
                     ~year, ~all_percentage, ~umc_percentage, ~all_mouseover, ~umc_mouseover,
@@ -370,14 +370,14 @@ umc_plot_linkage <- function (dataset, dataset_all, umc_selected, color_palette)
                 width = 1.5
             )
         )
-    ) %>%
+    ) |>
          add_trace(
-             data=plot_data %>% filter(!is.na(umc_percentage)),
+             data=plot_data |> filter(!is.na(umc_percentage)),
              y=~umc_percentage,
              text=~umc_mouseover,
              name=umc_selected,
              marker = list(color = color_palette[2])
-         ) %>%
+         ) |>
          layout(
              xaxis = list(
                  title = '<b>Completion year</b>',
@@ -400,47 +400,47 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
     # 
     # if (toggled_registry == "EUCTR") {
     # 
-    #     dataset <- eutt_dataset %>%
+    #     dataset <- eutt_dataset |>
     #         filter (date > Sys.Date()-365*1.5) ## Only look at the last year and a half
     # 
     #     ## Only take the latest data point per month
-    #     dataset$month <- dataset$date %>%
+    #     dataset$month <- dataset$date |>
     #         format("%Y-%m")
     # 
-    #     dataset <- dataset %>%
-    #         group_by(umc, month) %>%
-    #         arrange(desc(date)) %>%
-    #         slice_head() %>%
+    #     dataset <- dataset |>
+    #         group_by(umc, month) |>
+    #         arrange(desc(date)) |>
+    #         slice_head() |>
     #         ungroup()
     #     
-    #     all_data <- dataset %>%
-    #         group_by(date) %>%
-    #         mutate(avg = round(100*sum(total_reported)/sum(total_due), digits=1)) %>%
-    #         mutate(mouseover = paste0(sum(total_reported), "/", sum(total_due))) %>%
-    #         slice_head() %>%
-    #         select(date, hash, avg, month, total_due, total_reported, mouseover) %>%
-    #         rename(percent_reported = avg) %>%
-    #         mutate(umc = "All") %>%
+    #     all_data <- dataset |>
+    #         group_by(date) |>
+    #         mutate(avg = round(100*sum(total_reported)/sum(total_due), digits=1)) |>
+    #         mutate(mouseover = paste0(sum(total_reported), "/", sum(total_due))) |>
+    #         slice_head() |>
+    #         select(date, hash, avg, month, total_due, total_reported, mouseover) |>
+    #         rename(percent_reported = avg) |>
+    #         mutate(umc = "All") |>
     #         ungroup()
     #     
-    #     umc_data <- dataset %>%
-    #         group_by(date) %>%
-    #         filter(umc == umc_selected) %>%
+    #     umc_data <- dataset |>
+    #         group_by(date) |>
+    #         filter(umc == umc_selected) |>
     #         mutate(mouseover = paste0(sum(total_reported), "/", sum(total_due)))
     #     
     # } else { ## The registry is not EUCTR
 
-        dataset <- iv_dataset %>% 
-          filter(!is.na(primary_completion_year)) %>%
+        dataset <- iv_dataset |> 
+          filter(!is.na(primary_completion_year)) |>
             filter(
         #         registry == toggled_registry,
                 umc == umc_selected
             )
 
-        min_year <- dataset$primary_completion_year %>%
+        min_year <- dataset$primary_completion_year |>
             min()
 
-        max_year <- dataset$primary_completion_year %>%
+        max_year <- dataset$primary_completion_year |>
             max()
 
         umc_data <- tribble(
@@ -449,18 +449,18 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
 
         for (currentyear in seq(from=min_year, to=max_year)) {
 
-            currentyear_trials <- dataset %>%
+            currentyear_trials <- dataset |>
                 filter(
                     primary_completion_year <= currentyear
                 )
 
             currentyear_denom <- nrow(currentyear_trials)
 
-            currentyear_numer <- currentyear_trials %>%
-                filter(has_summary_results == TRUE) %>%
+            currentyear_numer <- currentyear_trials |>
+                filter(has_summary_results == TRUE) |>
                 nrow()
 
-            umc_data <- umc_data %>%
+            umc_data <- umc_data |>
                 bind_rows(
                     tribble(
                         ~date, ~percent_reported, ~umc, ~mouseover,
@@ -471,7 +471,7 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
         }
 
         dataset <- iv_all_dataset
-        # %>%
+        # |>
         #     filter(
         #         registry == toggled_registry
         #     )
@@ -482,18 +482,18 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
 
         for (currentyear in seq(from=min_year, to=max_year)) {
 
-            currentyear_trials <- dataset %>%
+            currentyear_trials <- dataset |>
                 filter(
                     primary_completion_year <= currentyear
                 )
 
             currentyear_denom <- nrow(currentyear_trials)
 
-            currentyear_numer <- currentyear_trials %>%
-                filter(has_summary_results == TRUE) %>%
+            currentyear_numer <- currentyear_trials |>
+                filter(has_summary_results == TRUE) |>
                 nrow()
 
-            all_data <- all_data %>%
+            all_data <- all_data |>
                 bind_rows(
                     tribble(
                         ~date, ~percent_reported, ~umc, ~mouseover,
@@ -522,13 +522,13 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
           width = 1.5
         )
       )
-    ) %>%    
+    ) |>    
       add_trace(
         data=umc_data,
         text=~mouseover,
         name=~umc,
         marker = list(color = color_palette[2])
-      ) %>%
+      ) |>
     # plot_ly(
     #     plot_data,
     #     x = ~date,
@@ -544,7 +544,7 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
     #             width = 1.5
     #         )
     #     )
-    # ) %>%
+    # ) |>
 
         layout(
             xaxis = list(
@@ -567,13 +567,13 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
     if (rt != "Summary results or manuscript publication") {
 
         if (rt == "Summary results only") {
-            dataset <- dataset %>%
+            dataset <- dataset |>
                 filter(
                     has_followup_2y_sumres
                 )
             dataset$published_2a <- dataset$is_summary_results_2y
             
-            dataset_all <- dataset_all %>%
+            dataset_all <- dataset_all |>
                 filter(
                     has_followup_2y_sumres
                 )
@@ -581,13 +581,13 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
         }
         
         if (rt == "Manuscript publication only") {
-            dataset <- dataset %>%
+            dataset <- dataset |>
                 filter(
                     has_followup_2y_pub
                 )
             dataset$published_2a <- dataset$is_publication_2y
             
-            dataset_all <- dataset_all %>%
+            dataset_all <- dataset_all |>
                 filter(
                     has_followup_2y_pub
                 )
@@ -595,13 +595,13 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
         }
         
     } else {
-        dataset <- dataset %>%
+        dataset <- dataset |>
             filter(
                 has_followup_2y_pub & has_followup_2y_sumres
             )
         dataset$published_2a <- dataset$is_summary_results_2y | dataset$is_publication_2y
         
-        dataset_all <- dataset_all %>%
+        dataset_all <- dataset_all |>
             filter(
                 has_followup_2y_pub & has_followup_2y_sumres
             )
@@ -610,11 +610,11 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
 
     years <- seq(from=min(dataset$primary_completion_year), to=max(dataset$primary_completion_year))
 
-    all_denom <- dataset_all %>%
+    all_denom <- dataset_all |>
         nrow()
     
-    all_numer <- dataset_all %>%
-        filter(published_2a) %>%
+    all_numer <- dataset_all |>
+        filter(published_2a) |>
         nrow()
 
     plot_data <- tribble(
@@ -623,32 +623,32 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
 
     for (current_year in years) {
 
-        umc_numer <-  dataset %>%
+        umc_numer <-  dataset |>
             filter(
                 umc == umc_selected,
                 primary_completion_year == current_year,
                 published_2a
-            ) %>%
+            ) |>
             nrow()
 
-        umc_denom <-  dataset %>%
+        umc_denom <-  dataset |>
             filter(
                 umc == umc_selected,
                 primary_completion_year == current_year
-            ) %>%
+            ) |>
             nrow()
 
-        all_numer <-  dataset_all %>%
+        all_numer <-  dataset_all |>
             filter(
                 primary_completion_year == current_year,
                 published_2a
-            ) %>%
+            ) |>
             nrow()
 
-        all_denom <-  dataset_all %>%
+        all_denom <-  dataset_all |>
             filter(
                 primary_completion_year == current_year
-            ) %>%
+            ) |>
             nrow()
 
         if (umc_denom > 0) {
@@ -659,7 +659,7 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
         
         all_percentage <- round(100*all_numer/all_denom, digits=1)
 
-        plot_data <- plot_data %>%
+        plot_data <- plot_data |>
             bind_rows(
                 tribble(
                     ~year, ~all_percentage, ~umc_percentage, ~all_mouseover, ~umc_mouseover,
@@ -684,14 +684,14 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
                 width = 1.5
             )
         )
-    ) %>%
+    ) |>
         add_trace(
-            data=plot_data %>% filter(!is.na(umc_percentage)),
+            data=plot_data |> filter(!is.na(umc_percentage)),
             y=~umc_percentage,
             name=umc_selected,
             text=~umc_mouseover,
             marker = list(color = color_palette[2])
-        ) %>%
+        ) |>
         layout(
             xaxis = list(
                 title = '<b>Completion year</b>',
@@ -714,13 +714,13 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
     if (rt != "Summary results or manuscript publication") {
 
         if (rt == "Summary results only") {
-            dataset <- dataset %>%
+            dataset <- dataset |>
                 filter(
                     has_followup_5y_sumres
                 )
             dataset$published_5a <- dataset$is_summary_results_5y
             
-            dataset_all <- dataset_all %>%
+            dataset_all <- dataset_all |>
                 filter(
                     has_followup_5y_sumres
                 )
@@ -728,13 +728,13 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
         }
         
         if (rt == "Manuscript publication only") {
-            dataset <- dataset %>%
+            dataset <- dataset |>
                 filter(
                     has_followup_5y_pub
                 )
             dataset$published_5a <- dataset$is_publication_5y
             
-            dataset_all <- dataset_all %>%
+            dataset_all <- dataset_all |>
                 filter(
                     has_followup_5y_pub
                 )
@@ -742,13 +742,13 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
         }
         
     } else {
-        dataset <- dataset %>%
+        dataset <- dataset |>
             filter(
                 has_followup_5y_pub & has_followup_5y_sumres
             )
         dataset$published_5a <- dataset$is_summary_results_5y | dataset$is_publication_5y
         
-        dataset_all <- dataset_all %>%
+        dataset_all <- dataset_all |>
             filter(
                 has_followup_5y_pub & has_followup_5y_sumres
             )
@@ -757,11 +757,11 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
 
     years <- seq(from=min(dataset$primary_completion_year), to=max(dataset$primary_completion_year))
 
-    all_denom <- dataset_all %>%
+    all_denom <- dataset_all |>
         nrow()
     
-    all_numer <- dataset_all %>%
-        filter(published_5a) %>%
+    all_numer <- dataset_all |>
+        filter(published_5a) |>
         nrow()
     
     plot_data <- tribble(
@@ -770,32 +770,32 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
 
     for (current_year in years) {
 
-        umc_numer <-  dataset %>%
+        umc_numer <-  dataset |>
             filter(
                 umc == umc_selected,
                 primary_completion_year == current_year,
                 published_5a
-            ) %>%
+            ) |>
             nrow()
 
-        umc_denom <-  dataset %>%
+        umc_denom <-  dataset |>
             filter(
                 umc == umc_selected,
                 primary_completion_year == current_year
-            ) %>%
+            ) |>
             nrow()
 
-        all_numer <-  dataset_all %>%
+        all_numer <-  dataset_all |>
             filter(
                 primary_completion_year == current_year,
                 published_5a
-            ) %>%
+            ) |>
             nrow()
 
-        all_denom <-  dataset_all %>%
+        all_denom <-  dataset_all |>
             filter(
                 primary_completion_year == current_year
-            ) %>%
+            ) |>
             nrow()
         
         if (umc_denom > 0) {
@@ -806,11 +806,11 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
         
         all_percentage <- round(100*all_numer/all_denom, digits=1)
 
-        manuscript_denom <- dataset %>%
+        manuscript_denom <- dataset |>
             filter(
                 primary_completion_year == current_year &
                 has_followup_5y_pub
-            ) %>%
+            ) |>
             nrow()
 
         if (rt ==
@@ -820,7 +820,7 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
             ## data point in 2013 with 5 years of
             ## follow-up
 
-            plot_data <- plot_data %>%
+            plot_data <- plot_data |>
                 bind_rows(
                     tribble(
                         ~year, ~all_percentage, ~umc_percentage, ~all_mouseover, ~umc_mouseover,
@@ -846,14 +846,14 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
                 width = 1.5
             )
         )
-    ) %>%
+    ) |>
         add_trace(
-            data=plot_data %>% filter(!is.na(umc_percentage)),
+            data=plot_data |> filter(!is.na(umc_percentage)),
             y=~umc_percentage,
             text=~umc_mouseover,
             name=umc_selected,
             marker = list(color = color_palette[2])
-        ) %>%
+        ) |>
         layout(
             xaxis = list(
                 title = '<b>Completion year</b>',
@@ -872,109 +872,111 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
 
 ## Open access
 umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, color_palette) {
-
+  # dataset_all <- cali_trials
+  #dataset <- cali_umc
+  # umc_selected <- "Stanford"
     ## Calculate the numerators and the denominator for the
     ## "all" bars
 
-    plot_data <- dataset %>%
+    plot_data <- dataset |>
         filter(
             has_publication == TRUE,
             publication_type == "journal publication",
             umc == umc_selected,
             !is.na(doi),
             !is.na(publication_date_unpaywall)
-        ) %>%
+        ) |>
         distinct(doi, .keep_all = TRUE)
 
-    plot_data_all <- dataset_all %>%
+    plot_data_all <- dataset_all |>
         filter(
             has_publication == TRUE,
             publication_type == "journal publication",
             !is.na(doi),
             !is.na(publication_date_unpaywall)
-        ) %>%
+        ) |>
         distinct(doi, .keep_all=TRUE)
 
-    all_denom <- plot_data_all %>%
+    all_denom <- plot_data_all |>
         nrow()
 
-    all_gold <- plot_data_all %>%
-        filter( color == "gold") %>%
+    all_gold <- plot_data_all |>
+        filter( color_green_only == "gold") |>
         nrow()
 
-    all_green <- plot_data_all %>%
-        filter( color == "green") %>%
+    all_green <- plot_data_all |>
+        filter( color_green_only == "green") |>
         nrow()
 
-    all_hybrid <- plot_data_all %>%
-        filter( color == "hybrid") %>%
+    all_hybrid <- plot_data_all |>
+        filter( color_green_only == "hybrid") |>
         nrow()
 
-    all_na <- plot_data_all %>%
-        filter( is.na(color) ) %>%
+    all_na <- plot_data_all |>
+        filter( is.na(color) ) |>
         nrow()
 
-    all_closed <- plot_data_all %>%
-        filter( color == "closed") %>%
+    all_closed <- plot_data_all |>
+        filter( color_green_only == "closed") |>
         nrow()
 
-    all_bronze <- plot_data_all %>%
-        filter( color == "bronze") %>%
+    all_bronze <- plot_data_all |>
+        filter( color_green_only == "bronze") |>
         nrow()
 
 
-    umc_denom <- plot_data %>%
+    umc_denom <- plot_data |>
         nrow()
 
-    umc_gold <- plot_data %>%
+    umc_gold <- plot_data |>
         filter(
-            color == "gold"
-        ) %>%
+          color_green_only == "gold"
+        ) |>
         nrow()
 
-    umc_green <- plot_data %>%
+    umc_green <- plot_data |>
         filter(
-            color == "green"
-        ) %>%
+          color_green_only == "green"
+        ) |>
         nrow()
 
-    umc_hybrid <- plot_data %>%
+    umc_hybrid <- plot_data |>
         filter(
-            color == "hybrid"
-        ) %>%
+          color_green_only == "hybrid"
+        ) |>
         nrow()
 
-    umc_na <- plot_data %>%
+    umc_na <- plot_data |>
         filter(
-            is.na(color)
-        ) %>%
+            is.na(color_green_only)
+        ) |>
         nrow()
 
-    umc_closed <- plot_data %>%
+    umc_closed <- plot_data |>
         filter(
-            color == "closed"
-        ) %>%
+          color_green_only == "closed"
+        ) |>
         nrow()
 
-    umc_bronze <- plot_data %>%
+    umc_bronze <- plot_data |>
         filter(
-            color == "bronze"
-        ) %>%
+          color_green_only == "bronze"
+        ) |>
         nrow()
 
     if (absnum == "Show absolute numbers") {
 
-        dataset <- dataset %>%
+        dataset <- dataset |>
             filter(
                 has_publication == TRUE,
                 publication_type == "journal publication",
                 !is.na(doi),
                 ! is.na (publication_date_unpaywall),
                 umc == umc_selected
-            ) %>%
+            ) |>
             distinct(doi, .keep_all = TRUE)
 
-        dataset$oa_year <- dataset$publication_date_unpaywall %>%
+        dataset$oa_year <- dataset$publication_date_unpaywall |>
             format("%Y")
 
         plot_data <- tribble(
@@ -987,59 +989,59 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
 
         for (year in years) {
             
-            gold_num <- dataset %>%
+            gold_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color == "gold"
-                ) %>%
+                    color_green_only == "gold"
+                ) |>
                 nrow()
             
-            green_num <- dataset %>%
+            green_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color == "green"
-                ) %>%
+                    color_green_only == "green"
+                ) |>
                 nrow()
 
-            hybrid_num <- dataset %>%
+            hybrid_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color == "hybrid"
-                ) %>%
+                    color_green_only == "hybrid"
+                ) |>
                 nrow()
 
-            na_num <- dataset %>%
+            na_num <- dataset |>
                 filter(
                     oa_year == year,
-                    is.na(color)
-                ) %>%
+                    is.na(color_green_only)
+                ) |>
                 nrow()
             
-            closed_num <- dataset %>%
+            closed_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color == "closed"
-                ) %>%
+                    color_green_only == "closed"
+                ) |>
                 nrow()
 
-            bronze_num <- dataset %>%
+            bronze_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color == "bronze"
-                ) %>%
+                    color_green_only == "bronze"
+                ) |>
                 nrow()
             
-            year_denom <- dataset %>%
+            year_denom <- dataset |>
                 filter(
                     oa_year == year
-                ) %>%
+                ) |>
                 nrow()
 
             if (year_denom > 0) {
-                plot_data <- plot_data %>%
+                plot_data <- plot_data |>
                     bind_rows(
                         tribble(
-                            ~x_label, ~gold,    ~green,    ~hybrid,    ~na,    ~closed,    ~bronze,
+                            ~x_label, ~gold,    ~green,    ~hybrid,  ~na,    ~closed,    ~bronze,
                             year, gold_num, green_num, hybrid_num, na_num, closed_num, bronze_num
                         )
                     )
@@ -1065,7 +1067,7 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
                 width = 1.5
             )
         )
-    ) %>%
+    ) |>
         add_trace(
             y = ~green,
             name = "Green",
@@ -1076,7 +1078,7 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
                     width = 1.5
                 )
             )
-        ) %>%
+        ) |>
         add_trace(
             y = ~hybrid,
             name = "Hybrid",
@@ -1087,7 +1089,7 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
                     width = 1.5
                 )
             )
-        ) %>%
+        ) |>
         add_trace(
             y = ~bronze,
             name = "Bronze",
@@ -1098,7 +1100,7 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
                     width = 1.5
                 )
             )
-        ) %>%
+        ) |>
         add_trace(
             y = ~closed,
             name = "Closed",
@@ -1109,7 +1111,7 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
                     width = 1.5
                 )
             )
-        ) %>%
+        ) |>
         
         # add_trace(
         #     y = ~na,
@@ -1121,16 +1123,19 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
         #             width = 1.5
         #         )
         #     )
-        # ) %>%
+        # ) |>
         layout(
             barmode = 'stack',
             xaxis = list(
-                title = '<b>Year of publication</b>'
+                title = '<b>Year of publication</b>',
+                spikemode = 'marker',
+                spikethickness = 0
             ),
             yaxis = list(
                 title = paste('<b>', ylabel, '</b>'),
                 range = c(0, upperlimit)
             ),
+            hovermode = "x unified",
             paper_bgcolor = color_palette[9],
             plot_bgcolor = color_palette[9]
         )
@@ -1141,9 +1146,9 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
         ## Not "absolute numbers"
 
         plot_data <- tribble(
-            ~x_label, ~gold,                         ~green,                         ~hybrid,                         ~na,                         ~closed,                         ~bronze,     ~gold_numer, ~green_numer, ~hybrid_numer, ~sum,
-            "All",    round(100*all_gold/all_denom, digits=1), round(100*all_green/all_denom, digits=1), round(100*all_hybrid/all_denom, digits=1), round(100*all_na/all_denom, digits=1), round(100*all_closed/all_denom, digits=1), round(100*all_bronze/all_denom, digits=1), all_gold, all_green, all_hybrid, all_denom,
-            umc_selected,      round(100*umc_gold/umc_denom, digits=1), round(100*umc_green/umc_denom, digits=1), round(100*umc_hybrid/umc_denom, digits=1), round(100*umc_na/umc_denom, digits=1), round(100*umc_closed/umc_denom, digits=1), round(100*umc_bronze/umc_denom, digits=1), umc_gold, umc_green, umc_hybrid, umc_denom
+            ~x_label, ~gold,                         ~green,                         ~hybrid,                         ~na,                         ~closed,                         ~bronze,     ~gold_numer, ~green_numer, ~hybrid_numer, ~bronze_numer, ~sum,
+            "All",    round(100*all_gold/all_denom, digits=1), round(100*all_green/all_denom, digits=1), round(100*all_hybrid/all_denom, digits=1), round(100*all_na/all_denom, digits=1), round(100*all_closed/all_denom, digits=1), round(100*all_bronze/all_denom, digits=1), all_gold, all_green, all_hybrid, all_bronze, all_denom,
+            umc_selected,      round(100*umc_gold/umc_denom, digits=1), round(100*umc_green/umc_denom, digits=1), round(100*umc_hybrid/umc_denom, digits=1), round(100*umc_na/umc_denom, digits=1), round(100*umc_closed/umc_denom, digits=1), round(100*umc_bronze/umc_denom, digits=1), umc_gold, umc_green, umc_hybrid, umc_bronze, umc_denom
         )
 
         plot_data$x_label <- fct_relevel(plot_data$x_label, "All", after= Inf)
@@ -1156,7 +1161,10 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
         x = ~x_label,
         y = ~gold,
         name = "Gold",
-        text = ~paste0(gold_numer, "/", sum),
+        text = ~paste0(gold_numer, " out of ", sum),
+        textposition = "none",
+        hovertemplate = paste0('<b>%{x} : </b>', '%{y}%',
+                               ', %{text}'),
         type = 'bar',
         marker = list(
             color = color_palette[3],
@@ -1165,263 +1173,268 @@ umc_plot_opensci_oa <- function (dataset, dataset_all, umc_selected, absnum, col
                 width = 1.5
             )
         )
-    ) %>%
+    ) |>
         add_trace(
-            y = ~green,
-            name = "Green",
-            text = ~paste0(green_numer, "/", sum),
+            y = ~green, name = "Green",
+            text = ~paste0(green_numer, " out of ", sum),
             marker = list(
                 color = color_palette[8],
-                line = list(
-                    color = 'rgb(0,0,0)',
-                    width = 1.5
-                )
+                line = list(color = 'rgb(0,0,0)',
+                            width = 1.5)
             )
-        ) %>%
+        ) |>
         add_trace(
-            y = ~hybrid,
-            name = "Hybrid",
-            text = ~paste0(hybrid_numer, "/", sum),
+            y = ~hybrid, name = "Hybrid",
+            text = ~paste0(hybrid_numer, " out of ", sum),
             marker = list(
                 color = color_palette[10],
-                line = list(
-                    color = 'rgb(0,0,0)',
-                    width = 1.5
-                )
+                line = list(color = 'rgb(0,0,0)',
+                            width = 1.5)
             )
-        ) %>%
+        ) |>
+        add_trace(y = ~bronze, name = "Bronze",
+                text = ~paste0(bronze_numer, " out of ", sum),
+                marker = list(
+                  color = "#cf9188",
+                  line = list(color = 'rgb(0,0,0)',
+                              width = 1.5)),
+                visible = "legendonly"
+      ) |>
+      
         layout(
             barmode = 'stack',
             xaxis = list(
-                title = '<b>UMC</b>'
+                title = '<b>UMC</b>',
+                spikemode = 'marker',
+                spikethickness = 0
             ),
             yaxis = list(
                 title = paste('<b>', ylabel, '</b>'),
                 range = c(0, 115)
             ),
+            hovermode = "x unified",
             paper_bgcolor = color_palette[9],
             plot_bgcolor = color_palette[9]
         )
-    
-
+   
         
     }
 
 }
 
-umc_plot_opensci_green_oa <- function (dataset, dataset_all, umc_selected, absnum, color_palette) {
-
-    dataset$oa_year <- dataset$publication_date_unpaywall %>%
-        format("%Y")
-    
-    #Denom for percentage plot
-    oa_set <- dataset %>%
-        filter(
-            has_publication == TRUE,
-            publication_type == "journal publication",
-            !is.na(doi),
-            ! is.na(publication_date_unpaywall),
-            is_closed_archivable == TRUE | color_green_only == "green",
-            umc == umc_selected
-        ) %>%
-        distinct(doi, .keep_all = TRUE)
-
-    oa_set_all <- dataset_all %>%
-        filter(
-            has_publication == TRUE,
-            publication_type == "journal publication",
-            !is.na(doi),
-            ! is.na(publication_date_unpaywall),
-            is_closed_archivable == TRUE | color_green_only == "green"
-        ) %>%
-        distinct(doi, .keep_all=TRUE)
-    
-    umc_denom <- oa_set %>%
-        nrow()
-    
-    umc_numer <- oa_set %>%
-        filter(
-            color_green_only == "green"
-        ) %>%
-        nrow()
-    
-    all_denom <- oa_set_all %>%
-        nrow()
-    
-    all_numer <- oa_set_all %>%
-        filter(
-            color_green_only == "green"
-        ) %>%
-        nrow()
-    
-    #Filter data for absolute number plot
-    oa_set_abs <- dataset %>%
-        filter(
-            has_publication == TRUE,
-            publication_type == "journal publication",
-            !is.na(doi),
-            ! is.na(publication_date_unpaywall),
-            umc == umc_selected
-        ) %>%
-        distinct(doi, .keep_all = TRUE)
-    
-    #Denominator for the absolute number plot
-    
-    if (absnum == "Show absolute numbers") {
-
-        plot_data <- tribble(
-            ~x_label, ~percentage, ~can_archive,   ~cant_archive,    ~no_data
-        )
-
-        upperlimit <- 0
-
-        years <- seq(from=min(oa_set_abs$oa_year, na.rm=TRUE), to=max(oa_set_abs$oa_year, na.rm=TRUE))
-
-        for (year in years) {
-
-            umc_archived <- oa_set_abs %>%
-                filter(
-                    color_green_only == "green",
-                    oa_year == year
-                ) %>%
-                nrow()
-            
-            umc_can_archive <- oa_set_abs %>%
-                filter(
-                    is_closed_archivable == TRUE,
-                    oa_year == year
-                ) %>%
-                nrow()
-            
-            umc_cant_archive <- oa_set_abs %>%
-                filter(
-                    is_closed_archivable == FALSE,
-                    oa_year == year
-                ) %>%
-                nrow()
-            
-            umc_no_data <- oa_set_abs %>%
-                filter(
-                    color == "closed",
-                    is.na(is_closed_archivable),
-                    oa_year == year
-                ) %>%
-                nrow()
-
-            plot_data <- plot_data %>%
-                bind_rows(
-                    tribble(
-                        ~x_label, ~percentage, ~can_archive,   ~cant_archive,    ~no_data,
-                        year, umc_archived, umc_can_archive, umc_cant_archive, umc_no_data
-                    )
-                )
-            
-            year_upperlimit <- 1.1 * sum(umc_archived, umc_can_archive, umc_cant_archive, umc_no_data)
-            upperlimit <- max(year_upperlimit, upperlimit)
-            
-        }
-        
-        ylabel <- "Paywalled publications"
-        
-        plot_ly(
-            plot_data,
-            x = ~x_label,
-            y = ~percentage,
-            name = "Archived",
-            type = 'bar',
-            marker = list(
-                color = color_palette[8],
-                line = list(
-                    color = 'rgb(0,0,0)',
-                    width = 1.5
-                )
-            )
-        ) %>%
-            add_trace(
-                y = ~can_archive,
-                name = "Could archive",
-                marker = list(
-                    color = color_palette[12],
-                    line = list(
-                        color = 'rgb(0,0,0)',
-                        width = 1.5
-                    )
-                )
-            ) %>% 
-            add_trace(
-                y = ~cant_archive,
-                name = "Cannot archive",
-                marker = list(
-                    color = color_palette[13],
-                    line = list(
-                        color = 'rgb(0,0,0)',
-                        width = 1.5
-                    )
-                )
-            ) %>%
-            add_trace(
-                y = ~no_data,
-                name = "No data",
-                marker = list(
-                    color = color_palette[6],
-                    line = list(
-                        color = 'rgb(0,0,0)',
-                        width = 1.5
-                    )
-                )
-            ) %>%
-            layout(
-                barmode = 'stack',
-                xaxis = list(
-                    title = '<b>Year of publication</b>'
-                ),
-                yaxis = list(
-                    title = paste('<b>', ylabel, '</b>'),
-                    range = c(0, upperlimit + upperlimit/10)
-                ),
-                paper_bgcolor = color_palette[9],
-                plot_bgcolor = color_palette[9]
-            )
-        
-    } else {
-
-        plot_data <- tribble(
-            ~x_label, ~percentage, ~mouseover,
-            "All", round(100*all_numer/all_denom, digits=1), paste0(all_numer, "/", all_denom),
-            umc_selected, round(100*umc_numer/umc_denom, digits=1), paste0(umc_numer, "/", umc_denom)
-        )
-        
-        plot_data$x_label <- fct_relevel(plot_data$x_label, "All", after= Inf)
-        
-        upperlimit <- 105
-        ylabel <- "Paywalled publications (%)"
-        
-        plot_ly(
-            plot_data,
-            x = ~x_label,
-            y = ~percentage,
-            text = ~mouseover,
-            type = 'bar',
-            marker = list(
-                color = color_palette[8],
-                line = list(
-                    color = 'rgb(0,0,0)',
-                    width = 1.5
-                )
-            )
-        ) %>%
-            layout(
-                xaxis = list(
-                    title = '<b>UMC</b>'
-                ),
-                yaxis = list(
-                    title = paste('<b>', ylabel, '</b>'),
-                    range = c(0, upperlimit/10)
-                ),
-                paper_bgcolor = color_palette[9],
-                plot_bgcolor = color_palette[9]
-            )
-        
-    }
-    
-}
+# umc_plot_opensci_green_oa <- function (dataset, dataset_all, umc_selected, absnum, color_palette) {
+# 
+#     dataset$oa_year <- dataset$publication_date_unpaywall |>
+#         format("%Y")
+#     
+#     #Denom for percentage plot
+#     oa_set <- dataset |>
+#         filter(
+#             has_publication == TRUE,
+#             publication_type == "journal publication",
+#             !is.na(doi),
+#             ! is.na(publication_date_unpaywall),
+#             is_closed_archivable == TRUE | color_green_only == "green",
+#             umc == umc_selected
+#         ) |>
+#         distinct(doi, .keep_all = TRUE)
+# 
+#     oa_set_all <- dataset_all |>
+#         filter(
+#             has_publication == TRUE,
+#             publication_type == "journal publication",
+#             !is.na(doi),
+#             ! is.na(publication_date_unpaywall),
+#             is_closed_archivable == TRUE | color_green_only == "green"
+#         ) |>
+#         distinct(doi, .keep_all=TRUE)
+#     
+#     umc_denom <- oa_set |>
+#         nrow()
+#     
+#     umc_numer <- oa_set |>
+#         filter(
+#             color_green_only == "green"
+#         ) |>
+#         nrow()
+#     
+#     all_denom <- oa_set_all |>
+#         nrow()
+#     
+#     all_numer <- oa_set_all |>
+#         filter(
+#             color_green_only == "green"
+#         ) |>
+#         nrow()
+#     
+#     #Filter data for absolute number plot
+#     oa_set_abs <- dataset |>
+#         filter(
+#             has_publication == TRUE,
+#             publication_type == "journal publication",
+#             !is.na(doi),
+#             ! is.na(publication_date_unpaywall),
+#             umc == umc_selected
+#         ) |>
+#         distinct(doi, .keep_all = TRUE)
+#     
+#     #Denominator for the absolute number plot
+#     
+#     if (absnum == "Show absolute numbers") {
+# 
+#         plot_data <- tribble(
+#             ~x_label, ~percentage, ~can_archive,   ~cant_archive,    ~no_data
+#         )
+# 
+#         upperlimit <- 0
+# 
+#         years <- seq(from=min(oa_set_abs$oa_year, na.rm=TRUE), to=max(oa_set_abs$oa_year, na.rm=TRUE))
+# 
+#         for (year in years) {
+# 
+#             umc_archived <- oa_set_abs |>
+#                 filter(
+#                     color_green_only == "green",
+#                     oa_year == year
+#                 ) |>
+#                 nrow()
+#             
+#             umc_can_archive <- oa_set_abs |>
+#                 filter(
+#                     is_closed_archivable == TRUE,
+#                     oa_year == year
+#                 ) |>
+#                 nrow()
+#             
+#             umc_cant_archive <- oa_set_abs |>
+#                 filter(
+#                     is_closed_archivable == FALSE,
+#                     oa_year == year
+#                 ) |>
+#                 nrow()
+#             
+#             umc_no_data <- oa_set_abs |>
+#                 filter(
+#                     color == "closed",
+#                     is.na(is_closed_archivable),
+#                     oa_year == year
+#                 ) |>
+#                 nrow()
+# 
+#             plot_data <- plot_data |>
+#                 bind_rows(
+#                     tribble(
+#                         ~x_label, ~percentage, ~can_archive,   ~cant_archive,    ~no_data,
+#                         year, umc_archived, umc_can_archive, umc_cant_archive, umc_no_data
+#                     )
+#                 )
+#             
+#             year_upperlimit <- 1.1 * sum(umc_archived, umc_can_archive, umc_cant_archive, umc_no_data)
+#             upperlimit <- max(year_upperlimit, upperlimit)
+#             
+#         }
+#         
+#         ylabel <- "Paywalled publications"
+#         
+#         plot_ly(
+#             plot_data,
+#             x = ~x_label,
+#             y = ~percentage,
+#             name = "Archived",
+#             type = 'bar',
+#             marker = list(
+#                 color = color_palette[8],
+#                 line = list(
+#                     color = 'rgb(0,0,0)',
+#                     width = 1.5
+#                 )
+#             )
+#         ) |>
+#             add_trace(
+#                 y = ~can_archive,
+#                 name = "Could archive",
+#                 marker = list(
+#                     color = color_palette[12],
+#                     line = list(
+#                         color = 'rgb(0,0,0)',
+#                         width = 1.5
+#                     )
+#                 )
+#             ) |> 
+#             add_trace(
+#                 y = ~cant_archive,
+#                 name = "Cannot archive",
+#                 marker = list(
+#                     color = color_palette[13],
+#                     line = list(
+#                         color = 'rgb(0,0,0)',
+#                         width = 1.5
+#                     )
+#                 )
+#             ) |>
+#             add_trace(
+#                 y = ~no_data,
+#                 name = "No data",
+#                 marker = list(
+#                     color = color_palette[6],
+#                     line = list(
+#                         color = 'rgb(0,0,0)',
+#                         width = 1.5
+#                     )
+#                 )
+#             ) |>
+#             layout(
+#                 barmode = 'stack',
+#                 xaxis = list(
+#                     title = '<b>Year of publication</b>'
+#                 ),
+#                 yaxis = list(
+#                     title = paste('<b>', ylabel, '</b>'),
+#                     range = c(0, upperlimit + upperlimit/10)
+#                 ),
+#                 paper_bgcolor = color_palette[9],
+#                 plot_bgcolor = color_palette[9]
+#             )
+#         
+#     } else {
+# 
+#         plot_data <- tribble(
+#             ~x_label, ~percentage, ~mouseover,
+#             "All", round(100*all_numer/all_denom, digits=1), paste0(all_numer, "/", all_denom),
+#             umc_selected, round(100*umc_numer/umc_denom, digits=1), paste0(umc_numer, "/", umc_denom)
+#         )
+#         
+#         plot_data$x_label <- fct_relevel(plot_data$x_label, "All", after= Inf)
+#         
+#         upperlimit <- 105
+#         ylabel <- "Paywalled publications (%)"
+#         
+#         plot_ly(
+#             plot_data,
+#             x = ~x_label,
+#             y = ~percentage,
+#             text = ~mouseover,
+#             type = 'bar',
+#             marker = list(
+#                 color = color_palette[8],
+#                 line = list(
+#                     color = 'rgb(0,0,0)',
+#                     width = 1.5
+#                 )
+#             )
+#         ) |>
+#             layout(
+#                 xaxis = list(
+#                     title = '<b>UMC</b>'
+#                 ),
+#                 yaxis = list(
+#                     title = paste('<b>', ylabel, '</b>'),
+#                     range = c(0, upperlimit/10)
+#                 ),
+#                 paper_bgcolor = color_palette[9],
+#                 plot_bgcolor = color_palette[9]
+#             )
+#         
+#     }
+#     
+# }

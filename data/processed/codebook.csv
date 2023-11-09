@@ -1,0 +1,72 @@
+name;type;description;levels
+id;character;Trial registration number, a ClinicalTrials.gov NCT id ;
+pmid;numeric;Publication PMID. Manually entered during publication search or derived from DOI via FatCat.;NA
+doi;character;Publication DOI. Manually entered during publication search or derived from PMID via FatCat.;NA
+any_paper;;;
+publication_found;;;
+publication_date;date;Publication date. Manually entered during publication search. Earliest date used, whether ePub or print pub date.;NA
+comments_from_doublecheck;;;
+last_update_submitted_date;;;
+registration_date;date;Date of study submission to registry, as given on registry.;NA
+study_type;character;NA;"Interventional; Observational"
+phase;character;Trial phase, as given on registry;"Early Phase 1; Not Applicable; Phase 1; Phase 1/Phase 2; Phase 2; Phase 2/Phase 3; Phase 3; Phase 4"
+enrollment;numeric;Number of trial participants, as given on registry. May be anticipated or actual number.;NA
+recruitment_status;character;Recruitment status, as given on registry.;"Active, not recruiting; Completed; Suspended; Terminated"
+title;character;NA;NA
+start_date;date;Date of the study start, as given on registry. ClinicalTrials.gov previously allowed start dates without day, in which case date is defaulted to first of the month.;NA
+completion_date;date;Date of the study completion, as given on registry. ClinicalTrials.gov previously allowed completion dates without day, in which case date is defaulted to first of the month.;NA
+primary_completion_date;date;Date of the study primary completion, as given on registry. ClinicalTrials.gov only. ClinicalTrials.gov previously allowed primary completion dates without day, in which case date is defaulted to first of the month.;NA
+has_summary_results;logical;Whether summary results were posted on registry. ClinicalTrials.gov includes a structured summary results field.;NA
+allocation;character;Trial allocation and randomization, as given on registry.;"Non-Randomized; Randomized;"
+masking;character;Trial masking, as given on registry, ClinicalTrials.gov. None (Open Label), Single, Double, Triple, Quadruple;
+main_sponsor;character;Whether main sponsor is industry or other, as given on registry. For ClinicalTrials.gov, sourced from `agency_class` in `sponsors` datatable , and `Other` includes NIH.;
+is_multicentric;logical;Whether multiple study centers are involved, as given on registry. Derived from `has_single_facility`.;NA
+principle_investigator_1;;;
+principle_investigator_2;;;
+principle_investigator_3;;;
+study_chair_1;;;
+study_chair_2;;;
+study_director_1;;;
+study_director_2;;;
+unspecified_official;;;
+sub_investigator;;;
+registration_year;numeric;Year of the study registration. Derived from `registration_date`.;NA
+start_year;numeric;Year of the study start. Derived from `start_date`.;NA
+completion_year;numeric;Year of the study completion. Derived from `completion_date`.;NA
+primary_completion_year;numeric;Year of the study primary completion. Derived from `primary_completion_date`. ClinicalTrials.gov only.;NA
+affiliation;character;;
+initial_doublecheck;;;
+main_sample_rater;;;
+publication_type;character;Type of identified publication. Can be journal publication or dissertation.;"abstract; dissertation; journal publication"
+has_reg_pub_link;logical;NA;NA
+color_green_only;character;NA;"bronze; closed; gold; green; hybrid"
+color;character;NA;"bronze; closed; gold; green; hybrid"
+issn;character;NA;NA
+journal;character;NA;NA
+publisher;character;NA;NA
+publication_date_unpaywall;date;NA;NA
+has_followup_2y;logical;NA;NA
+has_followup_2y_pub;logical;NA;NA
+has_followup_2y_sumres;logical;NA;NA
+has_followup_5y;logical;NA;NA
+has_followup_5y_pub;logical;NA;NA
+has_followup_5y_sumres;logical;NA;NA
+is_summary_results_2y;logical;NA;NA
+is_summary_results_5y;logical;NA;NA
+is_publication_2y;logical;NA;NA
+is_publication_5y;logical;NA;NA
+has_publication;logical;NA;NA
+has_pubmed;logical;NA;NA
+has_ft;logical;Whether full text of the article was retreived.;NA
+ft_source;character;The source of the full text of the article.;"doi; pmid"
+ft_doi;logical;NA;NA
+pub_title;character;NA;NA
+journal_pubmed;character;NA;NA
+ppub_date;character;NA;NA
+epub_date;date;NA;NA
+citation;character;NA;NA
+registry;character;NA;NA
+has_trn_secondary_id;logical;Whether a trial number was detected via secondary id.;NA
+has_trn_abstract;logical;Whether a trial number was detected in the abstract.;NA
+has_trn_ft;logical;Whether a trial number was detected in the full text.;NA
+is_prospective;logical;Whether trial was prospectively registered. Derived from `study_first_submitted_date` and `start_date`. Trial is considered prospectively registered if registered in the same or previous months to start date.;NA

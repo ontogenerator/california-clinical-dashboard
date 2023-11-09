@@ -26,8 +26,8 @@ cali_umc <- vroom(here("data", "cali_dashboard_umc.csv"))
 ## Data from the prospective registration refresh
 pros_reg_data <- vroom(here("data", "processed", "cali_prospective_registration.csv"))
 
-pros_reg_data_umc <- pros_reg_data %>%
-  mutate(umc = strsplit(as.character(affiliation), ", ")) %>%
+pros_reg_data_umc <- pros_reg_data |>
+  mutate(umc = strsplit(as.character(affiliation), ", ")) |>
   tidyr::unnest(umc)
 
 ## Load functions
@@ -87,49 +87,49 @@ server <- function (input, output, session) {
     updateTabsetPanel(   
       session, "navbarTabs",
       selected = "tabUMC"
-    )}) %>% 
+    )}) |> 
     bindEvent(input$buttonUMC)
   
   observe({
     updateTabsetPanel(   
       session, "navbarTabs",
       selected = "tabAllUMCs"
-    )}) %>% 
+    )}) |> 
     bindEvent(input$buttonAllUMCs)
   
   observe({
     updateTabsetPanel(   
       session, "navbarTabs",
       selected = "tabMethods"
-    )}) %>% 
+    )}) |> 
     bindEvent(input$buttonMethods)
   
   observe({
     updateTabsetPanel(   
       session, "navbarTabs",
       selected = "tabDatasets"
-    )}) %>% 
+    )}) |> 
     bindEvent(input$buttonDatasets)
   
   observe({
     updateTabsetPanel(   
       session, "navbarTabs",
       selected = "tabMethods"
-    )}) %>% 
+    )}) |> 
     bindEvent(input$link_to_methods)
   
   observe({
     updateTabsetPanel(   
       session, "navbarTabs",
       selected = "tabMethods"
-    )}) %>% 
+    )}) |> 
     bindEvent(input$link_to_methods2)
   
   observe({
     updateTabsetPanel(   
       session, "navbarTabs",
       selected = "tabWhy"
-    )}) %>% 
+    )}) |> 
     bindEvent(input$link_to_why_these_practices)
   
   ## Dynamically generate options for UMC drop-down menu
@@ -224,16 +224,16 @@ server <- function (input, output, session) {
     
     ## Value for TRN in abstract
     
-    all_numer_trn <- cali %>%
-      filter(has_trn_abstract == TRUE) %>%
+    all_numer_trn <- cali |>
+      filter(has_trn_abstract == TRUE) |>
       nrow()
     
-    all_denom_trn <- cali %>%
+    all_denom_trn <- cali |>
       filter(
         has_publication == TRUE,
         publication_type == "journal publication",
         has_pubmed == TRUE
-      ) %>%
+      ) |>
       nrow()
     
     wellPanel(
@@ -242,7 +242,7 @@ server <- function (input, output, session) {
       fluidRow(
         column(
           col_width,
-          uiOutput("startprereg") %>% 
+          uiOutput("startprereg") |> 
             shinycssloaders::withSpinner(color = "#007265"),
         ),
         column(
@@ -252,7 +252,7 @@ server <- function (input, output, session) {
             value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
             value_text = paste0("of trials with a publication (n=",
                                 all_denom_trn, ") reported a trial registration number in the abstract"),
-            plot = plotlyOutput('plot_clinicaltrials_trn', height="300px") %>% 
+            plot = plotlyOutput('plot_clinicaltrials_trn', height="300px") |> 
               shinycssloaders::withSpinner(color = "#007265"),
             info_id = "infoTRN",
             info_title = "Reporting of Trial Registration Number in publications",
@@ -264,7 +264,7 @@ server <- function (input, output, session) {
         ),
         column(
           col_width,
-          uiOutput("startlinkage") %>%
+          uiOutput("startlinkage") |>
             shinycssloaders::withSpinner(color = "#007265"),
         )
       )
@@ -286,7 +286,7 @@ server <- function (input, output, session) {
     
    ## Value for prereg
     
-    pr_unique <- pros_reg_data %>%
+    pr_unique <- pros_reg_data |>
       filter(! is.na (start_date))
     
     pr_unique$start_year <- format(pr_unique$start_date, "%Y")
@@ -294,14 +294,14 @@ server <- function (input, output, session) {
     max_start_year <- max(pr_unique$start_year)
     
     # Filter for max start date for the pink descriptor text
-    all_numer_prereg <- pr_unique %>%
-      filter(start_year == max_start_year) %>%
-      filter(is_prospective) %>%
+    all_numer_prereg <- pr_unique |>
+      filter(start_year == max_start_year) |>
+      filter(is_prospective) |>
       nrow()
     
     # Filter for 2017 completion date for the pink descriptor text
-    all_denom_prereg <- pr_unique %>%
-      filter(start_year == max_start_year) %>%
+    all_denom_prereg <- pr_unique |>
+      filter(start_year == max_start_year) |>
       nrow()
     
     if (all_denom_prereg == 0) {
@@ -317,7 +317,7 @@ server <- function (input, output, session) {
       title = "Prospective registration",
       value = preregval,
       value_text = preregvaltext,
-      plot = plotlyOutput('plot_clinicaltrials_prereg', height="300px") %>% 
+      plot = plotlyOutput('plot_clinicaltrials_prereg', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoPreReg",
       info_title = "Prospective registration",
@@ -344,15 +344,15 @@ server <- function (input, output, session) {
     
     ## Value for linkage
     
-    link_num <- cali %>%
-      filter(has_reg_pub_link == TRUE) %>%
-      filter(publication_type == "journal publication") %>%
+    link_num <- cali |>
+      filter(has_reg_pub_link == TRUE) |>
+      filter(publication_type == "journal publication") |>
       nrow()
     
-    link_den <- cali %>%
-      filter(has_publication == TRUE) %>%
-      filter(publication_type == "journal publication") %>%
-      filter(has_pubmed == TRUE | ! is.na (doi)) %>%
+    link_den <- cali |>
+      filter(has_publication == TRUE) |>
+      filter(publication_type == "journal publication") |>
+      filter(has_pubmed == TRUE | ! is.na (doi)) |>
       nrow()
     
     linkage <- paste0(round(100*link_num/link_den), "%")
@@ -363,7 +363,7 @@ server <- function (input, output, session) {
       value = linkage,
       value_text = paste0("of trials completed in 2017 with a publication (n=",
                           link_den, ") provide a link to this publication in the registry entry"),
-      plot = plotlyOutput('plot_linkage', height="300px") %>% 
+      plot = plotlyOutput('plot_linkage', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoLinkage",
       info_title = "Publication link in registry",
@@ -394,11 +394,11 @@ server <- function (input, output, session) {
       fluidRow(
         column(
           col_width,
-          uiOutput("startsumres") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("startsumres") |>  shinycssloaders::withSpinner(color = "#007265"),
         ),
         column(
           col_width,
-          uiOutput("startreport2a") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("startreport2a") |>  shinycssloaders::withSpinner(color = "#007265"),
           selectInput(
             "startreporttype2a",
             strong("Reporting type"),
@@ -411,7 +411,7 @@ server <- function (input, output, session) {
         ),
         column(
           col_width,
-          uiOutput("startreport5a") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("startreport5a") |>  shinycssloaders::withSpinner(color = "#007265"),
           selectInput(
             "startreporttype5a",
             strong("Reporting type"),
@@ -443,14 +443,14 @@ server <- function (input, output, session) {
       first_lim_align <- "right"
     }
     
-    sumres_numer <- cali %>%
+    sumres_numer <- cali |>
       filter(
         # registry == input$startsumresregistry,
         has_summary_results == TRUE
-      ) %>%
+      ) |>
       nrow()
     
-    sumres_denom <- cali %>%
+    sumres_denom <- cali |>
        nrow()
     
     sumres_percent <- format(100*sumres_numer/sumres_denom, digits=2)
@@ -464,7 +464,7 @@ server <- function (input, output, session) {
       title = "Summary Results Reporting",
       value = sumresval,
       value_text = sumresvaltext,
-      plot = plotlyOutput('plot_clinicaltrials_sumres', height="300px") %>% 
+      plot = plotlyOutput('plot_clinicaltrials_sumres', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoSumRes",
       info_title = "Summary Results Reporting",
@@ -480,80 +480,80 @@ server <- function (input, output, session) {
   output$startreport2a <- renderUI({
     
     # Filter for last completion date for pink descriptor text
-    max_completion_year <- cali %>%
+    max_completion_year <- cali |>
       filter(
         has_followup_2y_pub & has_followup_2y_sumres
-      ) %>%
-      count(primary_completion_year) %>%
-      filter(n > 5) %>%
-      select(primary_completion_year) %>%
+      ) |>
+      count(primary_completion_year) |>
+      filter(n > 5) |>
+      select(primary_completion_year) |>
       max()
     
-    iv_data_unique <- cali %>%
+    cali_data_unique <- cali |>
       filter(primary_completion_year == max_completion_year)
     
-    all_numer_timpub <- iv_data_unique %>%
+    all_numer_timpub <- cali_data_unique |>
       filter(
         has_followup_2y_sumres & has_followup_2y_pub,
         is_summary_results_2y | is_publication_2y
-      ) %>%
+      ) |>
       nrow()
     
-    all_denom_timpub <- iv_data_unique %>%
+    all_denom_timpub <- cali_data_unique |>
       filter(
         has_followup_2y_sumres & has_followup_2y_pub
-      ) %>%
+      ) |>
       nrow()
     
     if (input$startreporttype2a == "Summary results only") {
       
       # Filter for last completion date for pink descriptor text
-      max_completion_year <- cali %>%
+      max_completion_year <- cali |>
         filter(
           has_followup_2y_sumres
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali %>%
+      cali_data_unique <- cali |>
         filter(primary_completion_year == max_completion_year)
       
-      all_numer_timpub <- iv_data_unique %>%
+      all_numer_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_sumres,
-          is_summary_results_2y) %>%
+          is_summary_results_2y) |>
         nrow()
       
-      all_denom_timpub <- iv_data_unique %>%
+      all_denom_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_sumres
-        ) %>%
+        ) |>
         nrow()
     }
     
     if (input$startreporttype2a == "Manuscript publication only") {
       
       # Filter for last completion date for pink descriptor text
-      max_completion_year <- cali %>%
+      max_completion_year <- cali |>
         filter(
           has_followup_2y_pub
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali %>%
+      cali_data_unique <- cali |>
         filter(primary_completion_year == max_completion_year)
       
-      all_numer_timpub <- iv_data_unique %>%
+      all_numer_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_pub,
-          is_publication_2y) %>%
+          is_publication_2y) |>
         nrow()
       
-      all_denom_timpub <- iv_data_unique %>%
+      all_denom_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_pub
-        ) %>%
+        ) |>
         nrow()
     }
     
@@ -572,7 +572,7 @@ server <- function (input, output, session) {
       title = "Results reporting within 2 years of trial completion (timely)",
       value = timpubval,
       value_text = timpubvaltext,
-      plot = plotlyOutput('plot_clinicaltrials_timpub_2a', height="300px") %>% 
+      plot = plotlyOutput('plot_clinicaltrials_timpub_2a', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoTimPub2",
       info_title = "Results reporting (2 years)",
@@ -587,81 +587,81 @@ server <- function (input, output, session) {
   output$startreport5a <-  renderUI({
     
     ## Filter for the last completion date for pink descriptor text
-    max_completion_year <- cali %>%
+    max_completion_year <- cali |>
       filter(
         has_followup_5y_pub & has_followup_5y_sumres
-      ) %>%
-      count(primary_completion_year) %>%
-      filter(n > 5) %>%
-      select(primary_completion_year) %>%
+      ) |>
+      count(primary_completion_year) |>
+      filter(n > 5) |>
+      select(primary_completion_year) |>
       max()
     
-    iv_data_unique <- cali %>%
+    cali_data_unique <- cali |>
       filter(primary_completion_year == max_completion_year)
     
-    all_numer_timpub5a <- iv_data_unique %>%
+    all_numer_timpub5a <- cali_data_unique |>
       filter(
         has_followup_5y_sumres & has_followup_5y_pub,
         is_summary_results_5y | is_publication_5y
-      ) %>%
+      ) |>
       nrow()
     
-    all_denom_timpub5a <- iv_data_unique %>%
+    all_denom_timpub5a <- cali_data_unique |>
       filter(
         has_followup_5y_sumres & has_followup_5y_pub
-      ) %>%
+      ) |>
       nrow()
     
     if (input$startreporttype5a == "Summary results only") {
       
       ## Filter for the last completion date for pink descriptor text
-      max_completion_year <- cali %>%
+      max_completion_year <- cali |>
         filter(
           has_followup_5y_sumres
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali %>%
+      cali_data_unique <- cali |>
         filter(primary_completion_year == max_completion_year)
       
-      all_numer_timpub5a <- iv_data_unique %>%
+      all_numer_timpub5a <- cali_data_unique |>
         filter(
           has_followup_5y_sumres,
           is_summary_results_5y
-        ) %>%
+        ) |>
         nrow()
       
-      all_denom_timpub5a <- iv_data_unique %>%
+      all_denom_timpub5a <- cali_data_unique |>
         filter(
           has_followup_5y_sumres
-        ) %>%
+        ) |>
         nrow()
     }
     
     if (input$startreporttype5a == "Manuscript publication only") {
       
       ## Filter for the last completion date for pink descriptor text
-      max_completion_year <- cali %>%
+      max_completion_year <- cali |>
         filter(
           has_followup_5y_pub
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali %>%
+      cali_data_unique <- cali |>
         filter(primary_completion_year == max_completion_year)
       
-      all_numer_timpub5a <- iv_data_unique %>%
+      all_numer_timpub5a <- cali_data_unique |>
         filter(
           has_followup_5y_pub,
-          is_publication_5y) %>%
+          is_publication_5y) |>
         nrow()
       
-      all_denom_timpub5a <- iv_data_unique %>%
+      all_denom_timpub5a <- cali_data_unique |>
         filter(
           has_followup_5y_pub
-        ) %>%
+        ) |>
         nrow()
     }
     
@@ -679,7 +679,7 @@ server <- function (input, output, session) {
       title = "Results reporting within 5 years of trial completion",
       value = timpubval5a,
       value_text = timpubvaltext5a,
-      plot = plotlyOutput('plot_clinicaltrials_timpub_5a', height="300px") %>% 
+      plot = plotlyOutput('plot_clinicaltrials_timpub_5a', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoTimPub5",
       info_title = "Results reporting (5 years)",
@@ -710,55 +710,30 @@ server <- function (input, output, session) {
     ## Value for Open Access
     
     #Create set for OA percentage plot
-    oa_set <- cali %>%
+    oa_set <- cali |>
       filter(
         has_publication == TRUE,
         publication_type == "journal publication",
         ! is.na(doi),
         ! is.na(publication_date_unpaywall)
-      ) %>%
+      ) |>
       distinct(doi, .keep_all=TRUE)
     
-    oa_set$oa_year <- oa_set$publication_date_unpaywall %>%
+    oa_set$oa_year <- oa_set$publication_date_unpaywall |>
       format("%Y")
     
-    all_numer_oa <- oa_set %>%
+    all_numer_oa <- oa_set |>
       filter(
-        color == "gold" | color == "green" | color == "hybrid",
+        color_green_only == "gold" | color_green_only == "green" | color_green_only == "hybrid",
         oa_year == reference_year - 1
-      ) %>%
+      ) |>
       nrow()
     
     # Keep pubs with NA color for now 
-    all_denom_oa <- oa_set %>%
-      filter(oa_year == reference_year - 1) %>%
+    all_denom_oa <- oa_set |>
+      filter(oa_year == reference_year - 1) |>
       nrow()
-    
-    #Create set for Green OA percentage plot
-    oa_set_green <- cali %>%
-      filter(
-        has_publication == TRUE,
-        publication_type == "journal publication",
-        ! is.na(doi),
-        ! is.na(publication_date_unpaywall),
-        # is_closed_archivable == TRUE | color_green_only == "green"
-      ) %>%
-      distinct(doi, .keep_all=TRUE)
-    
-    oa_set_green$oa_year <- oa_set_green$publication_date_unpaywall %>%
-      format("%Y")
-    
-    oa_set_green <- oa_set_green %>%
-      filter(oa_year == reference_year - 1)
-    
-    denom_greenoa <- oa_set_green %>%
-      nrow()
-    
-    numer_greenoa <- oa_set_green %>%
-      filter(
-        color_green_only == "green"
-      ) %>%
-      nrow()
+  
     
     wellPanel(
       style="padding-top: 0px; padding-bottom: 0px;",
@@ -779,7 +754,7 @@ server <- function (input, output, session) {
             value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
             value_text = paste0("of publications from ", reference_year - 1,
                                 " (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
-            plot = plotlyOutput('plot_opensci_oa', height="300px") %>% 
+            plot = plotlyOutput('plot_opensci_oa', height="300px") |> 
               shinycssloaders::withSpinner(color = "#007265"),
             info_id = "infoOpenAccess",
             info_title = "Open Access",
@@ -833,18 +808,18 @@ server <- function (input, output, session) {
       
       ## Value for TRN in abstract
       
-      all_numer_trn <- cali_umc %>%
-        filter(umc == input$selectUMC) %>%
-        filter(has_trn_abstract == TRUE) %>%
+      all_numer_trn <- cali_umc |>
+        filter(umc == input$selectUMC) |>
+        filter(has_trn_abstract == TRUE) |>
         nrow()
       
-      all_denom_trn <- cali_umc %>%
-        filter(umc == input$selectUMC) %>%
+      all_denom_trn <- cali_umc |>
+        filter(umc == input$selectUMC) |>
         filter(
           has_publication == TRUE,
           publication_type == "journal publication",
           has_pubmed == TRUE
-        ) %>%
+        ) |>
         nrow()
       
       
@@ -855,7 +830,7 @@ server <- function (input, output, session) {
         fluidRow(
           column(
             col_width,
-            uiOutput("oneumcprereg") %>%  shinycssloaders::withSpinner(color = "#007265"),
+            uiOutput("oneumcprereg") |>  shinycssloaders::withSpinner(color = "#007265"),
           ),
           column(
             col_width,
@@ -864,7 +839,7 @@ server <- function (input, output, session) {
               value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
               value_text = paste0("of trials with a publication (n=",
                                   all_denom_trn, ") reported a trial registration number in the abstract"),
-              plot = plotlyOutput('umc_plot_clinicaltrials_trn', height="300px") %>% 
+              plot = plotlyOutput('umc_plot_clinicaltrials_trn', height="300px") |> 
                 shinycssloaders::withSpinner(color = "#007265"),
               info_id = "UMCinfoTRN",
               info_title = "Reporting of Trial Registration Number in publications",
@@ -876,7 +851,7 @@ server <- function (input, output, session) {
           ),
           column(
             col_width,
-            uiOutput("oneumclinkage") %>%  shinycssloaders::withSpinner(color = "#007265"),
+            uiOutput("oneumclinkage") |>  shinycssloaders::withSpinner(color = "#007265"),
           )
           
         )
@@ -902,22 +877,22 @@ server <- function (input, output, session) {
     
     ## Value for prereg
     
-    pr_unique <- pros_reg_data_umc %>%
+    pr_unique <- pros_reg_data_umc |>
       filter(umc == input$selectUMC,
-             ! is.na (start_date)) %>%
+             ! is.na (start_date)) |>
       mutate(start_year = format(start_date, "%Y"))
     
     max_start_year <- max(pr_unique$start_year)
     
     # Filter for latest completion date for the pink descriptor text
-    all_numer_prereg <- pr_unique %>%
-      filter(start_year == max_start_year) %>%
-      filter(is_prospective) %>%
+    all_numer_prereg <- pr_unique |>
+      filter(start_year == max_start_year) |>
+      filter(is_prospective) |>
       nrow()
     
     # Filter for latest completion date for the pink descriptor text
-    all_denom_prereg <- pr_unique %>%
-      filter(start_year == max_start_year) %>%
+    all_denom_prereg <- pr_unique |>
+      filter(start_year == max_start_year) |>
       nrow()
     
     if (all_denom_prereg == 0) {
@@ -933,7 +908,7 @@ server <- function (input, output, session) {
       title = "Prospective registration",
       value = preregval,
       value_text = preregvaltext,
-      plot = plotlyOutput('umc_plot_clinicaltrials_prereg', height="300px") %>%
+      plot = plotlyOutput('umc_plot_clinicaltrials_prereg', height="300px") |>
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "UMCinfoPreReg",
       info_title = "Prospective registration",
@@ -961,17 +936,17 @@ server <- function (input, output, session) {
     
     ## Value for linkage
     
-    link_num <- cali_umc %>%
-      filter(umc == input$selectUMC) %>%
-      filter(has_reg_pub_link == TRUE) %>%
-      filter(publication_type == "journal publication") %>%
+    link_num <- cali_umc |>
+      filter(umc == input$selectUMC) |>
+      filter(has_reg_pub_link == TRUE) |>
+      filter(publication_type == "journal publication") |>
       nrow()
     
-    link_den <- cali_umc %>%
-      filter(umc == input$selectUMC) %>%
-      filter(has_publication == TRUE) %>%
-      filter(publication_type == "journal publication") %>%
-      filter (has_pubmed == TRUE | ! is.na (doi)) %>%
+    link_den <- cali_umc |>
+      filter(umc == input$selectUMC) |>
+      filter(has_publication == TRUE) |>
+      filter(publication_type == "journal publication") |>
+      filter (has_pubmed == TRUE | ! is.na (doi)) |>
       nrow()
     
     linkage <- paste0(round(100*link_num/link_den), "%")
@@ -980,7 +955,7 @@ server <- function (input, output, session) {
       title = "Publication link in registry",
       value = linkage,
       value_text = paste0("of trials completed in 2017 with a publication (n=", link_den, ") provide a link to this publication in the registry entry"),
-      plot = plotlyOutput('umc_plot_linkage', height="300px") %>% 
+      plot = plotlyOutput('umc_plot_linkage', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "UMCinfoLinkage",
       info_title = "Publication link in registry",
@@ -1017,12 +992,12 @@ server <- function (input, output, session) {
         fluidRow(
           column(
             col_width,
-            uiOutput("oneumcsumres") %>% 
+            uiOutput("oneumcsumres") |> 
               shinycssloaders::withSpinner(color = "#007265"),
           ),
           column(
             col_width,
-            uiOutput("report2a") %>%  shinycssloaders::withSpinner(color = "#007265"),
+            uiOutput("report2a") |>  shinycssloaders::withSpinner(color = "#007265"),
             selectInput(
               "reporttype2a",
               strong("Reporting type"),
@@ -1035,7 +1010,7 @@ server <- function (input, output, session) {
           ),
           column(
             col_width,
-            uiOutput("report5a") %>%  shinycssloaders::withSpinner(color = "#007265"),
+            uiOutput("report5a") |>  shinycssloaders::withSpinner(color = "#007265"),
             selectInput(
               "reporttype5a",
               strong("Reporting type"),
@@ -1070,17 +1045,17 @@ server <- function (input, output, session) {
     
    ## Summary results for CT dot gov
     
-    sumres_numer <- cali_umc %>%
+    sumres_numer <- cali_umc |>
       filter(
         umc == input$selectUMC,
         has_summary_results == TRUE
-      ) %>%
+      ) |>
       nrow()
     
-    sumres_denom <- cali_umc %>%
+    sumres_denom <- cali_umc |>
       filter(
         umc == input$selectUMC,
-      ) %>%
+      ) |>
       nrow()
     
     sumres_percent <- format(100*sumres_numer/sumres_denom, digits=2)
@@ -1095,7 +1070,7 @@ server <- function (input, output, session) {
       title = "Summary Results Reporting",
       value = sumresval,
       value_text = sumresvaltext,
-      plot = plotlyOutput('umc_plot_clinicaltrials_sumres', height="300px") %>% 
+      plot = plotlyOutput('umc_plot_clinicaltrials_sumres', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "UMCinfoSumRes",
       info_title = "Summary Results Reporting",
@@ -1112,81 +1087,81 @@ server <- function (input, output, session) {
   output$report2a <- renderUI({
     
     # Filter for the last completion date for the pink descriptor text
-    max_completion_year <- cali_umc %>%
+    max_completion_year <- cali_umc |>
       filter(umc == input$selectUMC,
              has_followup_2y_pub & has_followup_2y_sumres
-      ) %>%
-      select(primary_completion_year) %>%
+      ) |>
+      select(primary_completion_year) |>
       max()
     
-    iv_data_unique <- cali_umc %>%
-      filter(primary_completion_year == max_completion_year) %>%
+    cali_data_unique <- cali_umc |>
+      filter(primary_completion_year == max_completion_year) |>
       filter(umc == input$selectUMC)
     
-    all_numer_timpub <- iv_data_unique %>%
+    all_numer_timpub <- cali_data_unique |>
       filter(
         has_followup_2y_pub & has_followup_2y_sumres,
         is_publication_2y | is_summary_results_2y
-      ) %>%
+      ) |>
       nrow()
     
-    all_denom_timpub <- iv_data_unique %>%
+    all_denom_timpub <- cali_data_unique |>
       filter(
         has_followup_2y_pub & has_followup_2y_sumres
-      ) %>%
+      ) |>
       nrow()
     
     if (input$reporttype2a == "Summary results only") {
       
       # Filter for the last completion date for the pink descriptor text
-      max_completion_year <- cali_umc %>%
+      max_completion_year <- cali_umc |>
         filter(umc == input$selectUMC,
                has_followup_2y_sumres
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali_umc %>%
-        filter(primary_completion_year == max_completion_year) %>%
+      cali_data_unique <- cali_umc |>
+        filter(primary_completion_year == max_completion_year) |>
         filter(umc == input$selectUMC)
       
-      all_numer_timpub <- iv_data_unique %>%
+      all_numer_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_sumres,
-          is_summary_results_2y) %>%
+          is_summary_results_2y) |>
         nrow()
       
-      all_denom_timpub <- iv_data_unique %>%
+      all_denom_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_sumres
-        ) %>%
+        ) |>
         nrow()
     }
     
     if (input$reporttype2a == "Manuscript publication only") {
       
       # Filter for the last completion date for the pink descriptor text
-      max_completion_year <- cali_umc %>%
+      max_completion_year <- cali_umc |>
         filter(umc == input$selectUMC,
                has_followup_2y_pub
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali_umc %>%
-        filter(primary_completion_year == max_completion_year) %>%
+      cali_data_unique <- cali_umc |>
+        filter(primary_completion_year == max_completion_year) |>
         filter(umc == input$selectUMC)
       
-      all_numer_timpub <- iv_data_unique %>%
+      all_numer_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_pub,
-          is_publication_2y) %>%
+          is_publication_2y) |>
         nrow()
       
-      all_denom_timpub <- iv_data_unique %>%
+      all_denom_timpub <- cali_data_unique |>
         filter(
           has_followup_2y_pub
-        ) %>%
+        ) |>
         nrow()
     }
     
@@ -1204,7 +1179,7 @@ server <- function (input, output, session) {
       title = "Results reporting within 2 years of trial completion (timely)",
       value = timpubval,
       value_text = timpubvaltext,
-      plot = plotlyOutput('umc_plot_clinicaltrials_timpub_2a', height="300px") %>% 
+      plot = plotlyOutput('umc_plot_clinicaltrials_timpub_2a', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "UMCinfoTimPub2",
       info_title = "Results reporting (2 years)",
@@ -1219,79 +1194,79 @@ server <- function (input, output, session) {
   output$report5a <- renderUI({
     
     # Filter for the last completion date for the pink descriptor text
-    max_completion_year <- cali_umc %>%
+    max_completion_year <- cali_umc |>
       filter(umc == input$selectUMC,
              has_followup_5y_pub & has_followup_5y_sumres
-      ) %>%
-      select(primary_completion_year) %>%
+      ) |>
+      select(primary_completion_year) |>
       max()
     
-    iv_data_unique <- cali_umc %>%
-      filter(primary_completion_year == max_completion_year) %>%
+    cali_data_unique <- cali_umc |>
+      filter(primary_completion_year == max_completion_year) |>
       filter(umc == input$selectUMC)
     
-    all_numer_timpub <- iv_data_unique %>%
+    all_numer_timpub <- cali_data_unique |>
       filter(
         has_followup_5y_sumres & has_followup_5y_pub,
         is_summary_results_5y | is_publication_5y
-      ) %>%
+      ) |>
       nrow()
     
-    all_denom_timpub <- iv_data_unique %>%
+    all_denom_timpub <- cali_data_unique |>
       filter(
         has_followup_5y_sumres & has_followup_5y_pub
-      ) %>%
+      ) |>
       nrow()
     
     if (input$reporttype5a == "Summary results only") {
       
-      max_completion_year <- cali_umc %>%
+      max_completion_year <- cali_umc |>
         filter(umc == input$selectUMC,
                has_followup_5y_sumres
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali_umc %>%
-        filter(primary_completion_year == max_completion_year) %>%
+      cali_data_unique <- cali_umc |>
+        filter(primary_completion_year == max_completion_year) |>
         filter(umc == input$selectUMC)
       
-      all_numer_timpub <- iv_data_unique %>%
+      all_numer_timpub <- cali_data_unique |>
         filter(
           has_followup_5y_sumres,
-          is_summary_results_5y) %>%
+          is_summary_results_5y) |>
         nrow()
       
-      all_denom_timpub <- iv_data_unique %>%
+      all_denom_timpub <- cali_data_unique |>
         filter(
           has_followup_5y_sumres
-        ) %>%
+        ) |>
         nrow()
     }
     
     if (input$reporttype5a == "Manuscript publication only") {
       
-      max_completion_year <- cali_umc %>%
+      max_completion_year <- cali_umc |>
         filter(umc == input$selectUMC,
                has_followup_5y_pub
-        ) %>%
-        select(primary_completion_year) %>%
+        ) |>
+        select(primary_completion_year) |>
         max()
       
-      iv_data_unique <- cali_umc %>%
-        filter(primary_completion_year == max_completion_year) %>%
+      cali_data_unique <- cali_umc |>
+        filter(primary_completion_year == max_completion_year) |>
         filter(umc == input$selectUMC)
       
-      all_numer_timpub <- iv_data_unique %>%
+      all_numer_timpub <- cali_data_unique |>
         filter(
           has_followup_5y_pub,
-          is_publication_5y) %>%
+          is_publication_5y) |>
         nrow()
       
-      all_denom_timpub <- iv_data_unique %>%
+      all_denom_timpub <- cali_data_unique |>
         filter(
           has_followup_5y_pub
-        ) %>% nrow()
+        ) |> nrow()
     }
     
     if (all_denom_timpub == 0) {
@@ -1308,7 +1283,7 @@ server <- function (input, output, session) {
       title = "Results reporting within 5 years of trial completion",
       value = timpubval,
       value_text = timpubvaltext,
-      plot = plotlyOutput('umc_plot_clinicaltrials_timpub_5a', height="300px") %>% 
+      plot = plotlyOutput('umc_plot_clinicaltrials_timpub_5a', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "UMCinfoTimPub5",
       info_title = "Results reporting (5 years)",
@@ -1343,7 +1318,7 @@ server <- function (input, output, session) {
       ## Value for Open Access
       
       ## Create set for OA percentage plot
-      oa_set <- cali_umc %>%
+      oa_set <- cali_umc |>
         filter(
           has_publication == TRUE,
           publication_type == "journal publication",
@@ -1351,82 +1326,82 @@ server <- function (input, output, session) {
           ! is.na(publication_date_unpaywall)
         )
       
-      all_numer_oa <- oa_set %>%
+      all_numer_oa <- oa_set |>
         filter(
           umc == input$selectUMC,
-          color == "gold" | color == "green" | color == "hybrid"
-        ) %>%
-        distinct(doi, .keep_all = TRUE) %>%
+          color_green_only == "gold" | color_green_only == "green" | color_green_only == "hybrid"
+        ) |>
+        distinct(doi, .keep_all = TRUE) |>
         nrow()
       
-      all_denom_oa <- oa_set %>%
+      all_denom_oa <- oa_set |>
         filter(
           umc == input$selectUMC
-        ) %>%
-        distinct(doi, .keep_all = TRUE) %>%
+        ) |>
+        distinct(doi, .keep_all = TRUE) |>
         nrow()
       
       ## Date range for OA
-      min_oa <- oa_set %>%
-        filter(umc == input$selectUMC) %>%
-        distinct(doi, .keep_all = TRUE) %>%
-        select(publication_date_unpaywall) %>%
-        arrange(publication_date_unpaywall) %>%
-        slice_head() %>%
-        pull() %>%
+      min_oa <- oa_set |>
+        filter(umc == input$selectUMC) |>
+        distinct(doi, .keep_all = TRUE) |>
+        select(publication_date_unpaywall) |>
+        arrange(publication_date_unpaywall) |>
+        slice_head() |>
+        pull() |>
         format("%Y")
       
-      max_oa <- oa_set %>%
-        filter(umc == input$selectUMC) %>%
-        distinct(doi, .keep_all = TRUE) %>%
-        select(publication_date_unpaywall) %>%
-        arrange(publication_date_unpaywall) %>%
-        slice_tail() %>%
-        pull() %>%
+      max_oa <- oa_set |>
+        filter(umc == input$selectUMC) |>
+        distinct(doi, .keep_all = TRUE) |>
+        select(publication_date_unpaywall) |>
+        arrange(publication_date_unpaywall) |>
+        slice_tail() |>
+        pull() |>
         format("%Y")
       
       ## Create set for Green OA percentage plot
-      oa_set_green <- cali_umc %>%
-        filter(
-          has_publication == TRUE,
-          publication_type == "journal publication",
-          ! is.na(doi),
-          ! is.na(publication_date_unpaywall),
-        )
+      # oa_set_green <- cali_umc |>
+      #   filter(
+      #     has_publication == TRUE,
+      #     publication_type == "journal publication",
+      #     ! is.na(doi),
+      #     ! is.na(publication_date_unpaywall),
+      #   )
       
-      denom_greenoa <- oa_set_green %>%
-        filter(
-          umc == input$selectUMC
-        ) %>%
-        distinct(doi, .keep_all = TRUE) %>%
-        nrow()
-      
-      numer_greenoa <- oa_set_green %>%
-        filter(
-          umc == input$selectUMC,
-          color_green_only == "green"
-        ) %>%
-        distinct(doi, .keep_all = TRUE) %>%
-        nrow()
+      # denom_greenoa <- oa_set_green |>
+      #   filter(
+      #     umc == input$selectUMC
+      #   ) |>
+      #   distinct(doi, .keep_all = TRUE) |>
+      #   nrow()
+      # 
+      # numer_greenoa <- oa_set_green |>
+      #   filter(
+      #     umc == input$selectUMC,
+      #     color_green_only == "green"
+      #   ) |>
+      #   distinct(doi, .keep_all = TRUE) |>
+      #   nrow()
       
       ## Date range for Green OA
-      min_oa_green <- oa_set_green %>%
-        filter(umc == input$selectUMC) %>%
-        distinct(doi, .keep_all = TRUE) %>%
-        select(publication_date_unpaywall) %>%
-        arrange(publication_date_unpaywall) %>%
-        slice_head() %>%
-        pull() %>%
-        format("%Y")
-      
-      max_oa_green <- oa_set_green %>%
-        filter(umc == input$selectUMC) %>%
-        distinct(doi, .keep_all = TRUE) %>%
-        select(publication_date_unpaywall) %>%
-        arrange(publication_date_unpaywall) %>%
-        slice_tail() %>%
-        pull() %>%
-        format("%Y")
+      # min_oa_green <- oa_set_green |>
+      #   filter(umc == input$selectUMC) |>
+      #   distinct(doi, .keep_all = TRUE) |>
+      #   select(publication_date_unpaywall) |>
+      #   arrange(publication_date_unpaywall) |>
+      #   slice_head() |>
+      #   pull() |>
+      #   format("%Y")
+      # 
+      # max_oa_green <- oa_set_green |>
+      #   filter(umc == input$selectUMC) |>
+      #   distinct(doi, .keep_all = TRUE) |>
+      #   select(publication_date_unpaywall) |>
+      #   arrange(publication_date_unpaywall) |>
+      #   slice_tail() |>
+      #   pull() |>
+      #   format("%Y")
       
       wellPanel(
         style="padding-top: 0px; padding-bottom: 0px;",
@@ -1446,7 +1421,7 @@ server <- function (input, output, session) {
               title = "Open Access (OA)",
               value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
               value_text = paste0("of publications published between ", min_oa, " and ", max_oa, " (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
-              plot = plotlyOutput('umc_plot_opensci_oa', height="300px") %>% 
+              plot = plotlyOutput('umc_plot_opensci_oa', height="300px") |> 
                 shinycssloaders::withSpinner(color = "#007265"),
               info_id = "UMCinfoOpenAccess",
               info_title = "Open Access",
@@ -1492,13 +1467,13 @@ server <- function (input, output, session) {
       fluidRow(
         column(
           12,
-          uiOutput("prereg_all") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("prereg_all") |>  shinycssloaders::withSpinner(color = "#007265"),
         )
       ),
       fluidRow(
         column(
           12,
-          uiOutput("trn_in_pubs_all") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("trn_in_pubs_all") |>  shinycssloaders::withSpinner(color = "#007265"),
           selectInput(
             "allumc_trnpub",
             strong("Location of reported trial registration number"),
@@ -1514,7 +1489,7 @@ server <- function (input, output, session) {
       fluidRow(
         column(
           12,
-          uiOutput("allumclinkage") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("allumclinkage") |>  shinycssloaders::withSpinner(color = "#007265"),
         )
       )
     )
@@ -1526,22 +1501,22 @@ server <- function (input, output, session) {
     ## Value for linkage
     
 
-    all_numer_link <- cali %>%
-      filter(has_reg_pub_link == TRUE) %>%
-      filter(publication_type == "journal publication") %>%
+    all_numer_link <- cali |>
+      filter(has_reg_pub_link == TRUE) |>
+      filter(publication_type == "journal publication") |>
       nrow()
     
-    all_denom_link <- cali %>%
-      filter(has_publication == TRUE) %>%
-      filter(publication_type == "journal publication") %>%
-      filter(has_pubmed == TRUE | ! is.na(doi)) %>%
+    all_denom_link <- cali |>
+      filter(has_publication == TRUE) |>
+      filter(publication_type == "journal publication") |>
+      filter(has_pubmed == TRUE | ! is.na(doi)) |>
       nrow()
     
     metric_box(
       title = "Publication link in registry",
       value = paste0(round(100*all_numer_link/all_denom_link), "%"),
       value_text = "of trials with a publication provide a link to this publication in the registry entry",
-      plot = plotlyOutput('plot_allumc_linkage', height="300px") %>% 
+      plot = plotlyOutput('plot_allumc_linkage', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCLinkage",
       info_title = "Publication link in registry (All Universities)",
@@ -1559,13 +1534,13 @@ server <- function (input, output, session) {
     
     ## Summary results for CT dot gov
     
-    sumres_numer <- cali_umc %>%
+    sumres_numer <- cali_umc |>
       filter(
         has_summary_results == TRUE
-      ) %>%
+      ) |>
       nrow()
     
-    sumres_denom <- cali_umc %>%
+    sumres_denom <- cali_umc |>
       nrow()
     
     sumres_percent <- 100*sumres_numer/sumres_denom
@@ -1576,7 +1551,7 @@ server <- function (input, output, session) {
       title = "Summary Results Reporting",
       value = paste0(round(sumres_percent), "%"),
       value_text = sumresvaltext,
-      plot = plotlyOutput('plot_allumc_clinicaltrials_sumres', height="300px") %>% 
+      plot = plotlyOutput('plot_allumc_clinicaltrials_sumres', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCSumRes",
       info_title = "Summary results reporting (All Universities)",
@@ -1592,12 +1567,12 @@ server <- function (input, output, session) {
     
     ## Value for prereg
     
-    all_numer_prereg <- pros_reg_data %>%
-      filter(is_prospective == TRUE) %>%
+    all_numer_prereg <- pros_reg_data |>
+      filter(is_prospective == TRUE) |>
       nrow()
     
-    all_denom_prereg <- pros_reg_data %>%
-      filter(! is.na(start_date)) %>%
+    all_denom_prereg <- pros_reg_data |>
+      filter(! is.na(start_date)) |>
       nrow()
     
    
@@ -1606,7 +1581,7 @@ server <- function (input, output, session) {
       title = "Prospective registration",
       value = paste0(round(100*all_numer_prereg/all_denom_prereg), "%"),
       value_text = paste("of clinical trials registered on ClinicalTrials.gov  were prospectively registered"),
-      plot = plotlyOutput('plot_allumc_clinicaltrials_prereg', height="300px") %>% 
+      plot = plotlyOutput('plot_allumc_clinicaltrials_prereg', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCPreReg",
       info_title = "Prospective registration (All Universities)",
@@ -1623,15 +1598,15 @@ server <- function (input, output, session) {
     
     if (input$allumc_trnpub == "In abstract") {
       
-      all_numer_trn <- cali %>%
-        filter(has_trn_abstract == TRUE) %>%
+      all_numer_trn <- cali |>
+        filter(has_trn_abstract == TRUE) |>
         nrow()
       
-      all_denom_trn <- cali %>%
+      all_denom_trn <- cali |>
         filter(
           has_publication == TRUE,
           publication_type == "journal publication",
-          has_pubmed == TRUE) %>%
+          has_pubmed == TRUE) |>
         nrow()
       
       all_trn_value_text <- "of trials with a publication reported a trial registration number in the abstract"
@@ -1640,17 +1615,17 @@ server <- function (input, output, session) {
     
     if (input$allumc_trnpub == "In full-text") {
       
-      all_numer_trn <- cali %>%
-        filter(has_trn_ft == TRUE) %>%
+      all_numer_trn <- cali |>
+        filter(has_trn_ft == TRUE) |>
         nrow()
       
-      all_denom_trn <- cali %>%
+      all_denom_trn <- cali |>
         filter(
           has_publication == TRUE,
           publication_type == "journal publication",
           has_ft,
           ! is.na(has_trn_ft)
-        ) %>%
+        ) |>
         nrow()
       
       all_trn_value_text <- "of trials with a publication reported a trial registration number in the full-text"
@@ -1659,19 +1634,19 @@ server <- function (input, output, session) {
     
     if (input$allumc_trnpub == "In abstract or full-text") {
       
-      all_numer_trn <- cali %>%
+      all_numer_trn <- cali |>
         filter(
           has_trn_abstract == TRUE | has_trn_ft == TRUE
-        ) %>%
+        ) |>
         nrow()
       
-      all_denom_trn <- cali %>%
+      all_denom_trn <- cali |>
         filter(
           has_publication == TRUE,
           publication_type == "journal publication",
           has_ft | has_pubmed,
           ! is.na(has_trn_ft) | ! is.na(has_trn_abstract)
-        ) %>%
+        ) |>
         nrow()
       
       all_trn_value_text <- "of trials with a publication reported a trial registration number in the abstract or the full-text"
@@ -1680,19 +1655,19 @@ server <- function (input, output, session) {
     
     if (input$allumc_trnpub == "In abstract and full-text") {
       
-      all_numer_trn <- cali %>%
+      all_numer_trn <- cali |>
         filter(
           has_trn_abstract == TRUE & has_trn_ft == TRUE
-        ) %>%
+        ) |>
         nrow()
       
-      all_denom_trn <- cali %>%
+      all_denom_trn <- cali |>
         filter(
           has_publication == TRUE,
           publication_type == "journal publication",
           has_ft | has_pubmed,
           ! is.na(has_trn_ft) & ! is.na(has_trn_abstract)
-        ) %>%
+        ) |>
         nrow()
       
       all_trn_value_text <- "of trials with a publication reported a trial registration number in the abstract or the full-text"
@@ -1703,7 +1678,7 @@ server <- function (input, output, session) {
       title = "Reporting of Trial Registration Number in publications",
       value = paste0(round(100*all_numer_trn/all_denom_trn), "%"),
       value_text = all_trn_value_text,
-      plot = plotlyOutput('plot_allumc_clinicaltrials_trn', height="300px") %>% 
+      plot = plotlyOutput('plot_allumc_clinicaltrials_trn', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTRN",
       info_title = "TRN reporting (All Universities)",
@@ -1724,14 +1699,14 @@ server <- function (input, output, session) {
       fluidRow(
         column(
           12,
-          uiOutput("allumcsumres") %>% 
+          uiOutput("allumcsumres") |> 
             shinycssloaders::withSpinner(color = "#007265"),
         )
       ),
       fluidRow(
         column(
           12,
-          uiOutput("allumc_2a_pub") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("allumc_2a_pub") |>  shinycssloaders::withSpinner(color = "#007265"),
           selectInput(
             "allumcreporttype2a",
             strong("Reporting type"),
@@ -1746,7 +1721,7 @@ server <- function (input, output, session) {
       fluidRow(
         column(
           12,
-          uiOutput("allumc_5a_pub") %>%  shinycssloaders::withSpinner(color = "#007265"),
+          uiOutput("allumc_5a_pub") |>  shinycssloaders::withSpinner(color = "#007265"),
           selectInput(
             "allumcreporttype5a",
             strong("Reporting type"),
@@ -1768,48 +1743,48 @@ server <- function (input, output, session) {
     
     ## Value for timely pub 2a
     
-    all_numer_timpub <- cali %>%
+    all_numer_timpub <- cali |>
       filter(
         has_followup_2y_pub & has_followup_2y_sumres,
         is_publication_2y | is_summary_results_2y
-      ) %>%
+      ) |>
       nrow()
     
-    all_denom_timpub <- cali %>%
+    all_denom_timpub <- cali |>
       filter(
         has_followup_2y_pub & has_followup_2y_sumres
-      ) %>%
+      ) |>
       nrow()
     
     if (input$allumcreporttype2a == "Summary results only") {
       
-      all_numer_timpub <- cali %>%
+      all_numer_timpub <- cali |>
         filter(
           has_followup_2y_sumres,
           is_summary_results_2y
-        ) %>%
+        ) |>
         nrow()
       
-      all_denom_timpub <- cali %>%
+      all_denom_timpub <- cali |>
         filter(
           has_followup_2y_sumres
-        ) %>%
+        ) |>
         nrow()
     }
     
     if (input$allumcreporttype2a == "Manuscript publication only") {
       
-      all_numer_timpub <- cali %>%
+      all_numer_timpub <- cali |>
         filter(
           has_followup_2y_pub,
           is_publication_2y
-        ) %>%
+        ) |>
         nrow()
       
-      all_denom_timpub <- cali %>%
+      all_denom_timpub <- cali |>
         filter(
           has_followup_2y_pub
-        ) %>%
+        ) |>
         nrow()
     }
     
@@ -1817,7 +1792,7 @@ server <- function (input, output, session) {
       title = "Results reporting within 2 years of trial completion (timely)",
       value = paste0(round(100*all_numer_timpub/all_denom_timpub), "%"),
       value_text = "of clinical trials with the appropriate follow-up period reported results within 2 years",
-      plot = plotlyOutput('plot_allumc_clinicaltrials_timpub', height="300px") %>% 
+      plot = plotlyOutput('plot_allumc_clinicaltrials_timpub', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTimPub",
       info_title = "Results reporting (2 years) (All Universities)",
@@ -1834,48 +1809,48 @@ server <- function (input, output, session) {
     
     ## Value for timely pub 5a
     
-    all_numer_timpub5a <- cali %>%
+    all_numer_timpub5a <- cali |>
       filter(
         has_followup_5y_pub & has_followup_5y_sumres,
         is_publication_5y | is_summary_results_5y
-      ) %>%
+      ) |>
       nrow()
     
-    all_denom_timpub5a <- cali %>%
+    all_denom_timpub5a <- cali |>
       filter(
         has_followup_5y_pub & has_followup_5y_sumres
-      ) %>%
+      ) |>
       nrow()
     
     if (input$allumcreporttype5a == "Summary results only") {
       
-      all_numer_timpub5a <- cali %>%
+      all_numer_timpub5a <- cali |>
         filter(
           has_followup_5y_sumres,
           is_summary_results_5y
-        ) %>%
+        ) |>
         nrow()
       
-      all_denom_timpub5a <- cali %>%
+      all_denom_timpub5a <- cali |>
         filter(
           has_followup_5y_sumres
-        ) %>%
+        ) |>
         nrow()
     }
     
     if (input$allumcreporttype5a == "Manuscript publication only") {
       
-      all_numer_timpub5a <- cali %>%
+      all_numer_timpub5a <- cali |>
         filter(
           has_followup_5y_pub,
           is_publication_5y
-        ) %>%
+        ) |>
         nrow()
       
-      all_denom_timpub5a <- cali %>%
+      all_denom_timpub5a <- cali |>
         filter(
           has_followup_5y_pub
-        ) %>%
+        ) |>
         nrow()
     }
     
@@ -1883,7 +1858,7 @@ server <- function (input, output, session) {
       title = "Results reporting within 5 years of trial completion",
       value = paste0(round(100*all_numer_timpub5a/all_denom_timpub5a), "%"),
       value_text = "of clinical trials with the appropriate follow-up period reported results within 5 years",
-      plot = plotlyOutput('plot_allumc_timpub_5a', height="300px") %>% 
+      plot = plotlyOutput('plot_allumc_timpub_5a', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTimPub5a",
       info_title = "Results reporting (5 years) (All Universities)",
@@ -1901,44 +1876,44 @@ server <- function (input, output, session) {
     ## Value for All UMC Open Access
     
     #Create set for OA percentage plot
-    oa_set <- cali %>%
+    oa_set <- cali |>
       filter(
         has_publication == TRUE,
         publication_type == "journal publication",
         ! is.na(doi),
         ! is.na(publication_date_unpaywall)
-      ) %>%
+      ) |>
       distinct(doi, .keep_all = TRUE)
     
-    all_numer_oa <- oa_set %>%
+    all_numer_oa <- oa_set |>
       filter(
-        color == "gold" | color == "green" | color == "hybrid"
-      ) %>%
+        color_green_only == "gold" | color_green_only == "green" | color_green_only == "hybrid"
+      ) |>
       nrow()
     
     # Keep NA color for now
-    all_denom_oa <- oa_set %>%
+    all_denom_oa <- oa_set |>
       nrow()
     
     #Create set for Green OA percentage plot
-    oa_set_green <- cali %>%
-      filter(
-        has_publication == TRUE,
-        publication_type == "journal publication",
-        ! is.na(doi),
-        ! is.na(publication_date_unpaywall),
-        # is_closed_archivable | color_green_only == "green"
-      ) %>%
-      distinct(doi, .keep_all = TRUE)
-    
-    denom_greenoa <- oa_set_green %>%
-      nrow()
-    
-    numer_greenoa <- oa_set_green %>%
-      filter(
-        color_green_only == "green"
-      ) %>%
-      nrow()
+    # oa_set_green <- cali |>
+    #   filter(
+    #     has_publication == TRUE,
+    #     publication_type == "journal publication",
+    #     ! is.na(doi),
+    #     ! is.na(publication_date_unpaywall),
+    #     # is_closed_archivable | color_green_only == "green"
+    #   ) |>
+    #   distinct(doi, .keep_all = TRUE)
+    # 
+    # denom_greenoa <- oa_set_green |>
+    #   nrow()
+    # 
+    # numer_greenoa <- oa_set_green |>
+    #   filter(
+    #     color_green_only == "green"
+    #   ) |>
+    #   nrow()
     
     wellPanel(
       style="padding-top: 0px; padding-bottom: 0px;",
@@ -1950,7 +1925,7 @@ server <- function (input, output, session) {
             title = "Open Access",
             value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
             value_text = "of publications are Open Access (Gold, Green or Hybrid)",
-            plot = plotlyOutput('plot_allumc_openaccess', height="300px") %>% 
+            plot = plotlyOutput('plot_allumc_openaccess', height="300px") |> 
               shinycssloaders::withSpinner(color = "#007265"),
             info_id = "infoALLUMCOpenAccess",
             info_title = "Open Access (All Universities)",
@@ -2127,7 +2102,7 @@ server <- function (input, output, session) {
     make_datatable(pros_reg_data)
   })
   
-  output$data_table_iv_data <- DT::renderDataTable({
+  output$data_cali_data <- DT::renderDataTable({
     make_datatable(cali_umc)
   })
   

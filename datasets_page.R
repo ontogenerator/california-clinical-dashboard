@@ -1,17 +1,22 @@
 make_datatable <- function(dataset) {
     DT::datatable(
             data = dataset,
+            rownames = FALSE,
             extensions = 'Buttons',
             filter = 'top',
             options = list(
                 dom = 'Blfrtip',
+                title = NULL,
                 buttons =
                     list(
-                        list(
-                            extend = "collection",
-                            buttons = c("csv", "excel"),
-                            text = "Download"
-                        )
+                      "csv",
+                      list(extend = 'excel', title = NULL)
+                        # list(
+                        #     extend = "collection",
+                        #     buttons = c("csv", "excel"),
+                        #     title = NULL,
+                        #     text = "Download"
+                        # )
                     ),
                 orderClasses = TRUE,
                 pageLength = 20,
@@ -30,7 +35,7 @@ datasets_page <- tabPanel(
     #     id = "datasetPanels_prospective_reg_data",
         bsCollapsePanel(
             strong("California data set"),
-            DT::dataTableOutput("data_table_iv_data"),
+            DT::dataTableOutput("data_cali_data"),
             style = "default"
         # )
     ),

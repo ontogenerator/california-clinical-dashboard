@@ -1,8 +1,5 @@
 *~
-data/*
-prep/*.csv
-prep/prep-intovalue.R
-prep/eutt-history.R
+data/raw/*
 *.rds
 .htpasswd
 .gitignore
@@ -12,6 +9,6 @@ prep/eutt-history.R
 .DS_Store
 
 # R proj
-clinical-dashboard.Rproj
+california-clinical-dashboard.Rproj
 .RData
 .Rproj.user/
