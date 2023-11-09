@@ -5,7 +5,7 @@ library(vroom)
 
 cali_dois <- vroom(here("prep", "cali_dois.csv"))
 
-dois <- cali_dois$doi %>% unique()
+dois <- unique(cali_dois$doi)
 
 email <- "vladislav.nachev@charite.de"
 
@@ -30,7 +30,7 @@ oa_results <-
   unpaywallR::dois_OA_pick_color(
     oa_results_raw,
     hierarchy
-  ) %>%
+  ) |>
   rename(color = OA_color, publication_date_unpaywall = date)
 
 # 
@@ -42,24 +42,8 @@ oa_results <-
 # unpaywall_results %>% write.csv2(here("prep", "cali-data-oa.csv"), row.names = FALSE)
 
 
-green_oa_hierarchy <-
-  c("gold",
-    "hybrid",
-    "bronze",
-    "green",
-    "closed")
-
-oa_results_green <-
-  unpaywallR::dois_OA_pick_color(
-    oa_results_raw,
-    green_oa_hierarchy
-  ) %>%
-  select(doi, color_green_only = OA_color)
-
-has_duplicates(oa_results_green, doi)
-
-oa_unpaywall <- oa_results_green %>% 
-  left_join(oa_results, by = "doi") %>%
+oa_unpaywall <- oa_results |> 
   mutate(across(everything(), ~na_if(., "")))
 
-oa_unpaywall %>% write.csv2(here("prep", "cali-data-oa.csv"), row.names = FALSE)
+oa_unpaywall |> 
+  write_excel_csv2(here("data", "processed", "cali_data_oa.csv"))

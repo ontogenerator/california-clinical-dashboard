@@ -90,7 +90,8 @@ cali_trials <- cali_trials |>
 
 
 ## Read OA data from Delwen
-oa <- vroom(here("data", "processed", "cali_data_oa.csv"))
+oa <- vroom(here("data", "processed", "cali_data_oa.csv")) |> 
+  select(-color_green_only)
 oa_manual <- read_xlsx(here("data", "processed", "oa_manual.xlsx")) |> 
   mutate(doi = tolower(doi))
 ## Combine extracted data and OA data
@@ -98,13 +99,6 @@ cali_trials <- cali_trials |>
   left_join(oa, by = "doi") |> 
   rows_upsert(oa_manual, by = "id")
 
-cali_trials |> 
-  mutate(publication_year = year(publication_date)) |> 
-  count(publication_year, color_green_only) |> 
-  filter(publication_year == 2014)
-
-# oa_2014 <- oa |> 
-#   filter(str_detect(publication_date_unpaywall, "2014"))
 ## Determine the amount of follow-up
 search_date <- as.Date("2022-10-01")
 

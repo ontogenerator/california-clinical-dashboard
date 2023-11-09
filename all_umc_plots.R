@@ -594,7 +594,7 @@ plot_allumc_openaccess <- function (dataset, color_palette) {
     
     umc_gold <- dataset |>
       filter(
-        color_green_only == "gold",
+        color == "gold",
         umc == umc_selected
       ) |>
       distinct(doi, .keep_all = TRUE) |>
@@ -602,7 +602,7 @@ plot_allumc_openaccess <- function (dataset, color_palette) {
     
     umc_hybrid <- dataset |>
       filter(
-        color_green_only == "hybrid",
+        color == "hybrid",
         umc == umc_selected
       ) |>
       distinct(doi, .keep_all = TRUE) |>
@@ -610,7 +610,7 @@ plot_allumc_openaccess <- function (dataset, color_palette) {
     
     umc_green <- dataset |>
       filter(
-        color_green_only == "green",
+        color == "green",
         umc == umc_selected
       ) |>
       distinct(doi, .keep_all = TRUE) |>
@@ -618,7 +618,7 @@ plot_allumc_openaccess <- function (dataset, color_palette) {
     
     umc_bronze <- dataset |>
       filter(
-        color_green_only == "bronze",
+        color == "bronze",
         umc == umc_selected
       ) |>
       distinct(doi, .keep_all = TRUE) |>

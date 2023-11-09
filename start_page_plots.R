@@ -613,21 +613,21 @@ plot_opensci_oa <- function (dataset, absnum, color_palette) {
             gold_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "gold"
+                    color == "gold"
                 ) |>
                 nrow()
 
             green_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "green"
+                    color == "green"
                 ) |>
                 nrow()
 
             hybrid_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "hybrid"
+                    color == "hybrid"
                 ) |>
                 nrow()
 
@@ -641,14 +641,14 @@ plot_opensci_oa <- function (dataset, absnum, color_palette) {
             closed_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "closed"
+                    color == "closed"
                 ) |>
                 nrow()
 
             bronze_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "bronze"
+                    color == "bronze"
                 ) |>
                 nrow()
             
@@ -774,28 +774,28 @@ plot_opensci_oa <- function (dataset, absnum, color_palette) {
             gold_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "gold"
+                    color == "gold"
                 ) |>
                 nrow()
 
             green_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "green"
+                    color == "green"
                 ) |>
                 nrow()
 
             hybrid_num <- dataset |>
                 filter(
                     oa_year == year,
-                    color_green_only == "hybrid"
+                    color == "hybrid"
                 ) |>
                 nrow()
             
             bronze_num <- dataset |>
               filter(
                 oa_year == year,
-                color_green_only == "bronze"
+                color == "bronze"
               ) |>
               nrow()
             

@@ -724,7 +724,7 @@ server <- function (input, output, session) {
     
     all_numer_oa <- oa_set |>
       filter(
-        color_green_only == "gold" | color_green_only == "green" | color_green_only == "hybrid",
+        color == "gold" | color == "green" | color == "hybrid",
         oa_year == reference_year - 1
       ) |>
       nrow()
@@ -1329,7 +1329,7 @@ server <- function (input, output, session) {
       all_numer_oa <- oa_set |>
         filter(
           umc == input$selectUMC,
-          color_green_only == "gold" | color_green_only == "green" | color_green_only == "hybrid"
+          color == "gold" | color == "green" | color == "hybrid"
         ) |>
         distinct(doi, .keep_all = TRUE) |>
         nrow()
@@ -1379,7 +1379,7 @@ server <- function (input, output, session) {
       # numer_greenoa <- oa_set_green |>
       #   filter(
       #     umc == input$selectUMC,
-      #     color_green_only == "green"
+      #     color == "green"
       #   ) |>
       #   distinct(doi, .keep_all = TRUE) |>
       #   nrow()
@@ -1887,7 +1887,7 @@ server <- function (input, output, session) {
     
     all_numer_oa <- oa_set |>
       filter(
-        color_green_only == "gold" | color_green_only == "green" | color_green_only == "hybrid"
+        color == "gold" | color == "green" | color == "hybrid"
       ) |>
       nrow()
     
@@ -1902,7 +1902,7 @@ server <- function (input, output, session) {
     #     publication_type == "journal publication",
     #     ! is.na(doi),
     #     ! is.na(publication_date_unpaywall),
-    #     # is_closed_archivable | color_green_only == "green"
+    #     # is_closed_archivable | color == "green"
     #   ) |>
     #   distinct(doi, .keep_all = TRUE)
     # 
@@ -1911,7 +1911,7 @@ server <- function (input, output, session) {
     # 
     # numer_greenoa <- oa_set_green |>
     #   filter(
-    #     color_green_only == "green"
+    #     color == "green"
     #   ) |>
     #   nrow()
     
