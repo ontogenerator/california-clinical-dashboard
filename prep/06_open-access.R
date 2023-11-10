@@ -34,36 +34,11 @@ oa_results <-
   ) |> 
   rename(color = OA_color, publication_date_unpaywall = date)
 
-# 
-# unpaywall_results <- unpaywallR::dois_OA_colors(publications$doi, email, clusters = 1)
-# 
-# unpaywall_results <- unpaywall_results |> 
-#   rename(publication_date_unpaywall = date)
+oa_unpaywall <- oa_results |> 
+  mutate(across(everything(), ~na_if(., "")))
 
-# unpaywall_results |>  write.csv2(here("prep", "cali-data-oa.csv"), row.names = FALSE)
-
-
-green_oa_hierarchy <-
-  c("gold",
-    "hybrid",
-    "bronze",
-    "green",
-    "closed")
-
-oa_results_green <-
-  unpaywallR::dois_OA_pick_color(
-    oa_results_raw,
-    green_oa_hierarchy
-  ) |> 
-  select(doi, color_green_only = OA_color)
-
-oa_results_green |>  get_dupes(doi)
-
-oa_unpaywall <- oa_results_green |>  
-  left_join(oa_results, by = "doi") |> 
-  mutate(across(everything(), \(x) na_if(x, "")))
-
-oa_unpaywall |>  write.csv2(here("data", "processed", "cali_data_oa.csv"), row.names = FALSE)
+oa_unpaywall |> 
+  write_excel_csv2(here("data", "processed", "cali_data_oa.csv"))
 
 
 manual_oa_data <- read_xlsx(here("data", "processed", "oa_manual.xlsx"))
