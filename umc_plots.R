@@ -567,44 +567,44 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
     if (rt != "Summary results or manuscript publication") {
 
         if (rt == "Summary results only") {
-            dataset <- dataset |>
-                filter(
-                    has_followup_2y_sumres
-                )
+            # dataset <- dataset |>
+            #     filter(
+            #         has_followup_2y_sumres
+            #     )
             dataset$published_2a <- dataset$is_summary_results_2y
             
-            dataset_all <- dataset_all |>
-                filter(
-                    has_followup_2y_sumres
-                )
+            # dataset_all <- dataset_all |>
+            #     filter(
+            #         has_followup_2y_sumres
+            #     )
             dataset_all$published_2a <- dataset_all$is_summary_results_2y
         }
         
         if (rt == "Manuscript publication only") {
-            dataset <- dataset |>
-                filter(
-                    has_followup_2y_pub
-                )
+            # dataset <- dataset |>
+            #     filter(
+            #         has_followup_2y_pub
+            #     )
             dataset$published_2a <- dataset$is_publication_2y
             
-            dataset_all <- dataset_all |>
-                filter(
-                    has_followup_2y_pub
-                )
+            # dataset_all <- dataset_all |>
+            #     filter(
+            #         has_followup_2y_pub
+            #     )
             dataset_all$published_2a <- dataset_all$is_publication_2y
         }
         
     } else {
-        dataset <- dataset |>
-            filter(
-                has_followup_2y_pub & has_followup_2y_sumres
-            )
+        # dataset <- dataset |>
+        #     filter(
+        #         has_followup_2y_pub & has_followup_2y_sumres
+        #     )
         dataset$published_2a <- dataset$is_summary_results_2y | dataset$is_publication_2y
         
-        dataset_all <- dataset_all |>
-            filter(
-                has_followup_2y_pub & has_followup_2y_sumres
-            )
+        # dataset_all <- dataset_all |>
+        #     filter(
+        #         has_followup_2y_pub & has_followup_2y_sumres
+        #     )
         dataset_all$published_2a <- dataset_all$is_summary_results_2y | dataset_all$is_publication_2y
     }
 
@@ -714,44 +714,44 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
     if (rt != "Summary results or manuscript publication") {
 
         if (rt == "Summary results only") {
-            dataset <- dataset |>
-                filter(
-                    has_followup_5y_sumres
-                )
+            # dataset <- dataset |>
+            #     filter(
+            #         has_followup_5y_sumres
+            #     )
             dataset$published_5a <- dataset$is_summary_results_5y
             
-            dataset_all <- dataset_all |>
-                filter(
-                    has_followup_5y_sumres
-                )
+            # dataset_all <- dataset_all |>
+            #     filter(
+            #         has_followup_5y_sumres
+            #     )
             dataset_all$published_5a <- dataset_all$is_summary_results_5y
         }
         
         if (rt == "Manuscript publication only") {
-            dataset <- dataset |>
-                filter(
-                    has_followup_5y_pub
-                )
+            # dataset <- dataset |>
+            #     filter(
+            #         has_followup_5y_pub
+            #     )
             dataset$published_5a <- dataset$is_publication_5y
             
-            dataset_all <- dataset_all |>
-                filter(
-                    has_followup_5y_pub
-                )
+            # dataset_all <- dataset_all |>
+            #     filter(
+            #         has_followup_5y_pub
+            #     )
             dataset_all$published_5a <- dataset_all$is_publication_5y
         }
         
     } else {
-        dataset <- dataset |>
-            filter(
-                has_followup_5y_pub & has_followup_5y_sumres
-            )
+        # dataset <- dataset |>
+        #     filter(
+        #         has_followup_5y_pub & has_followup_5y_sumres
+        #     )
         dataset$published_5a <- dataset$is_summary_results_5y | dataset$is_publication_5y
         
-        dataset_all <- dataset_all |>
-            filter(
-                has_followup_5y_pub & has_followup_5y_sumres
-            )
+        # dataset_all <- dataset_all |>
+        #     filter(
+        #         has_followup_5y_pub & has_followup_5y_sumres
+        #     )
         dataset_all$published_5a <- dataset_all$is_summary_results_5y | dataset_all$is_publication_5y
     }
 
@@ -808,8 +808,8 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
 
         manuscript_denom <- dataset |>
             filter(
-                primary_completion_year == current_year &
-                has_followup_5y_pub
+                primary_completion_year == current_year
+                # has_followup_5y_pub
             ) |>
             nrow()
 

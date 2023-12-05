@@ -481,9 +481,9 @@ server <- function (input, output, session) {
     
     # Filter for last completion date for pink descriptor text
     max_completion_year <- cali |>
-      filter(
-        has_followup_2y_pub & has_followup_2y_sumres
-      ) |>
+      # filter(
+      #   has_followup_2y
+      # ) |>
       count(primary_completion_year) |>
       filter(n > 5) |>
       select(primary_completion_year) |>
@@ -494,24 +494,24 @@ server <- function (input, output, session) {
     
     all_numer_timpub <- cali_data_unique |>
       filter(
-        has_followup_2y_sumres & has_followup_2y_pub,
+        # has_followup_2y,
         is_summary_results_2y | is_publication_2y
       ) |>
       nrow()
     
     all_denom_timpub <- cali_data_unique |>
-      filter(
-        has_followup_2y_sumres & has_followup_2y_pub
-      ) |>
+      # filter(
+      #   has_followup_2y
+      # ) |>
       nrow()
     
     if (input$startreporttype2a == "Summary results only") {
       
       # Filter for last completion date for pink descriptor text
       max_completion_year <- cali |>
-        filter(
-          has_followup_2y_sumres
-        ) |>
+        # filter(
+        #   has_followup_2y
+        # ) |>
         select(primary_completion_year) |>
         max()
       
@@ -520,14 +520,14 @@ server <- function (input, output, session) {
       
       all_numer_timpub <- cali_data_unique |>
         filter(
-          has_followup_2y_sumres,
+          # has_followup_2y,
           is_summary_results_2y) |>
         nrow()
       
       all_denom_timpub <- cali_data_unique |>
-        filter(
-          has_followup_2y_sumres
-        ) |>
+        # filter(
+        #   has_followup_2y
+        # ) |>
         nrow()
     }
     
@@ -535,9 +535,9 @@ server <- function (input, output, session) {
       
       # Filter for last completion date for pink descriptor text
       max_completion_year <- cali |>
-        filter(
-          has_followup_2y_pub
-        ) |>
+        # filter(
+        #   has_followup_2y
+        # ) |>
         select(primary_completion_year) |>
         max()
       
@@ -546,14 +546,14 @@ server <- function (input, output, session) {
       
       all_numer_timpub <- cali_data_unique |>
         filter(
-          has_followup_2y_pub,
+          # has_followup_2y,
           is_publication_2y) |>
         nrow()
       
       all_denom_timpub <- cali_data_unique |>
-        filter(
-          has_followup_2y_pub
-        ) |>
+        # filter(
+        #   has_followup_2y
+        # ) |>
         nrow()
     }
     
@@ -588,9 +588,9 @@ server <- function (input, output, session) {
     
     ## Filter for the last completion date for pink descriptor text
     max_completion_year <- cali |>
-      filter(
-        has_followup_5y_pub & has_followup_5y_sumres
-      ) |>
+      # filter(
+      #   has_followup_5y
+      # ) |>
       count(primary_completion_year) |>
       filter(n > 5) |>
       select(primary_completion_year) |>
@@ -601,24 +601,24 @@ server <- function (input, output, session) {
     
     all_numer_timpub5a <- cali_data_unique |>
       filter(
-        has_followup_5y_sumres & has_followup_5y_pub,
+        # has_followup_5y,
         is_summary_results_5y | is_publication_5y
       ) |>
       nrow()
     
     all_denom_timpub5a <- cali_data_unique |>
-      filter(
-        has_followup_5y_sumres & has_followup_5y_pub
-      ) |>
+      # filter(
+      #   has_followup_5y
+      # ) |>
       nrow()
     
     if (input$startreporttype5a == "Summary results only") {
       
       ## Filter for the last completion date for pink descriptor text
       max_completion_year <- cali |>
-        filter(
-          has_followup_5y_sumres
-        ) |>
+        # filter(
+        #   has_followup_5y
+        # ) |>
         select(primary_completion_year) |>
         max()
       
@@ -627,15 +627,15 @@ server <- function (input, output, session) {
       
       all_numer_timpub5a <- cali_data_unique |>
         filter(
-          has_followup_5y_sumres,
+          # has_followup_5y,
           is_summary_results_5y
         ) |>
         nrow()
       
       all_denom_timpub5a <- cali_data_unique |>
-        filter(
-          has_followup_5y_sumres
-        ) |>
+        # filter(
+        #   has_followup_5y
+        # ) |>
         nrow()
     }
     
@@ -643,9 +643,9 @@ server <- function (input, output, session) {
       
       ## Filter for the last completion date for pink descriptor text
       max_completion_year <- cali |>
-        filter(
-          has_followup_5y_pub
-        ) |>
+        # filter(
+        #   has_followup_5y
+        # ) |>
         select(primary_completion_year) |>
         max()
       
@@ -654,14 +654,14 @@ server <- function (input, output, session) {
       
       all_numer_timpub5a <- cali_data_unique |>
         filter(
-          has_followup_5y_pub,
+          # has_followup_5y,
           is_publication_5y) |>
         nrow()
       
       all_denom_timpub5a <- cali_data_unique |>
-        filter(
-          has_followup_5y_pub
-        ) |>
+        # filter(
+        #   has_followup_5y
+        # ) |>
         nrow()
     }
     
@@ -1088,8 +1088,8 @@ server <- function (input, output, session) {
     
     # Filter for the last completion date for the pink descriptor text
     max_completion_year <- cali_umc |>
-      filter(umc == input$selectUMC,
-             has_followup_2y_pub & has_followup_2y_sumres
+      filter(umc == input$selectUMC
+             # has_followup_2y_pub & has_followup_2y_sumres
       ) |>
       select(primary_completion_year) |>
       max()
@@ -1100,23 +1100,23 @@ server <- function (input, output, session) {
     
     all_numer_timpub <- cali_data_unique |>
       filter(
-        has_followup_2y_pub & has_followup_2y_sumres,
+        # has_followup_2y_pub & has_followup_2y_sumres,
         is_publication_2y | is_summary_results_2y
       ) |>
       nrow()
     
     all_denom_timpub <- cali_data_unique |>
-      filter(
-        has_followup_2y_pub & has_followup_2y_sumres
-      ) |>
+      # filter(
+      #   has_followup_2y_pub & has_followup_2y_sumres
+      # ) |>
       nrow()
     
     if (input$reporttype2a == "Summary results only") {
       
       # Filter for the last completion date for the pink descriptor text
       max_completion_year <- cali_umc |>
-        filter(umc == input$selectUMC,
-               has_followup_2y_sumres
+        filter(umc == input$selectUMC
+               # has_followup_2y_sumres
         ) |>
         select(primary_completion_year) |>
         max()
@@ -1127,14 +1127,14 @@ server <- function (input, output, session) {
       
       all_numer_timpub <- cali_data_unique |>
         filter(
-          has_followup_2y_sumres,
+          # has_followup_2y_sumres,
           is_summary_results_2y) |>
         nrow()
       
       all_denom_timpub <- cali_data_unique |>
-        filter(
-          has_followup_2y_sumres
-        ) |>
+        # filter(
+        #   has_followup_2y_sumres
+        # ) |>
         nrow()
     }
     
@@ -1142,8 +1142,8 @@ server <- function (input, output, session) {
       
       # Filter for the last completion date for the pink descriptor text
       max_completion_year <- cali_umc |>
-        filter(umc == input$selectUMC,
-               has_followup_2y_pub
+        filter(umc == input$selectUMC
+               # has_followup_2y_pub
         ) |>
         select(primary_completion_year) |>
         max()
@@ -1154,14 +1154,14 @@ server <- function (input, output, session) {
       
       all_numer_timpub <- cali_data_unique |>
         filter(
-          has_followup_2y_pub,
+          # has_followup_2y_pub,
           is_publication_2y) |>
         nrow()
       
       all_denom_timpub <- cali_data_unique |>
-        filter(
-          has_followup_2y_pub
-        ) |>
+        # filter(
+        #   has_followup_2y_pub
+        # ) |>
         nrow()
     }
     
@@ -1195,8 +1195,8 @@ server <- function (input, output, session) {
     
     # Filter for the last completion date for the pink descriptor text
     max_completion_year <- cali_umc |>
-      filter(umc == input$selectUMC,
-             has_followup_5y_pub & has_followup_5y_sumres
+      filter(umc == input$selectUMC
+             # has_followup_5y_pub & has_followup_5y_sumres
       ) |>
       select(primary_completion_year) |>
       max()
@@ -1207,22 +1207,22 @@ server <- function (input, output, session) {
     
     all_numer_timpub <- cali_data_unique |>
       filter(
-        has_followup_5y_sumres & has_followup_5y_pub,
+        # has_followup_5y_sumres & has_followup_5y_pub,
         is_summary_results_5y | is_publication_5y
       ) |>
       nrow()
     
     all_denom_timpub <- cali_data_unique |>
-      filter(
-        has_followup_5y_sumres & has_followup_5y_pub
-      ) |>
+      # filter(
+      #   has_followup_5y_sumres & has_followup_5y_pub
+      # ) |>
       nrow()
     
     if (input$reporttype5a == "Summary results only") {
       
       max_completion_year <- cali_umc |>
-        filter(umc == input$selectUMC,
-               has_followup_5y_sumres
+        filter(umc == input$selectUMC
+               # has_followup_5y_sumres
         ) |>
         select(primary_completion_year) |>
         max()
@@ -1233,22 +1233,22 @@ server <- function (input, output, session) {
       
       all_numer_timpub <- cali_data_unique |>
         filter(
-          has_followup_5y_sumres,
+          # has_followup_5y_sumres,
           is_summary_results_5y) |>
         nrow()
       
       all_denom_timpub <- cali_data_unique |>
-        filter(
-          has_followup_5y_sumres
-        ) |>
+        # filter(
+        #   has_followup_5y_sumres
+        # ) |>
         nrow()
     }
     
     if (input$reporttype5a == "Manuscript publication only") {
       
       max_completion_year <- cali_umc |>
-        filter(umc == input$selectUMC,
-               has_followup_5y_pub
+        filter(umc == input$selectUMC
+               # has_followup_5y_pub
         ) |>
         select(primary_completion_year) |>
         max()
@@ -1259,14 +1259,15 @@ server <- function (input, output, session) {
       
       all_numer_timpub <- cali_data_unique |>
         filter(
-          has_followup_5y_pub,
+          # has_followup_5y_pub,
           is_publication_5y) |>
         nrow()
       
       all_denom_timpub <- cali_data_unique |>
-        filter(
-          has_followup_5y_pub
-        ) |> nrow()
+        # filter(
+        #   has_followup_5y_pub
+        # ) |>
+        nrow()
     }
     
     if (all_denom_timpub == 0) {
@@ -1745,30 +1746,30 @@ server <- function (input, output, session) {
     
     all_numer_timpub <- cali |>
       filter(
-        has_followup_2y_pub & has_followup_2y_sumres,
+        # has_followup_2y_pub & has_followup_2y_sumres,
         is_publication_2y | is_summary_results_2y
       ) |>
       nrow()
     
     all_denom_timpub <- cali |>
-      filter(
-        has_followup_2y_pub & has_followup_2y_sumres
-      ) |>
+      # filter(
+        # has_followup_2y_pub & has_followup_2y_sumres
+      # ) |>
       nrow()
     
     if (input$allumcreporttype2a == "Summary results only") {
       
       all_numer_timpub <- cali |>
         filter(
-          has_followup_2y_sumres,
+          # has_followup_2y_sumres,
           is_summary_results_2y
         ) |>
         nrow()
       
       all_denom_timpub <- cali |>
-        filter(
-          has_followup_2y_sumres
-        ) |>
+        # filter(
+        #   has_followup_2y_sumres
+        # ) |>
         nrow()
     }
     
@@ -1776,15 +1777,15 @@ server <- function (input, output, session) {
       
       all_numer_timpub <- cali |>
         filter(
-          has_followup_2y_pub,
+          # has_followup_2y_pub,
           is_publication_2y
         ) |>
         nrow()
       
       all_denom_timpub <- cali |>
-        filter(
-          has_followup_2y_pub
-        ) |>
+        # filter(
+        #   has_followup_2y_pub
+        # ) |>
         nrow()
     }
     
@@ -1811,30 +1812,30 @@ server <- function (input, output, session) {
     
     all_numer_timpub5a <- cali |>
       filter(
-        has_followup_5y_pub & has_followup_5y_sumres,
+        # has_followup_5y_pub & has_followup_5y_sumres,
         is_publication_5y | is_summary_results_5y
       ) |>
       nrow()
     
     all_denom_timpub5a <- cali |>
-      filter(
-        has_followup_5y_pub & has_followup_5y_sumres
-      ) |>
+      # filter(
+      #   has_followup_5y_pub & has_followup_5y_sumres
+      # ) |>
       nrow()
     
     if (input$allumcreporttype5a == "Summary results only") {
       
       all_numer_timpub5a <- cali |>
         filter(
-          has_followup_5y_sumres,
+          # has_followup_5y_sumres,
           is_summary_results_5y
         ) |>
         nrow()
       
       all_denom_timpub5a <- cali |>
-        filter(
-          has_followup_5y_sumres
-        ) |>
+        # filter(
+        #   has_followup_5y_sumres
+        # ) |>
         nrow()
     }
     
@@ -1842,15 +1843,15 @@ server <- function (input, output, session) {
       
       all_numer_timpub5a <- cali |>
         filter(
-          has_followup_5y_pub,
+          # has_followup_5y_pub,
           is_publication_5y
         ) |>
         nrow()
       
       all_denom_timpub5a <- cali |>
-        filter(
-          has_followup_5y_pub
-        ) |>
+        # filter(
+        #   has_followup_5y_pub
+        # ) |>
         nrow()
     }
     
