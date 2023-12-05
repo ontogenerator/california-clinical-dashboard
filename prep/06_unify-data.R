@@ -455,10 +455,16 @@ CTgov_sample_Cali <- CTgov_sample_full |>
 
 funding <- AACT_datasets$sponsors |> 
   select(id = nct_id,
-         agency_class)
+         agency_class,
+         name) |> 
+  nest(.by = id) 
 
 CTgov_sample_Cali <- CTgov_sample_Cali |> 
-  left_join(funding, by = "id")
+  left_join(funding, by = "id") |> 
+  mutate(agency_class = map_chr(data, \(ac) pull(ac, agency_class) |> paste(collapse = "; ")),
+         sponsor_name = map_chr(data, \(sp) pull(sp, name) |> paste(collapse = "; "))) |> 
+  select(-data)
+
 
 CTgov_sample_Cali |> 
   count(agency_class)
@@ -495,8 +501,13 @@ cali_prosp <- cali_trials |>
     !str_detect(start_month_year, ",")  ~ "Estimated",
     .default = "Exact"
   )) |> 
-  select(id, is_prospective, study_first_submitted_date, results_first_submitted_date,
+  select(id, is_prospective, is_prospective_type, study_first_submitted_date, results_first_submitted_date,
          start_date_type, start_month_year, contains("start_date"), contains("primary_completion"),
          everything()) 
 
 cali_prosp |> count(start_date_type)
+
+
+cali_prosp |> 
+  count(is_prospective,
+        is_prospective_type)
