@@ -4,7 +4,7 @@ library(vroom)
 library(here)
 library(stringr)
 library(fulltext)
-
+library(readxl)
 
 # Full-text acquired via a combination of automated and manual techniques
 # Full-text searched for via DOI, if available, else PMID
@@ -36,14 +36,15 @@ source(here("prep", "functions", "correct_pdf_url.R"))
 
 # Get pdfs from dois ------------------------------------------------------
 
-cali <- vroom(here("data", "California-trials_2014-2017.csv"))
+cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
 cali_dois <- vroom(here("data", "processed", "cali_dois.csv")) |> 
   rename(nct_id = id)
 
 
 cali_dois <- cali |> 
   left_join(cali_dois) |> 
-  filter(!is.na(doi)) |> 
+  filter(!is.na(doi),
+         any_paper != 2) |> 
   # Alternatively, could limit to dois for pubmed records (with pmid)
   # filter(!is.na(pmid)) |>
   distinct(doi, .keep_all = TRUE) |>

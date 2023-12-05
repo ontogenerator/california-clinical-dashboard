@@ -12,7 +12,7 @@ library(vroom)
 source(here("prep", "functions", "extract_pubmed.R"))
 source(here("prep", "functions", "get_grobid_ft_trn.R"))
 
-cali <- vroom(here("data", "California-trials_2014-2017.csv"))
+cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
 cali_dois <- vroom(here("data", "processed", "cali_dois.csv")) |> 
   rename(nct_id = id)
 
