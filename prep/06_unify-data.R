@@ -88,7 +88,6 @@ cali_trials <- cali_trials |>
     filter(!is.na(any_paper)) |> 
   select(id, pmid, doi, everything())
 
-
 ## Read OA data from Delwen
 oa <- vroom(here("data", "processed", "cali_data_oa.csv")) |> 
   select(-color_green_only)
@@ -97,39 +96,58 @@ oa_manual <- read_xlsx(here("data", "processed", "oa_manual.xlsx")) |>
 ## Combine extracted data and OA data
 cali_trials <- cali_trials |>
   left_join(oa, by = "doi") |> 
-  rows_upsert(oa_manual, by = "id")
+  rows_upsert(oa_manual, by = "id") |> 
+  mutate(any_open_access = case_when(
+    is.na(color) ~ NA,
+    str_detect(color, "bro|clo") ~ 2,
+    .default = 1
+  ))
 
 ## Determine the amount of follow-up
-search_date <- as.Date("2022-10-01")
+search_date <- as.Date("2023-12-01")
+# 
+# cali_trials$has_followup_2y <-
+#     as.Date(cali_trials$primary_completion_date) + 365*2 < search_date
+# cali_trials$has_followup_2y_pub <- cali_trials$has_followup_2y
+# cali_trials$has_followup_2y_sumres <- cali_trials$has_followup_2y
+# 
+# cali_trials$has_followup_5y <-
+#     as.Date(cali_trials$primary_completion_date) + 365*5 < search_date
+# cali_trials$has_followup_5y_pub <- cali_trials$has_followup_5y
+# cali_trials$has_followup_5y_sumres <- cali_trials$has_followup_5y
 
-cali_trials$has_followup_2y <-
-    as.Date(cali_trials$primary_completion_date) + 365*2 < search_date
-cali_trials$has_followup_2y_pub <- cali_trials$has_followup_2y
-cali_trials$has_followup_2y_sumres <- cali_trials$has_followup_2y
 
-cali_trials$has_followup_5y <-
-    as.Date(cali_trials$primary_completion_date) + 365*5 < search_date
-cali_trials$has_followup_5y_pub <- cali_trials$has_followup_5y
-cali_trials$has_followup_5y_sumres <- cali_trials$has_followup_5y
+cali_trials <- cali_trials |> 
+  mutate(
+  #   has_followup_2y = as.Date(cali_trials$primary_completion_date) +
+  #          365*2 < search_date,
+  # has_followup_2y_pub = has_followup_2y,
+  # has_followup_2y_sumres = has_followup_2y,
+  # has_followup_5y = as.Date(cali_trials$primary_completion_date) +
+  #   365*5 < search_date,
+  # has_followup_5y_pub = has_followup_5y,
+  # has_followup_5y_sumres = has_followup_5y,
+  is_summary_results_2y = case_when(
+    is.na(summary_results_date) ~ FALSE,
+    .default = as.Date(cali_trials$summary_results_date) <=
+      as.Date(cali_trials$primary_completion_date) + 365*2
+  ),
+  is_summary_results_5y = case_when(
+    is.na(summary_results_date) ~ FALSE,
+    .default = as.Date(cali_trials$summary_results_date) <=
+      as.Date(cali_trials$primary_completion_date) + 365*5
+  ),
+  is_publication_2y = case_when(
+    is.na(publication_date) ~ FALSE,
+    .default = as.Date(cali_trials$publication_date) <=
+      as.Date(cali_trials$primary_completion_date) + 365*2
+  ),
+  is_publication_5y = case_when(
+    is.na(publication_date) ~ FALSE,
+    .default = as.Date(cali_trials$publication_date) <=
+      as.Date(cali_trials$primary_completion_date) + 365*5
+  ))
 
-## Determine whether there are summary results within 2, 5 years
-#which dates are floored????
-  
-cali_trials$is_summary_results_2y <-
-  as.Date(cali_trials$summary_results_date) <=
-  as.Date(cali_trials$primary_completion_date) + 365*2
-
-cali_trials$is_summary_results_5y <-
-    as.Date(cali_trials$summary_results_date) <=
-    as.Date(cali_trials$primary_completion_date) + 365*5
-
-cali_trials$is_publication_2y <-
-    as.Date(cali_trials$publication_date) <=
-    as.Date(cali_trials$primary_completion_date) + 365*2
-
-cali_trials$is_publication_5y <-
-    as.Date(cali_trials$publication_date) <=
-    as.Date(cali_trials$primary_completion_date) + 365*5
 
 cali_trials <- cali_trials |> 
   mutate(pub_date_incomplete = id %in% incomplete_dates)
@@ -219,7 +237,12 @@ cali_trials <-
       if_else(has_pubmed & is.na(has_trn_abstract), FALSE, has_trn_abstract),
     has_trn_secondary_id =
       if_else(has_pubmed & is.na(has_trn_secondary_id), FALSE, has_trn_secondary_id),
-    has_trn_ft = if_else(has_ft & is.na(has_trn_ft), FALSE, has_trn_ft)
+    has_trn_ft = case_when(
+      any_paper == 2 ~ NA,
+      has_ft & is.na(has_trn_ft) ~ FALSE,
+      .default = has_trn_ft
+    )
+      # if_else(has_ft & is.na(has_trn_ft), FALSE, has_trn_ft)
   ) |> 
   # select(-starts_with("has_trn_")) |> 
   
@@ -396,36 +419,84 @@ CTgov_sample_full <- AACT_datasets$studies |>
 
 #add calculated columns to dataset - time to summary results & prospective registration
 CTgov_sample_full <- CTgov_sample_full |>
-  mutate(days_compl_to_summary = results_first_submitted_date - completion_date,
+  mutate(days_compl_to_summary = results_first_submitted_date - primary_completion_date,
          days_reg_to_start = start_date - study_first_submitted_date)
 
 #calculate the metrics of interest
 CTgov_sample_full <- CTgov_sample_full |>
-  mutate(has_prospective_registration = floor_date(start_date, unit = "month") >=
+  mutate(is_prospective = floor_date(start_date, unit = "month") >=
            floor_date(study_first_submitted_date, unit = "month"),
+         is_prospective_type = case_when(
+           !str_detect(start_month_year, ",")  ~ "Estimated",
+           .default = "Exact"
+         ),
          summary_result_12_month = days_compl_to_summary < 365,
          summary_result_24_month = days_compl_to_summary < 2*365,
          summary_result_12_month = replace_na(summary_result_12_month, FALSE),
-         summary_result_24_month = replace_na(summary_result_24_month, FALSE))
+         summary_result_24_month = replace_na(summary_result_24_month, FALSE),
+         summary_result_type = case_when(
+           !str_detect(primary_completion_date, ",")  ~ "Estimated",
+           .default = "Exact"
+         ))
 
 CTgov_sample_Cali <- CTgov_sample_full |>
   filter(
-    # nct_id %in% institutions_ncts_primary$nct_id,
     nct_id %in% cali_trials$id,
-    study_type == "Interventional",
-    # primary_completion_date >= "2014-01-01",
-    # primary_completion_date < "2017-12-31",
-    # start_date > "2007-01-01",
-    # start_date < "2021-12-31"
     ) |> 
-  select(nct_id, start_date, is_prospective = has_prospective_registration) |> 
-  mutate(start_year = year(start_date)) 
+  select(id = nct_id, contains("start_"),
+         contains("completion_"),
+         -contains("type"),
+         summary_result_type,
+         results_first_submitted_date,
+         study_first_submitted_date,
+         is_prospective = has_prospective_registration,
+         is_prospective_type)
 
-# add affiliation information
-cali_prosp_reg <- CTgov_sample_Cali |> 
-  left_join(institutions_ncts_primary, by = "nct_id")
 
-write_excel_csv2(cali_prosp_reg, here("data", "processed", "cali_prospective_registration.csv"))
+funding <- AACT_datasets$sponsors |> 
+  select(id = nct_id,
+         agency_class)
+
+CTgov_sample_Cali <- CTgov_sample_Cali |> 
+  left_join(funding, by = "id")
+
+CTgov_sample_Cali |> 
+  count(agency_class)
+
+write_excel_csv2(CTgov_sample_Cali,
+                 here("data", "processed", "cali_prospective_registration.csv"))
+
+cali_trials |> 
+  distinct(doi, .keep_all = TRUE) |> 
+  count(is.na(has_trn_ft))
+
+missing_pdfs <- cali_trials |> 
+  distinct(doi, .keep_all = TRUE) |> 
+  filter(is.na(has_trn_ft),
+         any_paper != 2,
+         str_detect(doi, "^10.")) |> 
+  select(doi, pmid)
+
+pt <- cali_trials |> 
+  select(publication_type, doi, has_trn_ft) |> 
+  filter(!is.na(doi))
+
+
+pt |> 
+  filter(publication_type != "abstract") |> 
+  count(has_trn_ft)
 
 
 
+cali_prosp <- cali_trials |> 
+  left_join(CTgov_sample_Cali, by = "id") |> 
+  rowwise() |> 
+  mutate(start_date_type = case_when(
+    !str_detect(start_month_year, ",")  ~ "Estimated",
+    .default = "Exact"
+  )) |> 
+  select(id, is_prospective, study_first_submitted_date, results_first_submitted_date,
+         start_date_type, start_month_year, contains("start_date"), contains("primary_completion"),
+         everything()) 
+
+cali_prosp |> count(start_date_type)
