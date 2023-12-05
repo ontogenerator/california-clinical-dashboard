@@ -467,7 +467,13 @@ CTgov_sample_Cali <- CTgov_sample_Cali |>
 
 
 CTgov_sample_Cali |> 
-  count(agency_class)
+  count(agency_class, sort = TRUE)
+
+affils <- cali_trials |> 
+  select(id, affiliation)
+
+CTgov_sample_Cali <- CTgov_sample_Cali |> 
+  left_join(affils, by = "id")
 
 write_excel_csv2(CTgov_sample_Cali,
                  here("data", "processed", "cali_prospective_registration.csv"))
