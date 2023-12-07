@@ -13,10 +13,9 @@ source(here("prep", "functions", "extract_pubmed.R"))
 source(here("prep", "functions", "get_grobid_ft_trn.R"))
 
 cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
-cali_dois <- vroom(here("data", "processed", "cali_dois.csv")) |> 
+cali_dois <- vroom(here("data", "processed", "cali_dois.csv"), delim = ";") |> 
   rename(nct_id = id)
 
-# TODO: obtain this one without pubmed and potentially rename
 pubmed_ft_retrieved <- read_rds(here("data", "processed", "pubmed", "pubmed-ft-retrieved.rds"))
 
 # Prepare directory paths
@@ -81,6 +80,8 @@ abs <-
 write_rds(abs, path(dir_pubmed, "pubmed-abstract.rds"))
 # abs <- read_rds(path(dir_pubmed, "pubmed-abstract.rds"))
 
+
+
 abs <-
   abs |>
   tidyr::drop_na(trn) |>
@@ -94,6 +95,14 @@ abs <-
     trn_cleaned = purrr::map_chr(trn_detected, ctregistries::clean_trn)
   ) |>
   left_join(pmids_dois, by  = "pmid")
+# 
+# manual_abs <- tribble(pmid = "",
+#                       registry = "ClinicalTrials.gov",
+#                       trn_detected = "NCT02320812",
+#                       n_detected = 1,
+#                       source = "abstract",
+#                       trn_cleaned = "NCT02320812",
+#                       doi = NA)
 
 write_rds(abs, path(dir_trn, "trn-abstract.rds"))
 # abs <- read_rds(path(dir_trn, "trn-abstract.rds"))
@@ -113,12 +122,40 @@ ft_doi <-
     source = "ft",
     trn_cleaned = purrr::map_chr(trn_detected, ctregistries::clean_trn)
   ) |>
-  left_join(pmids_dois, by  = "doi")
+  left_join(pmids_dois, by = "doi")
+
+
+# manual_nondoi <- tibble(doi = "hilarispublisher.com+fg3019+26153",
+#                       n_detected = 1,
+#                       trn_detected = "NCT01181245",
+#                       registry = "ClinicalTrials.gov",
+#                       source = "ft",
+#                       trn_cleaned = "NCT01181245",
+#                       pmid = "https://www.hilarispublisher.com/abstract/fg3019-a-human-monoclonal-antibody-to-connective-tissue-growth-factor-combined-with-chemotherapy-in-patients-with-locall-26153.html")
+# 
+# ft_doi2 <- ft_doi |> 
+#   rows_append(manual_nondoi)
+
 
 write_rds(ft_doi, path(dir_trn, "trn-ft-doi.rds"))
 # ft_doi <- read_rds(path(dir_trn, "trn-ft-doi.rds"))
 
-# Full-text PMID ----------------------------------------------------------
+# Full-text pmid----------------------------------------------------------
+
+
+
+# ft_nondoi_xmls <-
+#   dir_ls(here("data", "raw", "fulltext", "nondoi", "xml"))
+# 
+# ft_nondoi <- ft_nondoi_xmls |>
+#   purrr::map_dfr(get_grobid_ft_trn) |>
+#   select(-doi) |>
+#   rename(trn_detected = trn, n_detected = n) |>
+#   mutate(
+#     source = "ft",
+#     trn_cleaned = purrr::map_chr(trn_detected, ctregistries::clean_trn)
+#   ) |>
+#   left_join(pmids_dois, by  = "pmid")
 
 # ft_pmid_xmls <-
 #   dir_ls(here("data", "raw", "fulltext", "pmid", "xml"))

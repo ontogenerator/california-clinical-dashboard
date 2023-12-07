@@ -2,17 +2,17 @@
 # Also add whether source of pdf if doi or pmid (TRUE/FALSE only)
 # Use xml versions of pdfs
 
-library(dplyr)
+library(tidyverse)
 library(vroom)
 library(fs)
 library(here)
-library(stringr)
 library(janitor)
 library(readxl)
 
 
+
 cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
-cali_dois <- vroom(here("data", "processed", "cali_dois.csv")) |> 
+cali_dois <- vroom(here("data", "processed", "cali_dois.csv"), delim = ";") |> 
   rename(nct_id = id)
 
 # Prepare paths
@@ -45,7 +45,6 @@ ft_doi_retrieved <-
 # str_replace_all("\\+", "/") |>
 # tolower()
 
-
 pubmed_ft_retrieved <-
   cali |>
   left_join(cali_dois) |>
@@ -58,6 +57,7 @@ pubmed_ft_retrieved <-
     ),
 
     has_ft = case_when(
+      str_detect(pmid, "hilaris|arvoj|ajog") ~ TRUE,
       is.na(doi) ~ NA,
       (doi %in% ft_doi_retrieved) ~ TRUE,
       .default = FALSE
@@ -65,6 +65,7 @@ pubmed_ft_retrieved <-
 
     ft_source = case_when(
       doi %in% ft_doi_retrieved ~ "doi",
+      str_detect(pmid, "hilaris|arvoj|ajog") ~ "manual",
       # pmid %in% ft_pmid_retrieved ~ "pmid",
       .default = NA
     ),
@@ -76,3 +77,4 @@ pubmed_ft_retrieved <-
   distinct()
 
 write_rds(pubmed_ft_retrieved, path(dir_pubmed_processed, "pubmed-ft-retrieved.rds"))
+

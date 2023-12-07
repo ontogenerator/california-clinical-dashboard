@@ -16,10 +16,10 @@ incomplete_dates <- cali_trials_original |>
 
 cali_trials <- cali_trials |> 
   mutate(publication_type = case_when(
-           any_paper == 1 ~ "journal publication",
-          any_paper == 2 ~ "abstract",
-           TRUE ~ "unknown"
-         ),
+    any_paper == 1 ~ "journal publication",
+    any_paper == 2 ~ "abstract",
+    .default = "unknown"
+    ),
          # publication_date = lubridate::dmy(publication_date),
          # last_update_submitted_date = lubridate::dmy(last_update_submitted_date),
          # registration_date = lubridate::dmy(registration_date),
@@ -54,33 +54,33 @@ get_dupes(cali_trials, id)
 #   mutate(pmid = as.character(pmid)) |> 
 #   select(pmid, doi)
 
-# cali_trials_doi <- cali_trials |> 
-#   left_join(cali_dois_from_pmid, by = "pmid") |>
-#   select(id, pmid, doi, everything()) 
-# 
-# cali_trials_doi <- cali_trials_doi |> 
-#   mutate(doi = case_when(
-#     str_detect(pmid, "10\\.") ~ str_extract(pmid, "10\\..*"),
-#     .default = doi))
-# 
-# cali_trials_doi |> 
-#   count(is.na(doi))
-# 
-# cali_dois <- cali_trials_doi |> 
-#   drop_na(doi) |>
-#   filter(doi != "") |> 
-#   select(id, doi)
-# 
-# cali_dois |> 
-#   extract_duplicates(doi)
+# cali_trials_doi <- cali_trials |>
+  # left_join(cali_dois_from_pmid, by = "pmid") |>
+  # select(id, pmid, doi, everything())
+
+cali_trials_doi <- cali_trials |>
+  mutate(doi = case_when(
+    str_detect(pmid, "10\\.") ~ str_extract(pmid, "10\\..*"),
+    .default = doi))
+
+cali_trials_doi |>
+  count(is.na(doi))
+
+cali_dois <- cali_trials_doi |>
+  drop_na(doi) |>
+  filter(doi != "") |>
+  select(id, doi)
+
+cali_dois |>
+  get_dupes(doi)
 
 # cali_dois |>
    # mutate(is_doi = str_detect(doi, "10.")) |>
    # count(is_doi)
-# cali_dois <- cali_dois |> mutate(doi = tolower(doi)) 
-# cali_dois |> write.csv2(here("data", "processed", "cali_dois.csv"), row.names = FALSE)
+cali_dois <- cali_dois |> mutate(doi = tolower(doi))
+cali_dois |> write_excel_csv2(here("data", "processed", "cali_dois.csv"))
 
-cali_dois <- vroom(here("data", "processed", "cali_dois.csv"))
+cali_dois <- read_csv2(here("data", "processed", "cali_dois.csv"))
 
 ## Remove non-extracted rows
 cali_trials <- cali_trials |>
@@ -449,7 +449,7 @@ CTgov_sample_Cali <- CTgov_sample_full |>
          summary_result_type,
          results_first_submitted_date,
          study_first_submitted_date,
-         is_prospective = has_prospective_registration,
+         is_prospective,
          is_prospective_type)
 
 
