@@ -1,17 +1,15 @@
 ## Prospective registration
 umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, color_palette) {
-  # umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, dataset_iv_umc, dataset_iv_all, toggled_registry, umc, color_palette) {
+  # umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, dataset_umc, dataset_all, toggled_registry, umc, color_palette) {
     
     # if (toggled_registry == "ClinicalTrials.gov") {
         
         dataset <- dataset |>
-            filter( ! is.na (start_date) ) |>
-            mutate(start_year = format(start_date, "%Y"))
-
+            filter(!is.na(start_date))
+        
         dataset_all <- dataset_all |>
-            filter( ! is.na (start_date) ) |>
-            mutate(start_year = format(start_date, "%Y"))
-
+            filter(!is.na(start_date))
+        
         years <- seq(from=min(dataset$start_year, na.rm=TRUE), to=max(dataset$start_year, na.rm=TRUE))
 
         plot_data <- tribble(
@@ -65,78 +63,6 @@ umc_plot_clinicaltrials_prereg <- function (dataset, dataset_all, umc_selected, 
                 )
 
         }
-        
-    # }
-
-    # if (toggled_registry == "DRKS") {
-    # 
-    #     dataset <- dataset_iv_umc |>
-    #         filter( ! is.na (start_date) ) |>
-    #         filter(registry == toggled_registry) |>
-    #         mutate(start_year = format(start_date, "%Y")) |>
-    #         filter(start_year >= 2006)
-    # 
-    #     dataset_all <- dataset_iv_all |>
-    #         filter( ! is.na (start_date) ) |>
-    #         filter(registry == toggled_registry) |>
-    #         mutate(start_year = format(start_date, "%Y")) |>
-    #         filter(start_year >= 2006)
-    # 
-    #     years <- seq(from=min(dataset$start_year), to=max(dataset$start_year))
-    # 
-    #     plot_data <- tribble(
-    #         ~year, ~all_percentage, ~umc_percentage, ~all_mouseover, ~umc_mouseover
-    #     )
-    # 
-    #     for (current_year in years) {
-    # 
-    #         numer_for_year <- dataset |>
-    #             filter(
-    #                 umc == umc_selected,
-    #                 start_year == current_year,
-    #                 is_prospective == TRUE
-    #             ) |>
-    #             nrow()
-    # 
-    #         denom_for_year <- dataset |>
-    #             filter(
-    #                 umc == umc_selected,
-    #                 start_year == current_year
-    #             ) |>
-    #             nrow()
-    # 
-    #         all_numer_for_year <-  dataset_all |>
-    #             filter(
-    #                 start_year == current_year,
-    #                 is_prospective == TRUE
-    #             ) |>
-    #             nrow()
-    # 
-    #         all_denom_for_year <- dataset_all |>
-    #             filter(
-    #                 start_year == current_year
-    #             ) |>
-    #             nrow()
-    # 
-    #         if (denom_for_year > 0) {
-    #             percentage_for_year <- round(100*numer_for_year/denom_for_year, digits=1)
-    #         } else {
-    #             percentage_for_year <- NA
-    #         }
-    # 
-    #         all_percentage_for_year <- round(100*all_numer_for_year/all_denom_for_year, digits=1)
-    #         
-    #         plot_data <- plot_data |>
-    #             bind_rows(
-    #                 tribble(
-    #                     ~year, ~all_percentage, ~umc_percentage, ~all_mouseover, ~umc_mouseover,
-    #                     current_year, all_percentage_for_year, percentage_for_year, paste0(all_numer_for_year, "/", all_denom_for_year), paste0(numer_for_year, "/", denom_for_year)
-    #                 )
-    #             )
-    # 
-    #     }
-    #     
-    # }
 
     plot_ly(
         data=plot_data,
@@ -300,13 +226,6 @@ umc_plot_linkage <- function (dataset, dataset_all, umc_selected, color_palette)
                has_pubmed == TRUE | ! is.na (doi),
                ! is.na (primary_completion_year))
 
-    # if (chosenregistry != "All") {
-    #     dataset <- dataset |>
-    #         filter(registry == chosenregistry)
-    # 
-    #     dataset_all <- dataset_all |>
-    #         filter(registry == chosenregistry)
-    # }
     
     years <- seq(from=min(dataset_all$primary_completion_year), to=max(dataset_all$primary_completion_year))
     
@@ -394,46 +313,11 @@ umc_plot_linkage <- function (dataset, dataset_all, umc_selected, color_palette)
 }
 
 ## Summary results
-umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_selected, color_palette) {
-  # umc_plot_clinicaltrials_sumres <- function (eutt_dataset, iv_dataset, iv_all_dataset, toggled_registry, umc, color_palette) {
-    # 
-    # 
-    # if (toggled_registry == "EUCTR") {
-    # 
-    #     dataset <- eutt_dataset |>
-    #         filter (date > Sys.Date()-365*1.5) ## Only look at the last year and a half
-    # 
-    #     ## Only take the latest data point per month
-    #     dataset$month <- dataset$date |>
-    #         format("%Y-%m")
-    # 
-    #     dataset <- dataset |>
-    #         group_by(umc, month) |>
-    #         arrange(desc(date)) |>
-    #         slice_head() |>
-    #         ungroup()
-    #     
-    #     all_data <- dataset |>
-    #         group_by(date) |>
-    #         mutate(avg = round(100*sum(total_reported)/sum(total_due), digits=1)) |>
-    #         mutate(mouseover = paste0(sum(total_reported), "/", sum(total_due))) |>
-    #         slice_head() |>
-    #         select(date, hash, avg, month, total_due, total_reported, mouseover) |>
-    #         rename(percent_reported = avg) |>
-    #         mutate(umc = "All") |>
-    #         ungroup()
-    #     
-    #     umc_data <- dataset |>
-    #         group_by(date) |>
-    #         filter(umc == umc_selected) |>
-    #         mutate(mouseover = paste0(sum(total_reported), "/", sum(total_due)))
-    #     
-    # } else { ## The registry is not EUCTR
+umc_plot_clinicaltrials_sumres <- function (dataset, all_dataset, umc_selected, color_palette) {
 
-        dataset <- iv_dataset |> 
+        dataset <- dataset |> 
           filter(!is.na(primary_completion_year)) |>
             filter(
-        #         registry == toggled_registry,
                 umc == umc_selected
             )
 
@@ -457,7 +341,7 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
             currentyear_denom <- nrow(currentyear_trials)
 
             currentyear_numer <- currentyear_trials |>
-                filter(has_summary_results == TRUE) |>
+                filter(is_summary_results_1y == TRUE) |>
                 nrow()
 
             umc_data <- umc_data |>
@@ -470,12 +354,8 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
             
         }
 
-        dataset <- iv_all_dataset
-        # |>
-        #     filter(
-        #         registry == toggled_registry
-        #     )
-        
+        dataset <- all_dataset
+
         all_data <- tribble(
             ~date, ~percent_reported, ~umc
         )
@@ -490,7 +370,7 @@ umc_plot_clinicaltrials_sumres <- function (iv_dataset, iv_all_dataset, umc_sele
             currentyear_denom <- nrow(currentyear_trials)
 
             currentyear_numer <- currentyear_trials |>
-                filter(has_summary_results == TRUE) |>
+                filter(is_summary_results_1y == TRUE) |>
                 nrow()
 
             all_data <- all_data |>
@@ -567,44 +447,22 @@ umc_plot_clinicaltrials_timpub_2a <- function (dataset, dataset_all, umc_selecte
     if (rt != "Summary results or manuscript publication") {
 
         if (rt == "Summary results only") {
-            # dataset <- dataset |>
-            #     filter(
-            #         has_followup_2y_sumres
-            #     )
             dataset$published_2a <- dataset$is_summary_results_2y
             
-            # dataset_all <- dataset_all |>
-            #     filter(
-            #         has_followup_2y_sumres
-            #     )
             dataset_all$published_2a <- dataset_all$is_summary_results_2y
         }
         
         if (rt == "Manuscript publication only") {
-            # dataset <- dataset |>
-            #     filter(
-            #         has_followup_2y_pub
-            #     )
+ 
             dataset$published_2a <- dataset$is_publication_2y
             
-            # dataset_all <- dataset_all |>
-            #     filter(
-            #         has_followup_2y_pub
-            #     )
             dataset_all$published_2a <- dataset_all$is_publication_2y
         }
         
     } else {
-        # dataset <- dataset |>
-        #     filter(
-        #         has_followup_2y_pub & has_followup_2y_sumres
-        #     )
+
         dataset$published_2a <- dataset$is_summary_results_2y | dataset$is_publication_2y
         
-        # dataset_all <- dataset_all |>
-        #     filter(
-        #         has_followup_2y_pub & has_followup_2y_sumres
-        #     )
         dataset_all$published_2a <- dataset_all$is_summary_results_2y | dataset_all$is_publication_2y
     }
 
@@ -714,44 +572,21 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
     if (rt != "Summary results or manuscript publication") {
 
         if (rt == "Summary results only") {
-            # dataset <- dataset |>
-            #     filter(
-            #         has_followup_5y_sumres
-            #     )
             dataset$published_5a <- dataset$is_summary_results_5y
             
-            # dataset_all <- dataset_all |>
-            #     filter(
-            #         has_followup_5y_sumres
-            #     )
             dataset_all$published_5a <- dataset_all$is_summary_results_5y
         }
         
         if (rt == "Manuscript publication only") {
-            # dataset <- dataset |>
-            #     filter(
-            #         has_followup_5y_pub
-            #     )
             dataset$published_5a <- dataset$is_publication_5y
-            
-            # dataset_all <- dataset_all |>
-            #     filter(
-            #         has_followup_5y_pub
-            #     )
+  
             dataset_all$published_5a <- dataset_all$is_publication_5y
         }
         
     } else {
-        # dataset <- dataset |>
-        #     filter(
-        #         has_followup_5y_pub & has_followup_5y_sumres
-        #     )
+
         dataset$published_5a <- dataset$is_summary_results_5y | dataset$is_publication_5y
         
-        # dataset_all <- dataset_all |>
-        #     filter(
-        #         has_followup_5y_pub & has_followup_5y_sumres
-        #     )
         dataset_all$published_5a <- dataset_all$is_summary_results_5y | dataset_all$is_publication_5y
     }
 
@@ -809,7 +644,6 @@ umc_plot_clinicaltrials_timpub_5a <- function (dataset, dataset_all, umc_selecte
         manuscript_denom <- dataset |>
             filter(
                 primary_completion_year == current_year
-                # has_followup_5y_pub
             ) |>
             nrow()
 

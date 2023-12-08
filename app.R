@@ -24,11 +24,11 @@ cali <- vroom(here("data", "California-trials_2014-2017_exp.csv"))
 cali_umc <- vroom(here("data", "cali_dashboard_umc.csv"))
 
 ## Data from the prospective registration refresh
-pros_reg_data <- vroom(here("data", "processed", "cali_prospective_registration.csv"))
+# pros_reg_data <- vroom(here("data", "processed", "cali_prospective_registration.csv"))
 
-pros_reg_data_umc <- pros_reg_data |>
-  mutate(umc = strsplit(as.character(affiliation), ", ")) |>
-  tidyr::unnest(umc)
+# pros_reg_data_umc <- pros_reg_data |>
+#   mutate(umc = strsplit(as.character(affiliation), ", ")) |>
+#   tidyr::unnest(umc)
 
 ## Load functions
 source("ui_elements.R")
@@ -286,10 +286,10 @@ server <- function (input, output, session) {
     
    ## Value for prereg
     
-    pr_unique <- pros_reg_data |>
-      filter(! is.na (start_date))
+    pr_unique <- cali |>
+      filter(!is.na(start_date))
     
-    pr_unique$start_year <- format(pr_unique$start_date, "%Y")
+    # pr_unique$start_year <- format(pr_unique$start_date, "%Y")
     
     max_start_year <- max(pr_unique$start_year)
     
@@ -446,7 +446,7 @@ server <- function (input, output, session) {
     sumres_numer <- cali |>
       filter(
         # registry == input$startsumresregistry,
-        has_summary_results == TRUE
+        is_summary_results_1y == TRUE
       ) |>
       nrow()
     
@@ -457,9 +457,9 @@ server <- function (input, output, session) {
     
     sumresval <- paste0(sumres_percent, "%")
     
-    sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=",
-                            sumres_denom, ") reported summary results")
-    
+    # sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov  reported summary results")
+    sumresvaltext <- paste0("of clinical trials (n=", sumres_denom, ") reported results within 1 year")
+
     metric_box(
       title = "Summary Results Reporting",
       value = sumresval,
@@ -564,7 +564,7 @@ server <- function (input, output, session) {
       
       timpubval <- paste0(round(100*all_numer_timpub/all_denom_timpub), "%")
       timpubvaltext <- paste0("of clinical trials completed in ",
-                              max_completion_year, " with the appropriate follow-up period (n=",
+                              max_completion_year, " (n=",
                               all_denom_timpub, ") reported results within 2 years")
     }
     
@@ -671,7 +671,7 @@ server <- function (input, output, session) {
     } else {
       timpubval5a <- paste0(round(100*all_numer_timpub5a/all_denom_timpub5a), "%")
       timpubvaltext5a <- paste0("of clinical trials completed in ",
-                                max_completion_year, " with the appropriate follow-up period (n=",
+                                max_completion_year, " (n=",
                                 all_denom_timpub5a, ") reported results within 5 years")
     }
     
@@ -877,10 +877,9 @@ server <- function (input, output, session) {
     
     ## Value for prereg
     
-    pr_unique <- pros_reg_data_umc |>
+    pr_unique <- cali_umc |>
       filter(umc == input$selectUMC,
-             ! is.na (start_date)) |>
-      mutate(start_year = format(start_date, "%Y"))
+             !is.na(start_date))
     
     max_start_year <- max(pr_unique$start_year)
     
@@ -1026,7 +1025,6 @@ server <- function (input, output, session) {
         
       )
       
-      
     }
   })
   
@@ -1048,7 +1046,7 @@ server <- function (input, output, session) {
     sumres_numer <- cali_umc |>
       filter(
         umc == input$selectUMC,
-        has_summary_results == TRUE
+        is_summary_results_1y == TRUE
       ) |>
       nrow()
     
@@ -1057,14 +1055,22 @@ server <- function (input, output, session) {
         umc == input$selectUMC,
       ) |>
       nrow()
+    max_completion_year <- cali_umc |>
+      filter(umc == input$selectUMC
+      ) |>
+      select(primary_completion_year) |>
+      max()
     
     sumres_percent <- format(100*sumres_numer/sumres_denom, digits=2)
     
     sumresval <- paste0(sumres_percent, "%")
     
-    sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=",
-                            sumres_denom, ") reported summary results")
- 
+    # sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov (n=",
+                            # sumres_denom, ") reported summary results")
+    sumresvaltext <- paste0("of clinical trials completed in ",
+                            max_completion_year, " (n=",
+                            sumres_denom, ") reported results within 1 year")
+    
     
     metric_box(
       title = "Summary Results Reporting",
@@ -1171,7 +1177,7 @@ server <- function (input, output, session) {
     } else {
       timpubval <- paste0(round(100*all_numer_timpub/all_denom_timpub), "%")
       timpubvaltext <- paste0("of clinical trials completed in ",
-                              max_completion_year, " with the appropriate follow-up period (n=",
+                              max_completion_year, " (n=",
                               all_denom_timpub, ") reported results within 2 years")
     }
     
@@ -1276,7 +1282,7 @@ server <- function (input, output, session) {
     } else {
       timpubval <- paste0(round(100*all_numer_timpub/all_denom_timpub), "%")
       timpubvaltext <- paste0("of clinical trials completed in ",
-                              max_completion_year, " with the appropriate follow-up period (n=",
+                              max_completion_year, " (n=",
                               all_denom_timpub, ") reported results within 5 years")
     }
     
@@ -1537,7 +1543,7 @@ server <- function (input, output, session) {
     
     sumres_numer <- cali_umc |>
       filter(
-        has_summary_results == TRUE
+        is_summary_results_1y == TRUE
       ) |>
       nrow()
     
@@ -1546,7 +1552,9 @@ server <- function (input, output, session) {
     
     sumres_percent <- 100*sumres_numer/sumres_denom
     
-    sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov reported summary results")
+    # sumresvaltext <- paste0("of due clinical trials registered in ClinicalTrials.gov reported summary results")
+    sumresvaltext <- "of clinical trials reported results within 1 year"
+
     
     metric_box(
       title = "Summary Results Reporting",
@@ -1568,11 +1576,11 @@ server <- function (input, output, session) {
     
     ## Value for prereg
     
-    all_numer_prereg <- pros_reg_data |>
+    all_numer_prereg <- cali |>
       filter(is_prospective == TRUE) |>
       nrow()
     
-    all_denom_prereg <- pros_reg_data |>
+    all_denom_prereg <- cali |>
       filter(! is.na(start_date)) |>
       nrow()
     
@@ -1792,7 +1800,7 @@ server <- function (input, output, session) {
     metric_box(
       title = "Results reporting within 2 years of trial completion (timely)",
       value = paste0(round(100*all_numer_timpub/all_denom_timpub), "%"),
-      value_text = "of clinical trials with the appropriate follow-up period reported results within 2 years",
+      value_text = "of clinical trials reported results within 2 years",
       plot = plotlyOutput('plot_allumc_clinicaltrials_timpub', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTimPub",
@@ -1858,7 +1866,7 @@ server <- function (input, output, session) {
     metric_box(
       title = "Results reporting within 5 years of trial completion",
       value = paste0(round(100*all_numer_timpub5a/all_denom_timpub5a), "%"),
-      value_text = "of clinical trials with the appropriate follow-up period reported results within 5 years",
+      value_text = "of clinical trials reported results within 5 years",
       plot = plotlyOutput('plot_allumc_timpub_5a', height="300px") |> 
         shinycssloaders::withSpinner(color = "#007265"),
       info_id = "infoALLUMCTimPub5a",
@@ -1976,7 +1984,7 @@ server <- function (input, output, session) {
   
   ## Preregistration plot
   output$plot_clinicaltrials_prereg <- renderPlotly({
-    return (plot_clinicaltrials_prereg(pros_reg_data, color_palette))
+    return (plot_clinicaltrials_prereg(cali, color_palette))
   })
   
   ## TRN plot
@@ -2018,7 +2026,7 @@ server <- function (input, output, session) {
   
   ## Preregistration plot
   output$umc_plot_clinicaltrials_prereg <- renderPlotly({
-    return (umc_plot_clinicaltrials_prereg(pros_reg_data_umc, pros_reg_data, input$selectUMC, color_palette))  
+    return (umc_plot_clinicaltrials_prereg(cali_umc, cali, input$selectUMC, color_palette))  
   })
   
   ## TRN plot
@@ -2060,7 +2068,7 @@ server <- function (input, output, session) {
   
   ## Preregistration
   output$plot_allumc_clinicaltrials_prereg <- renderPlotly({
-    return(plot_allumc_clinicaltrials_prereg(pros_reg_data_umc, color_palette, color_palette_bars))
+    return(plot_allumc_clinicaltrials_prereg(cali_umc, color_palette, color_palette_bars))
   })
   
   ## TRN
@@ -2099,9 +2107,9 @@ server <- function (input, output, session) {
   
   # Data tables #
   
-  output$data_table_pros_reg_data <- DT::renderDataTable({
-    make_datatable(pros_reg_data)
-  })
+  # output$data_table_pros_reg_data <- DT::renderDataTable({
+  #   make_datatable(pros_reg_data)
+  # })
   
   output$data_cali_data <- DT::renderDataTable({
     make_datatable(cali_umc)

@@ -323,7 +323,7 @@ plot_allumc_clinicaltrials_sumres <- function (iv_dataset, color_palette, color_
             currentumc_denom <- nrow(umc_trials)
 
             currentumc_numer <- umc_trials |>
-                filter(has_summary_results == TRUE) |>
+                filter(is_summary_results_1y == TRUE) |>
                 nrow()
 
             plot_data <- plot_data |>

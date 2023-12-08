@@ -1,72 +1,71 @@
-name;type;description;levels
-id;character;Trial registration number, a ClinicalTrials.gov NCT id ;
-pmid;numeric;Publication PMID. Manually entered during publication search or derived from DOI via FatCat.;NA
-doi;character;Publication DOI. Manually entered during publication search or derived from PMID via FatCat.;NA
-any_paper;;;
-publication_found;;;
-publication_date;date;Publication date. Manually entered during publication search. Earliest date used, whether ePub or print pub date.;NA
-comments_from_doublecheck;;;
-last_update_submitted_date;;;
-registration_date;date;Date of study submission to registry, as given on registry.;NA
-study_type;character;NA;"Interventional; Observational"
-phase;character;Trial phase, as given on registry;"Early Phase 1; Not Applicable; Phase 1; Phase 1/Phase 2; Phase 2; Phase 2/Phase 3; Phase 3; Phase 4"
-enrollment;numeric;Number of trial participants, as given on registry. May be anticipated or actual number.;NA
-recruitment_status;character;Recruitment status, as given on registry.;"Active, not recruiting; Completed; Suspended; Terminated"
-title;character;NA;NA
-start_date;date;Date of the study start, as given on registry. ClinicalTrials.gov previously allowed start dates without day, in which case date is defaulted to first of the month.;NA
-completion_date;date;Date of the study completion, as given on registry. ClinicalTrials.gov previously allowed completion dates without day, in which case date is defaulted to first of the month.;NA
-primary_completion_date;date;Date of the study primary completion, as given on registry. ClinicalTrials.gov only. ClinicalTrials.gov previously allowed primary completion dates without day, in which case date is defaulted to first of the month.;NA
-has_summary_results;logical;Whether summary results were posted on registry. ClinicalTrials.gov includes a structured summary results field.;NA
-allocation;character;Trial allocation and randomization, as given on registry.;"Non-Randomized; Randomized;"
-masking;character;Trial masking, as given on registry, ClinicalTrials.gov. None (Open Label), Single, Double, Triple, Quadruple;
-main_sponsor;character;Whether main sponsor is industry or other, as given on registry. For ClinicalTrials.gov, sourced from `agency_class` in `sponsors` datatable , and `Other` includes NIH.;
-is_multicentric;logical;Whether multiple study centers are involved, as given on registry. Derived from `has_single_facility`.;NA
-principle_investigator_1;;;
-principle_investigator_2;;;
-principle_investigator_3;;;
-study_chair_1;;;
-study_chair_2;;;
-study_director_1;;;
-study_director_2;;;
-unspecified_official;;;
-sub_investigator;;;
-registration_year;numeric;Year of the study registration. Derived from `registration_date`.;NA
-start_year;numeric;Year of the study start. Derived from `start_date`.;NA
-completion_year;numeric;Year of the study completion. Derived from `completion_date`.;NA
-primary_completion_year;numeric;Year of the study primary completion. Derived from `primary_completion_date`. ClinicalTrials.gov only.;NA
-affiliation;character;;
-initial_doublecheck;;;
-main_sample_rater;;;
-publication_type;character;Type of identified publication. Can be journal publication or dissertation.;"abstract; dissertation; journal publication"
-has_reg_pub_link;logical;NA;NA
-color_green_only;character;NA;"bronze; closed; gold; green; hybrid"
-color;character;NA;"bronze; closed; gold; green; hybrid"
-issn;character;NA;NA
-journal;character;NA;NA
-publisher;character;NA;NA
-publication_date_unpaywall;date;NA;NA
-has_followup_2y;logical;NA;NA
-has_followup_2y_pub;logical;NA;NA
-has_followup_2y_sumres;logical;NA;NA
-has_followup_5y;logical;NA;NA
-has_followup_5y_pub;logical;NA;NA
-has_followup_5y_sumres;logical;NA;NA
-is_summary_results_2y;logical;NA;NA
-is_summary_results_5y;logical;NA;NA
-is_publication_2y;logical;NA;NA
-is_publication_5y;logical;NA;NA
-has_publication;logical;NA;NA
-has_pubmed;logical;NA;NA
-has_ft;logical;Whether full text of the article was retreived.;NA
-ft_source;character;The source of the full text of the article.;"doi; pmid"
-ft_doi;logical;NA;NA
-pub_title;character;NA;NA
-journal_pubmed;character;NA;NA
-ppub_date;character;NA;NA
-epub_date;date;NA;NA
-citation;character;NA;NA
-registry;character;NA;NA
-has_trn_secondary_id;logical;Whether a trial number was detected via secondary id.;NA
-has_trn_abstract;logical;Whether a trial number was detected in the abstract.;NA
-has_trn_ft;logical;Whether a trial number was detected in the full text.;NA
-is_prospective;logical;Whether trial was prospectively registered. Derived from `study_first_submitted_date` and `start_date`. Trial is considered prospectively registered if registered in the same or previous months to start date.;NA
+﻿Variable,Definition,Source
+id,Trial registration number  - ClinicalTrials.gov NCT id,AACT database
+pmid,Publication PMID or URL,Manually entered during publication search
+doi,Publication DOI,Manually entered during publication search or extracted using  PMID (see methods)
+any_paper,"(0=no paper, 1=article, 2=non-publication equivalent like abstract or poster)",Manually entered during publication search
+publication_found,"(1=linked in registry, 2=google search - trial number,  3=google search - PI + intervention, 4=google either via trial number or search terms)",Manually entered during publication search
+publication_date,Publication date,Manually entered during publication search or extracted using  PMID (see methods)
+last_update_submitted_date,Last date of update on the ClinicalTrials.gov,AACT database
+registration_date,Date of study submission to ClinicalTrials.gov,AACT database
+summary_results_date,"Date of summary results in ClinicalTrials.gov - date of submission to registry, derived from `results_first_submitted_date` (field previously called `first_received_results_date`). ",AACT database
+study_type,Trial study type as listed in the registry on `registry_download_date`.,AACT database
+phase,Trial phase as listed on the ClinicalTrials.gov,AACT database
+enrollment,Number of trial participants as listed on the ClinicalTrials.gov,AACT database
+recruitment_status,Recruitment status as listed on the ClinicalTrials.gov,AACT database
+title,Title of the trial - `brief_title` on ClinicalTrials.gov,AACT database
+start_date,"Date of the study start. ClinicalTrials.gov previously allowed start dates without day, in which case date is defaulted to first of the month.",AACT database
+completion_date,"Date of the study completion. ClinicalTrials.gov previously allowed completion dates without day, in which case date is defaulted to first of the month.",AACT database
+primary_completion_date,"Date of the study primary completion. ClinicalTrials.gov previously allowed primary completion dates without day, in which case date is defaulted to first of the month.",AACT database
+has_summary_results,Whether summary results were posted on registry. ClinicalTrials.gov includes a structured summary results field. ,AACT database
+allocation,Trial allocation as listed on ClinicalTrials.gov,AACT database
+masking,Trial masking as listed on ClinicalTrials.gov,AACT database
+main_sponsor,Sourced from ClinicalTrials.gov `agency_class` in `sponsors` datatable,"AACT database, this already contains about as much as we can easily get on funder information, anything else would require a lot of curation. With the addition of other sponsor info this column can be deleted from the main xlsx table"
+is_multicentric,Whether multiple study centers are involved. Derived from `has_single_facility` on ClinicalTrials.gov.,AACT database
+principal_investigator_1,Extracted from `investigators` field on ClinicalTrials.gov.,AACT database
+principal_investigator_2,Extracted from `investigators` field on ClinicalTrials.gov.,AACT database
+principal_investigator_3,Extracted from `investigators` field on ClinicalTrials.gov.,AACT database
+study_chair_1,Extracted from `investigators` field on ClinicalTrials.gov.,AACT database
+study_chair_2,Extracted from `investigators` field on ClinicalTrials.gov.,AACT database
+study_director_1,Extracted from `investigators` field on ClinicalTrials.gov.,AACT database
+registration_year,Date of study submission to registry,AACT database
+start_year,"Study start date. ClinicalTrials.gov previously allowed start dates without day, in which case date is defaulted to first of the month.",AACT database
+completion_year,Year of the study completion. Derived from `completion_date`.,AACT database
+primary_completion_year,Year of the study primary completion. Derived from `primary_completion_date`. ,AACT database
+affiliation,UNKNOWN,"unsure, as it was added in original extraction, which I was not involved with"
+publication_type,Publication types classified by extractors. ,Created by authors
+has_reg_pub_link,"Whether `doi` and/or `pmid` of results publication appear in registry references data. For ClinicalTrials.gov,""study_references"" table on AACT, which includes references on website under ""More Information"" (""Publications"",""Publications of Results"",""Publications automatically indexed to this study by ClinicalTrials.gov Identifier (NCT Number)"").",AACT database
+color,"The OA status ""green"" may include (self-)archived versions of a publication as well as preprints. ",Unpaywall
+issn,"Any ISSNs assigned to the journal of the publication, based on Unpaywall.",Unpaywall
+journal,"Name of the journal of the publication, based on Unpaywall.",Unpaywall
+publisher,"Name of the publisher of the publication, based on Unpaywall. Only where `has_publication` is TRUE and DOI resolves in Unpaywall on the query date.",Unpaywall
+publication_date_unpaywall,"Publication date of the publication, based on Unpaywall. Only where `has_publication` is TRUE and DOI resolves in Unpaywall on the query date.",Unpaywall
+any_open_access,"1 for green, gold, hybrid, 2 for bronze, NA otherwise",Derived from Unpaywall
+is_prospective,Whether trial was registered in same month or before the start_date,Derived from AACT
+is_summary_results_1y,Whether trial had summary results posted on registry within 1 year of completion.,Derived from AACT
+is_summary_results_2y,Whether trial had summary results posted on registry within 2 years of completion.,Derived from AACT
+is_summary_results_5y,Whether trial had summary results posted on registry within 5 years of completion.,Derived from AACT
+is_publication_2y,Whether trial had publication within 2 years completion.,Derived from AACT
+is_publication_5y,Whether trial had publication within 5 years completion.,Derived from AACT
+publication_date_type,Whether the date had only month and year (Estimated) or also day (Exact),"Derived from publication_date (watch out, Excel autocompletes to the first of the month!)"
+has_publication,Whether results publication was found for trial. TRUE only if `any_paper` > 0.,Calculated
+has_pubmed,Whether results publication found for trial is indexed in PubMed with PubMedID (PMID). NA if no PMID. FALSE if PMID (or URL) but no PubMed record.,Calculated
+has_ft,"Has full text. NA if no publication, FALSE if only the abstract, but not the full publication could be accessed, TRUE if the full text of the publication could be accessed.",Calculated
+pub_title,Title of results publication from PubMed.,PubMed
+journal_pubmed,Journal title from PubMed,PubMed
+ppub_date,"Publication date on which the issue of the journal was published, from PubMed.",PubMed
+epub_date,"Electronic publication date of the results publication, from PubMed. ",PubMed
+citation,Citation of  publication from PubMed.,PubMed
+has_trn_secondary_id,Whether `id` appears in PubMed secondary id. NA if `has_pubmed` not TRUE.,PubMed
+has_trn_abstract,Whether `id` appears in PubMed abstract. NA if `has_pubmed` not TRUE.,PubMed
+has_trn_ft,"Whether `id` appears in full text of results publication. Limited to publication ""body"" per PDF-to-XML extraction by GeneRation Of BIbliographic Data (GROBID).",PubMed
+trial_shared,Whether more than one UMCs were in the affiliations,Derived from affiliation
+multiple,The number of different institutions sharing the affiliations,Derived from affiliation
+start_month_year,Exact date from the AACT database,AACT database
+start_date_type,Whether the date had only month and year (Estimated) or also day (Exact),Derived from AACT
+completion_month_year,Exact date from the AACT database,AACT database
+completion_date_type,Whether the date had only month and year (Estimated) or also day (Exact),Derived from AACT
+primary_completion_month_year,Exact date from the AACT database,AACT database
+primary_completion_date_type,Whether the date had only month and year (Estimated) or also day (Exact),Derived from AACT
+agency_class,List of agency classes extracted from the AACT,Derived from AACT
+sponsor_name,List of sponsor names extracted from the AACT,Derived from AACT
+umc,Name of University,"Derived from affiliation, but in long format with one row per UMC, as opposed to one row per trial number"
