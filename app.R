@@ -17,7 +17,7 @@ library(gt)
 
 ## Load data
 
-reference_year <- 2022
+reference_year <- 2021
 
 cali <- vroom(here("data", "California-trials_2014-2017_exp.csv"))
 
@@ -713,9 +713,9 @@ server <- function (input, output, session) {
     oa_set <- cali |>
       filter(
         has_publication == TRUE,
-        publication_type == "journal publication",
-        ! is.na(doi),
-        ! is.na(publication_date_unpaywall)
+        publication_type == "journal publication"
+        # ! is.na(doi),
+        # ! is.na(publication_date_unpaywall)
       ) |>
       distinct(doi, .keep_all=TRUE)
     
@@ -725,13 +725,13 @@ server <- function (input, output, session) {
     all_numer_oa <- oa_set |>
       filter(
         color == "gold" | color == "green" | color == "hybrid",
-        oa_year == reference_year - 1
+        oa_year == reference_year
       ) |>
       nrow()
     
     # Keep pubs with NA color for now 
     all_denom_oa <- oa_set |>
-      filter(oa_year == reference_year - 1) |>
+      filter(oa_year == reference_year) |>
       nrow()
   
     
@@ -752,7 +752,7 @@ server <- function (input, output, session) {
           metric_box(
             title = "Open Access (OA)",
             value = paste0(round(100*all_numer_oa/all_denom_oa), "%"),
-            value_text = paste0("of publications from ", reference_year - 1,
+            value_text = paste0("of publications from ", reference_year,
                                 " (n=", all_denom_oa, ") are Open Access (Gold, Green or Hybrid)"),
             plot = plotlyOutput('plot_opensci_oa', height="300px") |> 
               shinycssloaders::withSpinner(color = "#007265"),
