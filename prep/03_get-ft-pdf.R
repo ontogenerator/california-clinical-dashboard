@@ -23,11 +23,11 @@ library(readxl)
 ## │       │   │   └── xml
 dir_ft       <- here("data", "raw", "fulltext")
 dir_doi      <- path(dir_ft, "doi")
-# dir_pmid     <- path(dir_ft, "pmid")
+dir_pmid     <- path(dir_ft, "pmid")
 dir_doi_pdf  <- dir_create(path(dir_doi, "pdf"))
-# dir_pmid_pdf <- dir_create(path(dir_pmid, "pdf"))
+dir_pmid_pdf <- dir_create(path(dir_pmid, "pdf"))
 dir_doi_xml  <- dir_create(path(dir_doi, "xml"))
-# dir_pmid_xml <- dir_create(path(dir_pmid, "xml"))
+dir_pmid_xml <- dir_create(path(dir_pmid, "xml"))
 
 
 source(here("prep", "functions", "retrieve_pdf.R"))
