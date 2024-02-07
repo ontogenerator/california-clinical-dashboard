@@ -461,8 +461,8 @@ CTgov_sample_Cali <- CTgov_sample_Cali |>
 CTgov_sample_Cali |> 
   count(agency_class, sort = TRUE)
 
-# affils <- cali_trials |> 
-#   select(id, affiliation)
+affils <- cali_trials |>
+  select(id, affiliation)
 
 CTgov_sample_Cali <- CTgov_sample_Cali |> 
   left_join(affils, by = "id")
@@ -502,8 +502,6 @@ cali_umc <- cali_trials |>
 cali_umc |> 
   write_excel_csv2(here("data", "cali_dashboard_umc.csv"))
 
-# write_excel_csv2(CTgov_sample_Cali,
-#                  here("data", "processed", "cali_prospective_registration.csv"))
 
 cali_trials |> 
   distinct(doi, .keep_all = TRUE) |> 
@@ -566,4 +564,46 @@ rfs <- CTgov_sample_Cali |>
   select(id, contains("completion"), everything())
 
 
+rds <- cali_trials |> 
+  select(id, registration_date)
 
+rds_compare <- CTgov_sample_full |> 
+  select(id = nct_id, study_first_submitted_date) |> 
+  right_join(rds)
+
+pub_dates$publication_date |> class()
+pub_dates$ppub_date |> class()
+
+
+pub_dates <- cali_trials |> 
+  select(id, pmid, doi, publication_date, epub_date, ppub_date, publication_date_unpaywall) |> 
+  mutate(epub_date = as.POSIXct(epub_date, tz = "UTC"),
+         publication_date_unpaywall = as.POSIXct(publication_date_unpaywall, tz = "UTC"),
+         ppub_date = case_when(
+           str_count(ppub_date, "-") == 2 ~ as.POSIXct(ymd(ppub_date), tz = "UTC"),
+           .default = NA
+         )) |> 
+  rowwise() |> 
+  mutate(min_date = min(epub_date, ppub_date, publication_date_unpaywall, na.rm = TRUE))
+
+
+pdu <- pub_dates |> 
+  filter(!is.na(epub_date)) |> 
+  filter(publication_date != epub_date) |> 
+  select(id, doi, contains("date")) 
+
+pd <- pub_dates |> 
+  filter(is.na(epub_date)) |> 
+  filter(publication_date != publication_date_unpaywall) |> 
+  select(id, doi, contains("date"))
+
+
+cali_trials |> 
+  select(id, contains("date"))
+
+cali_trials |> 
+  select(id, publication_date, doi, pmid, has_publication, has_pubmed, publication_type, has_trn_ft) |> 
+  filter(id == "NCT01823458")
+
+cali_qa <- cali_trials |> 
+  select(id, publication_date, doi, pmid, any_paper, publication_type, contains("has_"))

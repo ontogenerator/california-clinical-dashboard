@@ -19,7 +19,6 @@ pmids <-
   pull()
 
 
-
 # If pmids already downloaded, remove those from list to download
 if (dir_exists(dir)){
   

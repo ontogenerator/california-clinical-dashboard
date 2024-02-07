@@ -9,8 +9,6 @@ library(here)
 library(janitor)
 library(readxl)
 
-
-
 cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
 cali_dois <- vroom(here("data", "processed", "cali_dois.csv"), delim = ";") |> 
   rename(nct_id = id)
@@ -18,7 +16,7 @@ cali_dois <- vroom(here("data", "processed", "cali_dois.csv"), delim = ";") |>
 # Prepare paths
 dir_pubmed <- here("data", "raw", "pubmed")
 dir_doi_xml <- here("data", "raw", "fulltext", "doi", "xml")
-# dir_pmid_xml <- here("data", "raw", "fulltext", "pmid", "xml")
+dir_pmid_xml <- here("data", "raw", "fulltext", "pmid", "xml")
 
 dir_pubmed_processed <- dir_create(here("data", "processed", "pubmed"))
 
@@ -37,13 +35,12 @@ ft_doi_retrieved <-
   str_replace_all("\\+", "/") |> 
   tolower()
 
-# ft_pmid_retrieved <-
-# dir_pmid_xml |>
-# dir_ls() |>
-# path_file() |>
-# str_remove(".tei.xml$") |>
-# str_replace_all("\\+", "/") |>
-# tolower()
+# ft_pmid_retrieved <- dir_pmid_xml |>
+#   dir_ls() |>
+#   path_file() |>
+#   str_remove(".tei.xml$") |>
+#   str_replace_all("\\+", "/") |>
+#   tolower()
 
 pubmed_ft_retrieved <-
   cali |>
