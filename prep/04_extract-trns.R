@@ -16,6 +16,13 @@ cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
 cali_dois <- vroom(here("data", "processed", "cali_dois.csv"), delim = ";") |> 
   rename(nct_id = id)
 
+valid_doi_ids <- cali_trials |>
+  filter(any_paper == 1) |> 
+  pull(nct_id)
+
+cali_dois <- cali_dois |> 
+  filter(nct_id %in% valid_doi_ids)
+
 pubmed_ft_retrieved <- read_rds(here("data", "processed", "pubmed", "pubmed-ft-retrieved.rds"))
 
 # Prepare directory paths
@@ -31,7 +38,6 @@ pmids_dois <-
 
 # Extract TRNs from: PubMed secondary identifier, PubMed abstract, and PDF full-text
 pubmed_xmls <- dir_ls(here("data", "raw", "pubmed"))
-
 
 # Secondary identifier ----------------------------------------------------
 
@@ -50,7 +56,7 @@ si_trn_mismatches <-
   si |>
   filter(!accession_number %in% trn |
            !databank %in% registry)
-# write_rds(si_trn_mismatches, path_wd("data", "processed", "si-trn-mismatches", ext = "rds"))
+write_rds(si_trn_mismatches, path_wd("data", "processed", "si-trn-mismatches", ext = "rds"))
 
 si <-
   si |>
@@ -94,7 +100,7 @@ abs <-
     source = "abstract",
     trn_cleaned = purrr::map_chr(trn_detected, ctregistries::clean_trn)
   ) |>
-  left_join(pmids_dois, by  = "pmid")
+  left_join(pmids_dois, by = "pmid")
 # 
 # manual_abs <- tribble(pmid = "",
 #                       registry = "ClinicalTrials.gov",
@@ -125,16 +131,16 @@ ft_doi <-
   left_join(pmids_dois, by = "doi")
 
 
-# manual_nondoi <- tibble(doi = "hilarispublisher.com+fg3019+26153",
-#                       n_detected = 1,
-#                       trn_detected = "NCT01181245",
-#                       registry = "ClinicalTrials.gov",
-#                       source = "ft",
-#                       trn_cleaned = "NCT01181245",
-#                       pmid = "https://www.hilarispublisher.com/abstract/fg3019-a-human-monoclonal-antibody-to-connective-tissue-growth-factor-combined-with-chemotherapy-in-patients-with-locall-26153.html")
-# 
-# ft_doi2 <- ft_doi |> 
-#   rows_append(manual_nondoi)
+manual_nondoi <- tibble(doi = NA,
+                      n_detected = 1,
+                      trn_detected = "NCT01181245",
+                      registry = "ClinicalTrials.gov",
+                      source = "ft",
+                      trn_cleaned = "NCT01181245",
+                      pmid = "https://www.hilarispublisher.com/abstract/fg3019-a-human-monoclonal-antibody-to-connective-tissue-growth-factor-combined-with-chemotherapy-in-patients-with-locall-26153.html")
+
+ft_doi <- ft_doi |>
+  rows_append(manual_nondoi)
 
 
 write_rds(ft_doi, path(dir_trn, "trn-ft-doi.rds"))
@@ -145,11 +151,10 @@ write_rds(ft_doi, path(dir_trn, "trn-ft-doi.rds"))
 
 
 # ft_nondoi_xmls <-
-#   dir_ls(here("data", "raw", "fulltext", "nondoi", "xml"))
+#   dir_ls(here("data", "raw", "fulltext", "pmid", "xml"))
 # 
 # ft_nondoi <- ft_nondoi_xmls |>
 #   purrr::map_dfr(get_grobid_ft_trn) |>
-#   select(-doi) |>
 #   rename(trn_detected = trn, n_detected = n) |>
 #   mutate(
 #     source = "ft",
@@ -214,7 +219,7 @@ trn_combined <-
   select(-id, -ft_source, -ft_doi) |>
   janitor::remove_empty("rows") |>
   distinct() |>
-  (\(x) left_join(trn_combined, x, by = c("pmid", "doi")))() %>% 
+  (\(x) left_join(trn_combined, x, by = c("pmid", "doi")))() %>% # here because pmid??
     # Check that no rows added
   assertr::verify(nrow(.) == nrow(trn_combined)) |>
   
@@ -260,4 +265,7 @@ pubmed_main <-
   mutate(doi = tolower(doi))
 
 write_rds(pubmed_main, path(dir, "pubmed-main", ext = "rds"))
+
+
+# get_grobid_ft_trn("data/raw/fulltext/doi/xml/10.1177+237946152100700104.tei.xml")
 

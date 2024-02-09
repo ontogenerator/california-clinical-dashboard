@@ -8,8 +8,17 @@ library(janitor)
 library(readxl)
 
 cali_trials_original <- vroom(here("data", "California-trials_2014-2017.csv"))
-cali_trials <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
-
+cali_trials_xlsx <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+cali_trials <- read_csv(here("data", "California-trials_2014-2017_main.csv"))
+# all.equal(cali_trials, cali_trials2)
+cali_trials2 <- cali_trials |>
+  mutate(primary_completion_date = as.POSIXct(primary_completion_date)) |>
+  rows_upsert(pub_dates, by = "nct_id") |>
+  rows_upsert(cali_trials_cdates, by = "nct_id") |>
+  write_csv(here("data", "California-trials_2014-2017_main.csv"))
+# setdiff(names(cali_trials2), names(cali_trials))
+# glimpse(cali_trials2)
+glimpse(cali_trials)
 incomplete_dates <- cali_trials_original |> 
   filter(str_detect(publication_date, " ")) |> 
   pull(nct_id)
@@ -92,10 +101,10 @@ get_dupes(cali_trials, id)
    # mutate(is_doi = str_detect(doi, "10.")) |>
    # count(is_doi)
 # cali_dois <- cali_dois |> mutate(doi = tolower(doi))
+
 # cali_dois |> write_excel_csv2(here("data", "processed", "cali_dois.csv"))
 
 cali_dois <- read_csv2(here("data", "processed", "cali_dois.csv"))
-
 ## Remove non-extracted rows
 cali_trials <- cali_trials |>
   left_join(cali_dois) |> # add doi from pubmed
@@ -103,10 +112,9 @@ cali_trials <- cali_trials |>
   select(id, pmid, doi, everything())
 
 ## Read OA data from Delwen
-oa <- vroom(here("data", "processed", "cali_data_oa.csv")) |> 
-  select(-color_green_only)
+oa <- vroom(here("data", "processed", "cali_data_oa.csv")) 
 oa_manual <- read_xlsx(here("data", "processed", "oa_manual.xlsx")) |> 
-  mutate(doi = tolower(doi))
+  mutate(across(everything(), as.character))
 ## Combine extracted data and OA data
 cali_trials <- cali_trials |>
   left_join(oa, by = "doi") |> 
@@ -117,44 +125,10 @@ cali_trials <- cali_trials |>
     .default = 1
   ))
 
+
 # cali_trials$start_date |> class()
 # cali_trials$registration_date |> class()
 # cali_trials$completion_date |> class()
-
-cali_trials <- cali_trials |> 
-  mutate(
-  is_prospective = floor_date(start_date, "month") >=
-    floor_date(registration_date, "month"),
-  is_summary_results_1y = case_when(
-    is.na(summary_results_date) ~ FALSE,
-    .default = as.Date(summary_results_date) <= 
-      as.Date(primary_completion_date) + 365
-  ),  
-  is_summary_results_2y = case_when(
-    is.na(summary_results_date) ~ FALSE,
-    .default = as.Date(summary_results_date) <=
-      as.Date(primary_completion_date) + 365*2
-  ),
-  is_summary_results_5y = case_when(
-    is.na(summary_results_date) ~ FALSE,
-    .default = as.Date(summary_results_date) <=
-      as.Date(primary_completion_date) + 365*5
-  ),
-  is_publication_2y = case_when(
-    is.na(publication_date) ~ FALSE,
-    .default = as.Date(publication_date) <=
-      as.Date(primary_completion_date) + 365*2
-  ),
-  is_publication_5y = case_when(
-    is.na(publication_date) ~ FALSE,
-    .default = as.Date(publication_date) <=
-      as.Date(primary_completion_date) + 365*5
-  ),
-  publication_date_type = case_when(
-    id %in% incomplete_dates ~ "Estimated",
-    .default = "Exact")
-  ,
-  has_publication = ifelse(any_paper > 0, TRUE, FALSE))
 
 dir_raw <- here("data", "raw")
 dir_processed <- here("data", "processed")
@@ -209,19 +183,71 @@ pubmed <-
     citation
   )
 
+
+# cali_trials |> 
+#   filter(id == "NCT01564381") |> 
+#   select(id, doi, pmid)
+# 
+# pubmed_ft_retrieved |>
+#   filter(id == "NCT01564381") |>
+#   select(id, doi, pmid)
+
 cali_trials <- cali_trials |>
   
   # Add info about pubmed and ft (pdf) retrieval
   left_join(pubmed_ft_retrieved,
-            by = c("id", "doi", "pmid")) |>
+            # by = c("id", "doi")
+            by = c("id", "doi", "pmid")
+            ) |>
   
   # Add pubmed metadata
   left_join(pubmed, by = "pmid")
 
 no_pmids <- trn_reported_wide |> filter(is.na(pmid))
+
+cali_trials <- cali_trials |> 
+  mutate(
+    is_prospective = floor_date(start_date, "month") >=
+      floor_date(registration_date, "month"),
+    is_prospective_usa = registration_date <= start_date + days(21),
+    is_summary_results_1y = case_when(
+      is.na(summary_results_date) ~ FALSE,
+      .default = as.Date(summary_results_date) <= 
+        as.Date(primary_completion_date) + 365
+    ),  
+    is_summary_results_2y = case_when(
+      is.na(summary_results_date) ~ FALSE,
+      .default = as.Date(summary_results_date) <=
+        as.Date(primary_completion_date) + 365*2
+    ),
+    is_summary_results_5y = case_when(
+      is.na(summary_results_date) ~ FALSE,
+      .default = as.Date(summary_results_date) <=
+        as.Date(primary_completion_date) + 365*5
+    ),
+    is_publication_2y = case_when(
+      is.na(publication_date) ~ FALSE,
+      .default = as.Date(publication_date) <=
+        as.Date(primary_completion_date) + 365*2
+    ),
+    is_publication_5y = case_when(
+      is.na(publication_date) ~ FALSE,
+      .default = as.Date(publication_date) <=
+        as.Date(primary_completion_date) + 365*5
+    ),
+    publication_date_type = case_when(
+      id %in% incomplete_dates ~ "Estimated",
+      .default = "Exact")
+    ,
+    has_publication = ifelse(any_paper > 0, TRUE, FALSE))
+
+usa_check <- cali_trials |> 
+  select(id, doi, contains("is_prosp"), start_date, registration_date)
+
 # Add trns ------------------------------------------------------
 # cali_trials |> count(has_trn_ft)
 # ct <- cali_trials |> select(id, pmid, doi, contains("has"))
+
 
 cali_trials <-
   cali_trials |> 
@@ -502,68 +528,59 @@ cali_umc <- cali_trials |>
 cali_umc |> 
   write_excel_csv2(here("data", "cali_dashboard_umc.csv"))
 
-
 cali_trials |> 
   distinct(doi, .keep_all = TRUE) |> 
   count(is.na(has_trn_ft))
 
-missing_pdfs <- cali_trials |> 
-  distinct(doi, .keep_all = TRUE) |> 
-  filter(is.na(has_trn_ft),
-         any_paper != 2,
-         str_detect(doi, "^10.")) |> 
-  select(doi, pmid)
+# missing_pdfs <- cali_trials |> 
+#   distinct(doi, .keep_all = TRUE) |> 
+#   filter(is.na(has_trn_ft),
+#          any_paper != 2,
+#          str_detect(doi, "^10.")) |> 
+#   select(doi, pmid)
 
 pt <- cali_trials |> 
   select(publication_type, doi, has_trn_ft) |> 
   filter(!is.na(doi))
 
-
 pt |> 
   filter(publication_type != "abstract") |> 
   count(has_trn_ft)
 
+# 
+# cali_prosp <- cali_trials |> 
+#   left_join(CTgov_sample_Cali, by = "id") |> 
+#   rowwise() |> 
+#   mutate(start_date_type = case_when(
+#     !str_detect(start_month_year, ",")  ~ "Estimated",
+#     .default = "Exact"
+#   )) |> 
+#   select(id, is_prospective, is_prospective_type, study_first_submitted_date, results_first_submitted_date,
+#          start_date_type, start_month_year, contains("start_date"), contains("primary_completion"),
+#          everything()) 
+# 
+# cali_prosp |> count(start_date_type)
 
-
-cali_prosp <- cali_trials |> 
-  left_join(CTgov_sample_Cali, by = "id") |> 
-  rowwise() |> 
-  mutate(start_date_type = case_when(
-    !str_detect(start_month_year, ",")  ~ "Estimated",
-    .default = "Exact"
-  )) |> 
-  select(id, is_prospective, is_prospective_type, study_first_submitted_date, results_first_submitted_date,
-         start_date_type, start_month_year, contains("start_date"), contains("primary_completion"),
-         everything()) 
-
-cali_prosp |> count(start_date_type)
-
-
-cali_prosp |> 
-  count(is_prospective,
-        is_prospective_type)
+# 
+# cali_prosp |> 
+#   count(is_prospective,
+#         is_prospective_type)
 
 orig_dates <- cali_trials |> 
-  filter(id != "NCT01474746") |> 
   select(id, contains("date"))
 
-get_dupes(reg_dates, id)
 
-reg_dates |> 
-  slice(849)
+# rfs <- CTgov_sample_Cali |> 
+#   left_join(orig_dates, by = "id") |> 
+#   mutate(completion_date_match = case_when(
+#     !str_detect(completion_month_year, ",") ~ floor_date(completion_date.x, "month") ==
+#       completion_date.y,
+#     .default = completion_date.x == completion_date.y,
+#   )
+#            ) |> 
+#   select(id, contains("completion"), everything())
 
-rfs <- CTgov_sample_Cali |> 
-  filter(id != "NCT01474746") |> 
-  left_join(orig_dates, by = "id") |> 
-  mutate(completion_date_match = case_when(
-    !str_detect(completion_month_year, ",") ~ floor_date(completion_date.x, "month") ==
-      completion_date.y,
-    .default = completion_date.x == completion_date.y,
-  )
-           ) |> 
-  select(id, contains("completion"), everything())
-
-
+# proof that study_first_submitted_date = registration_date
 rds <- cali_trials |> 
   select(id, registration_date)
 
@@ -571,21 +588,42 @@ rds_compare <- CTgov_sample_full |>
   select(id = nct_id, study_first_submitted_date) |> 
   right_join(rds)
 
-pub_dates$publication_date |> class()
-pub_dates$ppub_date |> class()
-
 
 pub_dates <- cali_trials |> 
   select(id, pmid, doi, publication_date, epub_date, ppub_date, publication_date_unpaywall) |> 
   mutate(epub_date = as.POSIXct(epub_date, tz = "UTC"),
-         publication_date_unpaywall = as.POSIXct(publication_date_unpaywall, tz = "UTC"),
+         publication_date_unpaywall = case_when(
+           !str_detect(publication_date_unpaywall, "-01-01") ~ as.POSIXct(publication_date_unpaywall, tz = "UTC"),           .default = NA),
          ppub_date = case_when(
            str_count(ppub_date, "-") == 2 ~ as.POSIXct(ymd(ppub_date), tz = "UTC"),
            .default = NA
          )) |> 
   rowwise() |> 
-  mutate(min_date = min(epub_date, ppub_date, publication_date_unpaywall, na.rm = TRUE))
+  mutate(
+    # min_date = min(epub_date, ppub_date, na.rm = TRUE),
+         
+         min_3_date = case_when(
+           month(publication_date_unpaywall) == month(publication_date) & 
+             year(publication_date_unpaywall) == year(publication_date) ~
+             min(c(epub_date, ppub_date, publication_date), na.rm = TRUE),
+           is.na(epub_date) & is.na(ppub_date) & is.na(publication_date_unpaywall) ~ publication_date,
+           .default = min(c(epub_date, ppub_date, publication_date_unpaywall), na.rm = TRUE))
+         )
 
+pub_dates <- pub_dates |> 
+  select(nct_id = id, publication_date = min_3_date)
+
+
+fom <- pub_dates |> 
+  filter(!is.na(publication_date),
+         str_detect(publication_date_unpaywall, "-01$"),
+         publication_date_unpaywall == min_3_date,
+         publication_date_unpaywall != publication_date
+  )
+
+pub_dates |> 
+  count(is.na(epub_date), is.na(ppub_date), is.na(publication_date_unpaywall),
+        is.na(publication_date))
 
 pdu <- pub_dates |> 
   filter(!is.na(epub_date)) |> 
@@ -597,6 +635,17 @@ pd <- pub_dates |>
   filter(publication_date != publication_date_unpaywall) |> 
   select(id, doi, contains("date"))
 
+pdmin <- pub_dates |> 
+  filter(!is.na(epub_date)) |> 
+  filter(publication_date != min_date) |> 
+  select(id, doi, contains("date")) 
+
+
+new_pd <- pub_dates |> 
+  filter(min_3_date < Inf) |> 
+  filter(publication_date != min_3_date) |> 
+  select(id, doi, contains("date"))
+
 
 cali_trials |> 
   select(id, contains("date"))
@@ -606,4 +655,57 @@ cali_trials |>
   filter(id == "NCT01823458")
 
 cali_qa <- cali_trials |> 
-  select(id, publication_date, doi, pmid, any_paper, publication_type, contains("has_"))
+  select(id, publication_date, doi, pmid, any_paper, publication_type, contains("has_"), color)
+
+
+cali_trials_cdates <- cali_trials |> 
+  mutate(
+    pc_date = case_when(
+      primary_completion_date_type == "Estimated" ~ ceiling_date(primary_completion_date, unit = "month", change_on_boundary = TRUE) - days(1),
+    .default = primary_completion_date
+       ),
+    is_sr_1y = case_when(
+      is.na(summary_results_date) ~ FALSE,
+      .default = as.Date(summary_results_date) <= 
+        as.Date(pc_date) + 365
+    ),  
+    is_sr_2y = case_when(
+      is.na(summary_results_date) ~ FALSE,
+      .default = as.Date(summary_results_date) <=
+        as.Date(pc_date) + 365*2
+    ),
+    is_sr_5y = case_when(
+      is.na(summary_results_date) ~ FALSE,
+      .default = as.Date(summary_results_date) <=
+        as.Date(pc_date) + 365*5
+    ),
+    is_p_2y = case_when(
+      is.na(publication_date) ~ FALSE,
+      .default = as.Date(publication_date) <=
+        as.Date(pc_date) + 365*2
+    ),
+    is_p_5y = case_when(
+      is.na(publication_date) ~ FALSE,
+      .default = as.Date(publication_date) <=
+        as.Date(pc_date) + 365*5
+    )) |> 
+  select(id, publication_date, primary_completion_date, primary_completion_date_type,
+         pc_date, contains("is_p"), summary_results_date, contains("is_s"))
+
+
+cali_trials$primary_completion_date[1] 
+ceiling_date(cali_trials$primary_completion_date[1], change_on_boundary = TRUE, unit = "month") - days(1)
+
+x <- ymd_hms("2009-08-03 12:01:59.23")
+ceiling_date(x, "month") - days(1)
+
+cali_trials_cdates <- cali_trials_cdates |> 
+  select(nct_id = id, primary_completion_date = pc_date)
+
+cali_trials_cdates |> 
+  filter(id == "NCT01154192") |> 
+  mutate(
+    d1 = as.Date(publication_date),
+    d2 = as.Date(primary_completion_date) + 2*365,
+    diff = d1 <= d2) |> 
+  select(d1, d2, diff)

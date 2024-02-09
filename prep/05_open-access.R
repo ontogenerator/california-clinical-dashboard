@@ -4,7 +4,16 @@ library(here)
 library(vroom)
 library(readxl)
 
-cali_dois <- vroom(here("data", "processed", "cali_dois.csv"))
+cali_dois <- read_csv2(here("data", "processed", "cali_dois.csv"))
+
+cali_trials <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+
+valid_doi_ids <- cali_trials |>
+  filter(any_paper == 1) |> 
+  pull(nct_id)
+
+cali_dois <- cali_dois |> 
+  filter(id %in% valid_doi_ids)
 
 dois <- cali_dois$doi |> unique()
 dois <- "10.1200/jco.2014.32.3_suppl.115"
@@ -46,7 +55,12 @@ oa_results <-
 oa_unpaywall <- oa_results |> 
   mutate(across(everything(), ~na_if(., "")))
 
+valid_dois <- cali_dois |> 
+  filter(id %in% valid_doi_ids) |> 
+  pull(doi)
+
 oa_unpaywall |> 
+  filter(doi %in% valid_dois) |> 
   write_excel_csv2(here("data", "processed", "cali_data_oa.csv"))
 
 

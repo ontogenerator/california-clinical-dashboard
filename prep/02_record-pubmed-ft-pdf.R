@@ -16,7 +16,7 @@ cali_dois <- vroom(here("data", "processed", "cali_dois.csv"), delim = ";") |>
 # Prepare paths
 dir_pubmed <- here("data", "raw", "pubmed")
 dir_doi_xml <- here("data", "raw", "fulltext", "doi", "xml")
-dir_pmid_xml <- here("data", "raw", "fulltext", "pmid", "xml")
+dir_nondoi_xml <- here("data", "raw", "fulltext", "nondoi", "xml")
 
 dir_pubmed_processed <- dir_create(here("data", "processed", "pubmed"))
 
@@ -35,12 +35,12 @@ ft_doi_retrieved <-
   str_replace_all("\\+", "/") |> 
   tolower()
 
-# ft_pmid_retrieved <- dir_pmid_xml |>
-#   dir_ls() |>
-#   path_file() |>
-#   str_remove(".tei.xml$") |>
-#   str_replace_all("\\+", "/") |>
-#   tolower()
+ft_nondoi_retrieved <- dir_nondoi_xml |>
+  dir_ls() |>
+  path_file() |>
+  str_remove(".tei.xml$") |>
+  str_replace_all("\\+", "/") |>
+  tolower()
 
 pubmed_ft_retrieved <-
   cali |>
@@ -54,16 +54,16 @@ pubmed_ft_retrieved <-
     ),
 
     has_ft = case_when(
-      str_detect(pmid, "hilaris|arvoj|ajog") ~ TRUE,
+      str_detect(pmid, "hilaris") ~ TRUE,
+      (doi %in% ft_doi_retrieved) | (pmid %in% ft_nondoi_retrieved) ~ TRUE,
       is.na(doi) ~ NA,
-      (doi %in% ft_doi_retrieved) ~ TRUE,
       .default = FALSE
     ),
 
     ft_source = case_when(
       doi %in% ft_doi_retrieved ~ "doi",
-      str_detect(pmid, "hilaris|arvoj|ajog") ~ "manual",
-      # pmid %in% ft_pmid_retrieved ~ "pmid",
+      str_detect(pmid, "hilaris") ~ "manual",
+      pmid %in% ft_nondoi_retrieved ~ "pmid",
       .default = NA
     ),
     ft_doi = if_else(doi %in% ft_doi_retrieved, TRUE, FALSE)
