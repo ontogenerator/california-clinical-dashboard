@@ -8,7 +8,7 @@ source(here("prep", "functions", "download_pubmed.R"))
 dir <- dir_create(here("data", "raw", "pubmed"))
 
 # cali1 <- vroom::vroom(here("data", "California-trials_2014-2017.csv"))
-cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+cali <- read_xlsx(here("data", "processed", "original_extractions", "California-trials_2014-2017_main.xlsx"))
 
 
 pmids <-

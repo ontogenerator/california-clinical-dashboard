@@ -1,38 +1,33 @@
 library(here)
 library(vroom)
-library(lubridate)
 library(rcrossref)
 library(tidyverse)
 library(easyRPubMed)
 library(janitor)
 library(readxl)
 
-cali_trials_original <- vroom(here("data", "California-trials_2014-2017.csv"))
-cali_trials_xlsx <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
-cali_trials <- read_csv(here("data", "California-trials_2014-2017_main.csv"))
+# cali_trials_original <- read_csv(here("data", "processed", "original_extractions", "California-trials_2014-2017.csv"))
+# cali_trials_xlsx <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+cali_trials <- read_csv(here("data", "processed", "original_extractions",  "California-trials_2014-2017_main.csv"))
 # all.equal(cali_trials, cali_trials2)
-cali_trials2 <- cali_trials |>
-  mutate(primary_completion_date = as.POSIXct(primary_completion_date)) |>
-  rows_upsert(pub_dates, by = "nct_id") |>
-  rows_upsert(cali_trials_cdates, by = "nct_id") |>
-  write_csv(here("data", "California-trials_2014-2017_main.csv"))
+# cali_trials <- cali_trials |>
+#   mutate(primary_completion_date = as.POSIXct(primary_completion_date)) |>
+#   rows_upsert(pub_dates, by = "nct_id") |>
+#   rows_upsert(cali_trials_cdates, by = "nct_id") |>
+#   write_csv(here("data", "California-trials_2014-2017_main.csv"))
 # setdiff(names(cali_trials2), names(cali_trials))
 # glimpse(cali_trials2)
-glimpse(cali_trials)
-incomplete_dates <- cali_trials_original |> 
-  filter(str_detect(publication_date, " ")) |> 
-  pull(nct_id)
-# manually add last incomplete publication_date here!
-incomplete_dates <- c(incomplete_dates, "NCT01474746")
 
-pcy <- cali_trials |> 
-  select(id, primary_completion_year, primary_completion_date,
-         completion_year, completion_date)
+# manually add incomplete publication_dates here!
+incomplete_dates <- c("NCT02320812", "NCT00928564", "NCT02653456", "NCT01729416", "NCT01474746")
 
-pcy |> 
-  count(completion_date == "NA",
-        is.na(primary_completion_date))
-  
+# pcy <- cali_trials |> 
+#   select(id, primary_completion_year, primary_completion_date,
+#          completion_year, completion_date)
+# 
+# pcy |> 
+#   count(is.na(completion_date),
+#         is.na(primary_completion_date))
   
 cali_trials <- cali_trials |> 
   mutate(publication_type = case_when(

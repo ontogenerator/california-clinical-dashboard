@@ -9,7 +9,7 @@ library(here)
 library(janitor)
 library(readxl)
 
-cali <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+cali <- read_csv(here("data", "processed", "original_extractions",  "California-trials_2014-2017_main.csv"))
 cali_dois <- vroom(here("data", "processed", "cali_dois.csv"), delim = ";") |> 
   rename(nct_id = id)
 

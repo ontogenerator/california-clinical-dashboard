@@ -6,9 +6,10 @@ library(readxl)
 
 cali_dois <- read_csv2(here("data", "processed", "cali_dois.csv"))
 
-cali_trials <- read_xlsx(here("data", "California-trials_2014-2017_main.xlsx"))
+cali <- read_csv(here("data", "processed", "original_extractions",  "California-trials_2014-2017_main.csv"))
 
-valid_doi_ids <- cali_trials |>
+
+valid_doi_ids <- cali |>
   filter(any_paper == 1) |> 
   pull(nct_id)
 
