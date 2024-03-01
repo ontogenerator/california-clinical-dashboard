@@ -19,7 +19,8 @@ cali_trials <- read_csv(here("data", "processed", "original_extractions",  "Cali
 # glimpse(cali_trials2)
 
 # manually add incomplete publication_dates here!
-incomplete_dates <- c("NCT02320812", "NCT00928564", "NCT02653456", "NCT01729416", "NCT01474746")
+incomplete_dates <- c("NCT02320812", "NCT00928564", "NCT02653456", "NCT01729416", "NCT01474746",
+                      "NCT00505362", "NCT01559857")
 
 # pcy <- cali_trials |> 
 #   select(id, primary_completion_year, primary_completion_date,
