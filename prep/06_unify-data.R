@@ -210,7 +210,7 @@ cali_trials <- cali_trials |>
       is.na(summary_results_date) ~ FALSE,
       .default = as.Date(summary_results_date) <= 
         as.Date(primary_completion_date) + 365
-    ),  
+    ),
     is_summary_results_2y = case_when(
       is.na(summary_results_date) ~ FALSE,
       .default = as.Date(summary_results_date) <=
@@ -220,6 +220,11 @@ cali_trials <- cali_trials |>
       is.na(summary_results_date) ~ FALSE,
       .default = as.Date(summary_results_date) <=
         as.Date(primary_completion_date) + 365*5
+    ),
+    is_publication_1y = case_when(
+      is.na(publication_date) ~ FALSE,
+      .default = as.Date(publication_date) <=
+        as.Date(primary_completion_date) + 365
     ),
     is_publication_2y = case_when(
       is.na(publication_date) ~ FALSE,
@@ -235,7 +240,10 @@ cali_trials <- cali_trials |>
       id %in% incomplete_dates ~ "Estimated",
       .default = "Exact")
     ,
-    has_publication = ifelse(any_paper > 0, TRUE, FALSE))
+    has_publication = ifelse(any_paper > 0, TRUE, FALSE),
+    any_result = if_else(is_summary_results_1y | is_publication_1y, 1, 0),
+    any_result_2y = if_else(is_summary_results_2y | is_publication_2y, 1, 0),
+    any_result_5y = if_else(is_summary_results_5y | is_publication_5y, 1, 0))
 
 usa_check <- cali_trials |> 
   select(id, doi, contains("is_prosp"), start_date, registration_date)
