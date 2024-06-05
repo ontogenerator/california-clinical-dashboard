@@ -241,7 +241,8 @@ cali_trials <- cali_trials |>
       .default = "Exact")
     ,
     has_publication = ifelse(any_paper > 0, TRUE, FALSE),
-    any_result = if_else(is_summary_results_1y | is_publication_1y, 1, 0),
+    # any_result = if_else(is_summary_results_1y | is_publication_1y, 1, 0),
+    any_result = if_else(has_summary_results | has_publication, 1, 0),
     any_result_2y = if_else(is_summary_results_2y | is_publication_2y, 1, 0),
     any_result_5y = if_else(is_summary_results_5y | is_publication_5y, 1, 0))
 
