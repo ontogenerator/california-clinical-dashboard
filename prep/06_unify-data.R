@@ -401,12 +401,16 @@ affil_join <- function(affil_nct_list)
 }
 
 #lead sponsor if affil found in fields (PI/sponsor/responsible_party)
-search_NCTS_lead_sponsor <- function(AACT_datasets, city_search_terms)
+search_NCTS_lead_sponsor <- function(AACT_datasets, city_search_terms, sponsor_only = FALSE)
 {
-  #search the different affilation datasets for the city search terms
-  grep_PI <- city_grep(AACT_datasets$overall_officials, "affiliation", city_search_terms)
+  
   grep_sponsor <- city_grep(AACT_datasets$sponsors |> filter(lead_or_collaborator == "lead"),
                             "name", city_search_terms)
+  if (sponsor_only == TRUE) {
+    return(grep_sponsor)
+  }
+  #search the different affilation datasets for the city search terms
+  grep_PI <- city_grep(AACT_datasets$overall_officials, "affiliation", city_search_terms)
   grep_resp_party_org <- city_grep(AACT_datasets$responsible_parties, "organization", city_search_terms)
   grep_resp_party_affil <- city_grep(AACT_datasets$responsible_parties, "affiliation", city_search_terms)
 
@@ -419,7 +423,8 @@ search_NCTS_lead_sponsor <- function(AACT_datasets, city_search_terms)
 
 #create tibble with trial numbers and affiliations
 institutions_ncts_primary <- cali_unis$search_terms |>  
-  map(\(x) search_NCTS_lead_sponsor(AACT_datasets, x)[[1]]) |> 
+  # map(\(x) search_NCTS_lead_sponsor(AACT_datasets, x)[[1]]) |>
+  map(\(x) search_NCTS_lead_sponsor(AACT_datasets, x, sponsor_only = TRUE)[[1]]) |>
   set_names(cali_unis$acronyms) |>  
   enframe() |> 
   unnest(value) |> 
@@ -429,6 +434,20 @@ institutions_ncts_primary <- cali_unis$search_terms |>
 institutions_ncts_primary <- institutions_ncts_primary |> 
   group_by(nct_id) |> 
   summarise(affiliation = paste(affiliation, collapse = ", "))
+
+#create tibble with trial numbers and affiliations
+institutions_ncts_primary_sponsor <- cali_unis$search_terms |>  
+  # map(\(x) search_NCTS_lead_sponsor(AACT_datasets, x)[[1]]) |>
+  map(\(x) search_NCTS_lead_sponsor(AACT_datasets, x, sponsor_only = TRUE)[[1]]) |>
+  set_names(cali_unis$acronyms) |>  
+  enframe() |> 
+  unnest(value) |> 
+  rename(nct_id = value, affiliation = name)
+
+#collapse tibble to deduplicate and collapse affiliations in a single cell
+institutions_ncts_primary_sponsor <- institutions_ncts_primary_sponsor |> 
+  group_by(id = nct_id) |> 
+  summarise(sponsor_affiliation = paste(affiliation, collapse = ", "))
 
 #----------------------------------------------------------------------------------------------------------------------
 # reduce the CTgov dataset to those studies that are indeed affiliated
@@ -496,10 +515,14 @@ affils <- cali_trials |>
   select(id, affiliation)
 
 CTgov_sample_Cali <- CTgov_sample_Cali |> 
-  left_join(affils, by = "id")
+  left_join(affils, by = "id") |> 
+  left_join(institutions_ncts_primary_sponsor, by = "id")
+
+# mmatch <- CTgov_sample_Cali |> 
+#   filter(sponsor_affiliation != affiliation & !is.na(sponsor_affiliation))
 
 CTgov_sample_Cali <- CTgov_sample_Cali |> 
-  select(id, contains("month"), agency_class, sponsor_name) |>
+  select(id, contains("month"), agency_class, sponsor_name, sponsor_affiliation) |>
   mutate(start_date_type =
            if_else(str_detect(start_month_year, ", "), "Exact", "Estimated"),
          completion_date_type =
@@ -509,7 +532,7 @@ CTgov_sample_Cali <- CTgov_sample_Cali |>
                    "Exact", "Estimated")) |> 
   select(id, contains("start"), completion_month_year, completion_date_type,
          primary_completion_month_year, primary_completion_date_type,
-         agency_class, sponsor_name) |> 
+         agency_class, sponsor_name, sponsor_affiliation) |> 
   filter(id != "")
 
 CTgov_sample_Cali <- CTgov_sample_Cali |> 
@@ -526,6 +549,9 @@ cali_trials <- cali_trials |>
 ## Write to disk
 cali_trials |>
   write_excel_csv2(here("data", "California-trials_2014-2017_exp.csv"))
+
+cali_trials |> 
+  count(is.na(sponsor_affiliation))
 
 cali_umc <- cali_trials |>
   mutate(umc = strsplit(as.character(affiliation), ", ")) |>
