@@ -502,6 +502,8 @@ funding <- AACT_datasets$sponsors |>
          name) |> 
   nest(.by = id)
 
+double_sp <- funding |> 
+  left_join(affils)
 CTgov_sample_Cali <- CTgov_sample_Cali |> 
   left_join(funding, by = "id") |> 
   mutate(agency_class = map_chr(data, \(ac) pull(ac, agency_class) |> paste(collapse = "; ")),
@@ -552,6 +554,12 @@ cali_trials |>
 
 cali_trials |> 
   count(is.na(sponsor_affiliation))
+double_sp <- double_sp |> 
+  filter(id %in% cali_trials$id) |> 
+  unnest_wider(data)
+
+no_sponsor <- cali_trials |> 
+  filter(is.na(sponsor_affiliation))
 
 cali_umc <- cali_trials |>
   mutate(umc = strsplit(as.character(affiliation), ", ")) |>
